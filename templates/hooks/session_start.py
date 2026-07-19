@@ -19,6 +19,8 @@ def load_events(root):
 
 def days_since(ts):
     t = datetime.datetime.fromisoformat(ts)
+    if t.tzinfo is None:
+        t = t.replace(tzinfo=datetime.timezone.utc)
     return (datetime.datetime.now(datetime.timezone.utc) - t).days
 
 def trig(m, name):
@@ -43,7 +45,9 @@ def main():
                      "Reviews unlock after the minimum telemetry window (manifest cadence).")
     else:
         # 2. gap look-back: last session with no non-session events => untyped lapse
-        sessions = [e for e in evs if e["type"] == "session" and e.get("phase") == "start"]
+        # exclude the current session: SessionStart re-fires (resume/clear/compact) reuse the id
+        sessions = [e for e in evs if e["type"] == "session" and e.get("phase") == "start"
+                    and e.get("session_id") != h.get("session_id", "")]
         if sessions:
             last_id = sessions[-1].get("session_id")
             worked = any(e for e in evs if e.get("session_id") == last_id and e["type"] != "session")

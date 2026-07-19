@@ -43,3 +43,17 @@ def test_suspend_suggestion_after_lapses(instance):
     seed_event(instance, days_ago=9, type="session", phase="start", session_id="s1")
     out = boot(instance)
     assert "/suspend" in ctx(out)
+
+def test_refire_same_session_id_no_false_lapse(instance):
+    boot(instance)                      # first boot, session s2
+    boot(instance)                      # re-fire, same session_id s2 (resume/compact)
+    from conftest import events
+    assert not any(e["type"] == "lapse" for e in events(instance))
+
+def test_naive_timestamp_does_not_kill_banner(instance):
+    import json
+    with open(instance / "telemetry" / "events.jsonl", "a") as f:
+        f.write(json.dumps({"ts": "2026-07-01T10:00:00", "type": "session",
+                            "phase": "start", "session_id": "s0"}) + "\n")
+    out = boot(instance)
+    assert ctx(out)                     # banner still emitted
