@@ -1,0 +1,73 @@
+#!/usr/bin/env python3
+"""Keel validator ('lint'). Report-only: always exit 0. --json for machine output."""
+import json, re, sys, os, time, fnmatch, datetime
+from pathlib import Path
+from keel_lib import find_root, manifest
+
+SENTINEL_TTL_H = 24
+STAMP = re.compile(r"Last reconciled: (\d{4}-\d{2}-\d{2})")
+
+def cap_for(rel, caps):
+    for pat, cap in caps.items():
+        if rel == pat or fnmatch.fnmatch(rel, pat):
+            return cap
+    return None
+
+def run(root):
+    m = manifest(root)
+    out = []
+    caps = m.get("caps", {})
+    for rel in ["CLAUDE.md", "state/HOT.md",
+                *[f"state/working/{p.name}" for p in (root / "state" / "working").glob("*") if p.is_file()]]:
+        p = root / rel
+        cap = cap_for(rel, caps)
+        if p.is_file() and cap:
+            size = p.stat().st_size
+            if size > cap.get("hard", 1 << 30):
+                out.append({"check": "size_cap", "level": "hard", "file": rel, "size": size, "cap": cap["hard"]})
+            elif size > cap.get("soft", 1 << 30):
+                out.append({"check": "size_cap", "level": "soft", "file": rel, "size": size, "cap": cap["soft"]})
+    hot = root / "state" / "HOT.md"
+    stamp = STAMP.search(hot.read_text()) if hot.is_file() else None
+    if not stamp:
+        out.append({"check": "staleness", "level": "hard", "file": "state/HOT.md", "detail": "no 'Last reconciled:' stamp"})
+    else:
+        age = (datetime.date.today() - datetime.date.fromisoformat(stamp.group(1))).days
+        limit = next((t.get("days", 14) for t in m.get("triggers", [])
+                      if t.get("template") == "staleness_escalation"), 14)
+        if age > limit:
+            out.append({"check": "staleness", "level": "soft", "file": "state/HOT.md", "age_days": age})
+    for rel in ["state/archive.jsonl", "telemetry/events.jsonl"]:
+        p = root / rel
+        if p.is_file():
+            for i, line in enumerate(p.read_text().splitlines(), 1):
+                if line.strip():
+                    try:
+                        json.loads(line)
+                    except json.JSONDecodeError:
+                        out.append({"check": "jsonl_integrity", "level": "hard", "file": rel, "line": i})
+                        break
+    s = root / ".keel" / "review-in-progress"
+    if s.exists() and time.time() - s.stat().st_mtime > SENTINEL_TTL_H * 3600:
+        out.append({"check": "stale_sentinel", "level": "soft", "file": ".keel/review-in-progress"})
+    return out
+
+def main():
+    try:
+        root = find_root(os.getcwd())
+        if not root:
+            print("[]" if "--json" in sys.argv else "not a keel instance")
+            return
+        out = run(root)
+        if "--json" in sys.argv:
+            print(json.dumps(out))
+        else:
+            for f in out:
+                print(f"[{f['level']}] {f['check']}: {f.get('file','')} {f.get('detail','')}".strip())
+            if not out:
+                print("validator: clean")
+    except Exception:
+        print("[]" if "--json" in sys.argv else "validator error (fail-soft)")
+
+if __name__ == "__main__":
+    main()
