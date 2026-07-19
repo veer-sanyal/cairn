@@ -50,7 +50,9 @@ Prior-art position (P15): every individual capability exists scattered in the ec
 
 ### 1.2 Boot ritual
 
-SessionStart hook prints a reconcile banner: HOT.md staleness stamp, git state, telemetry gap (sessions since last event), lint status. Reconcile-against-reality before work (convergent with P2/P5; also the "welcome back" surface — see 3.3).
+SessionStart hook runs the **validator script** (the "lint" referenced throughout: one tested script checking file-size caps, staleness stamps, archive integrity; reused post-hoc by `/keel:review`) and emits a reconcile banner: HOT.md staleness stamp, git state, telemetry gap (a *look-back* — did the previous session log any non-session events?), validator status. Reconcile-against-reality before work (convergent with P2/P5; also the "welcome back" surface — see 3.3).
+
+**Honesty about the surface:** SessionStart output is context injected for the model (plus `systemMessage` for user-visible text where the platform supports it), not a guaranteed user-facing display — banner *relay* is best-effort by the spec's own P8 standard. The raw validator/gap data therefore always lands in `telemetry/events.jsonl` where the user (and `/keel:review`) can read it deterministically.
 
 ### 1.3 Enforced invariants (hooks, not prose — P8, P9)
 
@@ -59,12 +61,15 @@ Prose instructions measurably decay with turns (direction robust across 15 model
 | Invariant | Hook | Action |
 |---|---|---|
 | File-size caps (CLAUDE.md, HOT.md, working files) | PreToolUse on Write/Edit | block over hard cap, warn over soft cap |
-| archive.jsonl is append-only | PreToolUse | block edits/overwrites |
-| Telemetry write-through | Stop hook | warn if session ends with no event logged |
+| archive.jsonl is append-only | PreToolUse on Write/Edit | block edits/overwrites (appends go through the scaffolded append command) |
+| Protected-path Bash ops | PreToolUse on Bash | pattern-block redirects/truncation/`rm` targeting archive.jsonl and working/ — **explicitly heuristic**; Bash is the likelier bypass than out-of-band editors, and review re-validation is the real backstop |
+| Telemetry write-through | SessionStart (look-back) | if the *previous* session logged no non-session events, log a gap/lapse event and surface it in the banner |
 | Staleness stamp present/fresh | SessionStart | banner warning |
-| working/ destructive ops are pipeline-only (see 3.2) | PreToolUse | `Edit` (targeted fact write-through) always allowed — P2 requires it; block `Write`-overwrite of an existing working/ file and file deletion outside /keel:review |
+| working/ destructive ops are pipeline-only (see 3.2) | PreToolUse | `Edit` (targeted fact write-through) always allowed — P2 requires it; block `Write`-overwrite of an existing working/ file and file deletion **unless the review sentinel is present** — hooks cannot see which command is active, so `/keel:review` writes `.keel/review-in-progress` (with timestamp TTL + cleanup on completion) and the hook checks for it |
 
-Hook scripts are small, tested, and fail soft (a broken hook warns; it never bricks a session). Belt-and-suspenders: `/keel:review` re-validates all invariants post-hoc, for two reasons — hook enforcement has had real field bugs (open Claude Code issues, P9 caveat), and hooks only fire inside Claude Code; an out-of-band edit (vim on archive.jsonl) bypasses them entirely.
+Session-end records are written by the **SessionEnd** hook (which can write files but not feed context) — the Stop hook fires after *every* response turn, not at session end, and is not used for any of this.
+
+Hook runtime & fail-soft discipline: POSIX shell (+ python3 where jq-free parsing isn't enough); macOS/Linux for v1, Windows explicitly unsupported (declared in README, not silent). Deliberate blocks exit 2; every other failure path exits 0 with a warning line — a missing interpreter or crashed script must never brick a session. Belt-and-suspenders: `/keel:review` re-validates all invariants post-hoc, for three reasons — hook enforcement has had real field bugs (open Claude Code issues, P9 caveat), the Bash matcher is heuristic, and hooks only fire inside Claude Code (out-of-band edits bypass them entirely).
 
 Threshold values for caps are **[BET]** — no literature gives numbers; defaults chosen small (CLAUDE.md soft 4KB/hard 8KB; HOT.md soft 6KB/hard 12KB) and recorded in manifest as tunable.
 
@@ -76,16 +81,16 @@ Threshold values for caps are **[BET]** — no literature gives numbers; default
 
 | Event | Writer | Reliability |
 |---|---|---|
-| `session` — start/end, duration, boot context cost | SessionStart + Stop hooks | deterministic |
+| `session` — start/end, duration, boot context cost | SessionStart + **SessionEnd** hooks (Stop fires every turn and is not used) | deterministic |
 | `lapse` — **typed: forgot / upkeep / skipped / suspended** (P13) | SessionStart hook on gap detection; cause confirmed conversationally, recoverable by design | deterministic detection, best-effort typing |
-| `intent` — what the user came to do (enum per instance) | scaffolded `/log` command; Stop-hook prompt as fallback nudge | best-effort |
+| `intent` — what the user came to do (enum per instance) | scaffolded `/log` command; next-boot banner reminder as the fallback nudge | best-effort |
 | `outcome` — done / partial / friction (with reason) | same as intent | best-effort |
 | `metric` — north-star / input / guardrail observation | scaffolded commands at the moment the lever is pulled; `/keel:review` backfills | mixed |
 | `proposal` — governor lifecycle: proposed / validated / applied / discarded | `/keel:review` itself | deterministic |
 
-The Stop-hook telemetry-gap check (1.3) counts **non-session events** — the hook-written `session` events don't satisfy it, so it actually fires when a working session ends with nothing captured.
+The telemetry-gap check runs at the **next SessionStart** as a look-back counting non-session events from the previous session — hook-written `session` events don't satisfy it.
 
-Token/cost mechanics: hooks do not expose token counts. Boot context cost is estimated by the SessionStart hook from resident-file bytes (~bytes/4); per-session usage, where wanted, is parsed post-hoc from Claude Code's own transcript JSONL (the CCUsage-proven mechanism, P15). Cost derived from token counts (no OTel cost attribute exists — refuted claim). Metadata-only by default; prompt/content capture is per-instance opt-in (P11).
+Token/cost mechanics: hooks do not expose token counts. Boot context cost is estimated by the SessionStart hook from resident-file bytes (~bytes/4); per-session usage, where wanted, is parsed post-hoc from Claude Code's own transcript JSONL (the CCUsage-proven mechanism, P15). Cost derived from token counts (no OTel cost attribute exists — refuted claim). Metadata-only by default; prompt/content capture is per-instance opt-in (P11). Format is plain typed JSONL: borrow the handful of OTel GenAI names that genuinely fit (`gen_ai.usage.*`, `gen_ai.tool.name`); no semconv version-pin ceremony — nearly every Keel event is domain-specific and no OTel consumer will read this file.
 
 ## Component 2: Builder (`/keel:build`)
 
@@ -97,10 +102,27 @@ Five stages, evidence-shaped (P14):
    - **North star** — leading, value-representing, influenceable but *not directly targetable*; watched, never chased.
    - **Input metrics** — the levers daily use actually moves; what reviews act on.
    - **Guardrails** — OEC-style, each measurable-within-period / sensitive / timely. Every instance also gets standing anti-bloat guardrails: boot context cost, ceremony time per session, upkeep burden (P1, P13).
-4. **If-then compilation (P14).** Interactively convert goals into implementation intentions — "when X, the system does Y" (d=.65; interactive delivery beats documents). These are compiled by **selecting and parametrizing from a closed, tested menu of trigger templates** (review triggers, banner rules, command protocols) — never by generating freeform hook scripts, keeping scaffolding deterministic. Intent is forced explicit *early* because premature-interpretation lock-in is the documented failure mechanism (P8).
+4. **If-then compilation (P14).** Interactively convert goals into implementation intentions — "when X, the system does Y" (implementation intentions: d=.65 meta-analytic; separately, the MCII subgroup result shows interactive delivery beats written documents, g=.465 vs .277). These are compiled by **selecting and parametrizing from a closed, tested menu of trigger templates** (review triggers, banner rules, command protocols) — never by generating freeform hook scripts, keeping scaffolding deterministic. Intent is forced explicit *early* because premature-interpretation lock-in is the documented failure mechanism (P8).
 5. **Scaffold.** Template-driven (deterministic, testable), from the kernel templates + the interview's decisions. manifest.json records every design decision with its principle tag, including bets — so later reviews can re-examine bets against accumulated telemetry.
 
 Builder knowledge of platform capabilities (hooks/skills/MCP) comes from a bundled, refreshable snapshot doc — no live research per run (P1: it's all distractor tokens otherwise).
+
+### 2.1 The v1 trigger-template menu (closed, tested)
+
+The complete parametrizable set stage 4 selects from — an implementer builds exactly these eight, nothing freeform:
+
+| Template | Parameters | Compiles to |
+|---|---|---|
+| Gap nudge | days-threshold | SessionStart banner rule |
+| Metric observation prompt | metric, trigger command | scaffolded command step |
+| Guardrail regression flag | metric, direction, window | banner rule + review input |
+| Friction accumulator | count-threshold, window | banner "review suggested" rule |
+| Review-due reminder | cadence | banner rule |
+| Staleness escalation | file, age-threshold | banner rule (validator already checks) |
+| Intent enum | the instance's intent labels | `/log` command choices |
+| Suspend suggestion | lapse-count threshold | banner rule offering `/suspend` honorably |
+
+Menu growth is a kernel-release matter (P10), not a per-instance one.
 
 ## Component 3: Governor (`/keel:review`)
 
@@ -112,20 +134,21 @@ Default monthly, tunable; never weekly-or-faster for adoption judgments (P13: ha
 
 Intrinsic self-correction degrades performance; the workable pattern is proposal → external validation → gate. One pipeline, two lanes:
 
-- **Memory lane** (per review): probe-verify-repair — synthesize probe questions from recent sessions, test HOT.md + working/ against them, convert failures into repair proposals, consolidate via SKIP / MERGE / INSERT (never freeform rewriting — the hook from 1.3 enforces this). Demotion scoring runs here.
+- **Memory lane** (per review): probe-verify-repair — synthesize probe questions from recent sessions, test HOT.md + working/ against them, convert failures into repair proposals, consolidate via SKIP / MERGE / INSERT. The SKIP/MERGE/INSERT discipline is **protocol, verified post-hoc by the review's own validator pass** — the 1.3 hook blocks only overwrite/delete (Edit stays open for write-through, so a hook cannot fully enforce consolidation shape). Demotion scoring runs here.
 - **System lane** (proposals to change the instance itself): every proposal must **cite telemetry** (metric/friction/lapse events — no vibes features), must not regress the standing anti-bloat guardrails, and lands only through **BUILD / PARK / REJECT with the user as the gate**. Validation is empirical where possible (tests, before/after telemetry deltas); discard-on-failure. Contrast in the wild: SuperClaude's ungated auto-loop (P15).
 
 ### 3.3 Abandonment handling (P13)
 
 - Boot banner after a gap: "welcome back + what changed" — never a guilt screen.
 - Lapse cause captured as typed event; **upkeep-burden lapses are treated as kernel bugs** (the system demands too much manual writing — automate or delete the demand).
-- `/keel:suspend` and `/keel:conclude` are first-class: a system whose habit the user has internalized *concludes successfully*, and telemetry can tell that apart from decay.
+- `/suspend` and `/conclude` (instance-local commands, so they survive plugin uninstall) are first-class: a system whose habit the user has internalized *concludes successfully*, and telemetry can tell that apart from decay.
 - Drift **[BET]**: reviews re-run the artifact-based elicitation against the manifest goals when input metrics decline or lapses accumulate; no drift-detection literature survived, so this is a labeled bet.
 
 ## Kernel evolution & community
 
 - Kernel changes ship as versioned plugin releases; instances pin a version; `/keel:upgrade` migrates with a changelog diff. Never silent self-modification (P10).
-- Upstream learning: deferred past v1 (YAGNI — no community exists yet); a CONTRIBUTING.md line covers it until real users do.
+- **Upgrade merge semantics (no silent data loss inside a user's repo):** every kernel-managed file carries a `managed-by-keel: <version>` header. Unmodified managed files are replaced in place; a file the user has modified is never overwritten — the new version lands alongside as `<name>.keel-new` with the diff summarized in the upgrade report.
+- Upstream learning: deferred past v1 (YAGNI — no community exists yet); a CONTRIBUTING.md line covers it until real users do. Because no-network telemetry means Keel's own north star is uncollectable in aggregate (the author only ever sees dogfood instances), the public feedback channel is an **opt-in issue template** asking users to paste their locally-computed stats.
 
 ## Repo shape (the published plugin)
 
@@ -133,14 +156,16 @@ Intrinsic self-correction degrades performance; the workable pattern is proposal
 keel/
   .claude-plugin/plugin.json + marketplace.json   # self-hosted single-plugin marketplace;
                                                   # install: /plugin marketplace add veer-sanyal/keel
-  skills/build/  skills/review/  skills/upgrade/  # plugin-resident commands:
-  skills/suspend/  skills/conclude/               #   /keel:build /keel:review /keel:upgrade
-                                                  #   /keel:suspend /keel:conclude
+  skills/build/  skills/review/  skills/upgrade/  # plugin-resident: /keel:build /keel:review
+                                                  #   /keel:upgrade (the machinery)
   templates/                                      # instance scaffold (deterministic), INCLUDING
     hooks/                                        #   all runtime hooks — template payload copied
-    commands/                                     #   into each instance's .claude/; the PLUGIN
-                                                  #   registers NO hooks of its own (they would
-                                                  #   fire in every project the user opens)
+    commands/                                     #   into each instance's .claude/, INCLUDING
+                                                  #   suspend/conclude/log — abandonment features
+                                                  #   (P13) must survive plugin uninstall, so they
+                                                  #   are instance-local, not plugin skills.
+                                                  #   The PLUGIN registers NO hooks of its own
+                                                  #   (they would fire in every project)
   capabilities/snapshot.md                        # refreshable platform-capability doc
   docs/PRINCIPLES.md  docs/research/              # the evidence base, shipped with the product
   tests/
@@ -148,9 +173,18 @@ keel/
 
 The methodology ships inside the repo — people who want the ideas without the plugin get PRINCIPLES.md. README leads with a concrete before/after example (interview → a study coach that survives three months of real life), then the three differentiators: metric contract, typed-lapse abandonment model, human-gated governor.
 
+## Trust: what Keel executes on your machine
+
+Destined for the README, near the top — a stranger's first question about a plugin that writes hooks into their directories:
+
+- **What runs:** small POSIX-shell/python3 scripts, all readable in `templates/hooks/` before install and in your instance's `.claude/` after; nothing obfuscated, nothing compiled.
+- **When:** only inside instance directories you scaffolded (the plugin registers zero global hooks), at session start/end and before tool calls.
+- **Network: never.** No script makes a network call; telemetry is local JSONL you can `cat`.
+- **Removal:** uninstall the plugin and instances keep working (runtime is instance-local); delete an instance directory and Keel retains nothing about it.
+
 ## Lifecycle (v1 scope declarations)
 
-- **First session after scaffold:** boot banner shows "new instance" state; `/keel:review` refuses to run adoption judgments until a minimum telemetry window exists (default: 10 sessions or 4 weeks, manifest-tunable) — before that it offers only invariant re-validation.
+- **First session after scaffold:** boot banner shows "new instance" state; `/keel:review` refuses to run adoption judgments until a minimum telemetry window exists (**[BET]**, ledgered: default 10 sessions or 4 weeks, manifest-tunable — and adoption *verdicts* specifically are deferred to the P13 habit horizon of ~2 months; the earlier window permits only invariant re-validation and memory-lane consolidation).
 - **Single machine, single session at a time.** Multi-machine git sync is explicitly out of scope for v1: `events.jsonl`/`archive.jsonl` appends would union-merge, but `HOT.md` rewrites would not. Documented limitation, not a silent one.
 - **Offboarding:** `/keel:conclude` writes a final state summary to the archive and stamps the manifest; the instance directory remains a plain readable git repo forever — no lock-in to delete.
 
@@ -182,6 +216,8 @@ Keel's own success measures, computable locally by any user from their own telem
 | Drift re-elicitation trigger | no surviving drift evidence | input metrics decline without lapses |
 | Interview length/depth | elicitation studies used students, not solo users | build-session friction events |
 | "Unfilled niche" beyond Claude Code ecosystem | Letta/Mem0/Agent OS never verified | before public positioning claims |
+| Minimum telemetry window (10 sessions / 4 weeks) | no literature gives a number; sits below P13's 66-day habit median, which is why adoption verdicts wait ~2 months | window blocks useful early reviews, or early verdicts prove wrong |
+| Bash-matcher heuristic coverage | no way to enumerate all destructive shell patterns | review re-validation catches bypasses in practice |
 
 **[PREPRINT] — evidence-backed but not settled science; load-bearing decisions that must not read as VERIFIED:**
 
