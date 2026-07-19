@@ -1,0 +1,37 @@
+#!/usr/bin/env python3
+"""Heuristic Bash guard for keel-protected paths. Known-incomplete by design (spec §1.3):
+review re-validation is the real backstop. Patterns cover the common destructive forms."""
+import json, re, sys, os
+from keel_lib import find_root
+
+PROTECTED = r"(state/(?:working|archive\.jsonl)|telemetry/events\.jsonl)"
+PATTERNS = [
+    re.compile(r"\brm\b.*" + PROTECTED),                    # rm on protected paths
+    re.compile(r"(?<!>)>\s*\S*" + PROTECTED),               # single-> truncation (>> is allowed)
+    re.compile(r"\b(truncate|shred)\b.*" + PROTECTED),
+    re.compile(r"\bmv\b.*state/archive\.jsonl"),
+]
+
+def main():
+    h = json.load(sys.stdin)
+    if h.get("tool_name") != "Bash":
+        return
+    if not find_root(h.get("cwd") or os.getcwd()):
+        return
+    cmd = (h.get("tool_input") or {}).get("command") or ""
+    for p in PATTERNS:
+        if p.search(cmd):
+            print(json.dumps({"hookSpecificOutput": {
+                "hookEventName": "PreToolUse",
+                "permissionDecision": "deny",
+                "permissionDecisionReason":
+                    "This command targets a keel-protected file (archive/working are guarded; "
+                    "archive is append-only — use >> or keel_event.py; working/ changes go "
+                    "through Edit or /keel:review)."}}))
+            return
+
+if __name__ == "__main__":
+    try:
+        main()
+    except Exception:
+        pass
