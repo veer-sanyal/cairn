@@ -28,6 +28,6 @@ def append_event(root, etype, **fields):
     ev = {"ts": now_iso(), "type": etype, **fields}
     p = Path(root) / "telemetry" / "events.jsonl"
     p.parent.mkdir(parents=True, exist_ok=True)
-    with open(p, "a") as f:
+    with open(p, "a", encoding="utf-8") as f:
         f.write(json.dumps(ev) + "\n")
     return ev

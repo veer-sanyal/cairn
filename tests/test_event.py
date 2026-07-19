@@ -1,4 +1,3 @@
-import json
 from conftest import run_script, events
 
 def test_append_event(instance):
