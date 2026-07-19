@@ -6,10 +6,10 @@ from keel_lib import find_root
 
 PROTECTED = r"(state/(?:working|archive\.jsonl)|telemetry/events\.jsonl)"
 PATTERNS = [
-    re.compile(r"\brm\b.*" + PROTECTED),                    # rm on protected paths
-    re.compile(r"(?<!>)>\s*\S*" + PROTECTED),               # single-> truncation (>> is allowed)
-    re.compile(r"\b(truncate|shred)\b.*" + PROTECTED),
-    re.compile(r"\bmv\b.*state/archive\.jsonl"),
+    re.compile(r"\brm\b[^;&|\n]*" + PROTECTED),             # rm on protected paths (single command)
+    re.compile(r"(?<!>)>(?!>)\s*\S*" + PROTECTED),          # single-> truncation (>> is allowed)
+    re.compile(r"\b(truncate|shred)\b[^;&|\n]*" + PROTECTED),
+    re.compile(r"\bmv\b[^;&|\n]*state/archive\.jsonl"),
 ]
 
 def main():

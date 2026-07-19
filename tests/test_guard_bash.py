@@ -22,6 +22,15 @@ def test_truncate_archive_denied(instance):
 def test_append_archive_allowed(instance):
     assert not denied(hook(instance, 'echo "{}" >> state/archive.jsonl'))
 
+def test_append_no_space_allowed(instance):
+    assert not denied(hook(instance, 'echo "{}" >>state/archive.jsonl'))
+
+def test_rm_unrelated_then_read_allowed(instance):
+    assert not denied(hook(instance, "rm /tmp/junk && cat state/archive.jsonl"))
+
+def test_rm_chained_still_denied_when_targeting_protected(instance):
+    assert denied(hook(instance, "cd . && rm state/working/notes.md"))
+
 def test_ordinary_command_allowed(instance):
     assert not denied(hook(instance, "git status"))
 

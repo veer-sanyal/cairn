@@ -1,7 +1,6 @@
 #!/usr/bin/env python3
 """Keel validator ('lint'). Report-only: always exit 0. --json for machine output."""
 import json, re, sys, os, time, fnmatch, datetime
-from pathlib import Path
 from keel_lib import find_root, manifest
 
 SENTINEL_TTL_H = 24
