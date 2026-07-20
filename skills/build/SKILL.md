@@ -34,7 +34,8 @@ Echo the contract back as a table; get explicit confirmation.
 Convert their goals into if-then rules INTERACTIVELY ("when a week passes with no session,
 what should happen?"). Map each accepted rule onto the CLOSED trigger-template menu
 (spec §2.1): gap_nudge, review_due, staleness_escalation, friction_accumulator,
-suspend_suggestion, metric-observation prompts, intent enum. Parametrize; never invent new
+suspend_suggestion, guardrail regression flag, metric-observation prompts, intent enum.
+Parametrize; never invent new
 trigger mechanics — menu growth is a kernel-release matter.
 
 ## Stage 5 — Scaffold

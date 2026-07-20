@@ -84,6 +84,22 @@ def main():
             lines.append("Several lapses on record. If life has moved on, /suspend is an honorable "
                          "state — this system concluding is allowed to be success.")
 
+    # guardrail regression flag (spec §2.1): standing anti-bloat check
+    for g in m.get("metrics", {}).get("guardrails", []):
+        gmax = g.get("max")
+        if gmax is None:
+            continue
+        if g.get("name") == "boot_context_bytes":
+            val = resident
+        else:
+            vals = [e for e in evs if e["type"] == "metric" and e.get("name") == g.get("name")]
+            try:
+                val = float(vals[-1].get("value")) if vals else None
+            except (TypeError, ValueError):
+                val = None
+        if val is not None and val > gmax:
+            lines.append(f"guardrail regression: {g['name']} at {val} (max {gmax}) — review input.")
+
     # 4. validator findings
     v = subprocess.run([sys.executable, str(Path(__file__).parent / "validate.py"), "--json"],
                        capture_output=True, text=True, cwd=str(root))

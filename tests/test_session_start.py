@@ -57,3 +57,18 @@ def test_naive_timestamp_does_not_kill_banner(instance):
                             "phase": "start", "session_id": "s0"}) + "\n")
     out = boot(instance)
     assert ctx(out)                     # banner still emitted
+
+def test_guardrail_regression_metric_flagged(instance):
+    import json
+    m = json.loads((instance / "manifest.json").read_text())
+    m["metrics"]["guardrails"].append({"name": "ceremony_minutes", "max": 10})
+    (instance / "manifest.json").write_text(json.dumps(m))
+    seed_event(instance, days_ago=1, type="session", phase="start", session_id="s1")
+    seed_event(instance, days_ago=1, type="intent", intent="plan", session_id="s1")
+    seed_event(instance, days_ago=0, type="metric", name="ceremony_minutes", value="45")
+    out = boot(instance)
+    assert "guardrail regression: ceremony_minutes" in ctx(out)
+
+def test_no_guardrail_flag_when_within_max(instance):
+    out = boot(instance)   # fresh instance: tiny resident files, no metric events
+    assert "guardrail regression" not in ctx(out)
