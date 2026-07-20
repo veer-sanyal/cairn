@@ -1,6 +1,7 @@
 ---
 description: Conclude this keel instance successfully (habit internalized / goal reached)
 ---
+<!-- managed-by-keel: {{keel_version}} -->
 The user is done with this system — treat conclusion as success (P13: abandonment can signal diminishing returns, i.e., the habit stuck).
 
 1. Ask for a one-paragraph closing summary in the user's own words (what it did for them; what stuck).

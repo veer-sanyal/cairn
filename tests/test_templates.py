@@ -14,3 +14,7 @@ def test_templates_exist_and_are_wired():
         assert (T / "commands" / cmd).is_file()
     assert "{{instance_name}}" in (T / "CLAUDE.md.tmpl").read_text()
     assert "Last reconciled:" in (T / "HOT.md.tmpl").read_text()
+
+def test_command_templates_carry_managed_header():
+    for cmd in ["log.md", "suspend.md", "conclude.md"]:
+        assert "managed-by-keel" in (T / "commands" / cmd).read_text()

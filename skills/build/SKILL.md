@@ -16,7 +16,7 @@ their parameters — and iterate on the draft with the user. React-to-artifact b
 batteries. Prefer pairwise choices ("weekly plan file, or per-topic files?") over open ratings.
 
 ## Stage 2 — The user authors the goals (P14, PREPRINT-grade but load-bearing)
-Ask the user to state, IN THEIR OWN WORDS: what "this system is working" looks like.
+Ask the user to state, in their own words: what "this system is working" looks like.
 You may refine wording for clarity and split compound statements — you MUST NOT write goals
 for them or upgrade their phrasing into your own. If they ask you to write it, decline once,
 briefly, citing the follow-through evidence (46.6% vs 72.8%), then accept whatever they give.

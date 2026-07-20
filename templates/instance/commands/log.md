@@ -1,6 +1,7 @@
 ---
 description: Log intent, outcome, or a metric observation to keel telemetry
 ---
+<!-- managed-by-keel: {{keel_version}} -->
 Log a telemetry event for this session. Ask the user (or infer from the current conversation) which of these applies, then run the matching command via Bash:
 
 - Starting work: `python3 "$CLAUDE_PROJECT_DIR/.claude/hooks/keel_event.py" intent intent=<one of: {{intents}}> note="<short>"`

@@ -1,6 +1,7 @@
 ---
 description: Honorably pause this keel instance (typed, recoverable — not failure)
 ---
+<!-- managed-by-keel: {{keel_version}} -->
 The user wants to pause this system. This is a first-class, recoverable state (P13) — no guilt framing, ever.
 
 1. Ask (briefly) which cause fits: taking a break (`skipped`), too much upkeep (`upkeep`), life moved on for now (`suspended`).
