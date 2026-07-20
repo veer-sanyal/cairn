@@ -2,7 +2,7 @@
 """SessionEnd: close the session record. SessionEnd cannot feed context; file-write only."""
 import json, sys, os, datetime
 from pathlib import Path
-from keel_lib import find_root, append_event
+from cairn_lib import find_root, append_event
 
 def main():
     h = json.load(sys.stdin)

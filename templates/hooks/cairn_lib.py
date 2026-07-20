@@ -1,15 +1,15 @@
-"""Shared helpers for keel instance hooks. stdlib only; every caller must stay fail-soft."""
+"""Shared helpers for cairn instance hooks. stdlib only; every caller must stay fail-soft."""
 import json, os, datetime
 from pathlib import Path
 
 def find_root(start):
-    """Walk up from start looking for manifest.json with keel_version."""
+    """Walk up from start looking for manifest.json with cairn_version."""
     p = Path(start).resolve()
     for d in [p, *p.parents]:
         m = d / "manifest.json"
         if m.is_file():
             try:
-                if "keel_version" in json.loads(m.read_text()):
+                if "cairn_version" in json.loads(m.read_text()):
                     return d
             except (json.JSONDecodeError, OSError):
                 pass

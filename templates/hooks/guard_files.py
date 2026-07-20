@@ -1,8 +1,8 @@
 #!/usr/bin/env python3
-"""PreToolUse guard for Write|Edit inside a keel instance. Deny via JSON; all else silent allow."""
+"""PreToolUse guard for Write|Edit inside a cairn instance. Deny via JSON; all else silent allow."""
 import json, sys, os, fnmatch
 from pathlib import Path
-from keel_lib import find_root, manifest
+from cairn_lib import find_root, manifest
 
 def deny(reason):
     print(json.dumps({"hookSpecificOutput": {
@@ -26,10 +26,10 @@ def main():
     except ValueError:
         return
     if rel == "state/archive.jsonl":
-        deny("archive.jsonl is append-only (keel invariant). Append via the /log command or keel_event.py.")
+        deny("archive.jsonl is append-only (cairn invariant). Append via the /log command or cairn_event.py.")
     if rel.startswith("state/working/") and tool == "Write" and Path(path).exists() \
-            and not (root / ".keel" / "review-in-progress").exists():
-        deny("Wholesale overwrite of a working/ file is reserved for /keel:review "
+            and not (root / ".cairn" / "review-in-progress").exists():
+        deny("Wholesale overwrite of a working/ file is reserved for /cairn:review "
              "(SKIP/MERGE/INSERT consolidation). Use Edit for targeted fact updates.")
     if tool == "Write":
         for pat, cap in manifest(root).get("caps", {}).items():

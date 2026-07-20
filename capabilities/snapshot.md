@@ -1,8 +1,8 @@
-# Claude Code capabilities snapshot (for the Keel builder)
+# Claude Code capabilities snapshot (for the Cairn builder)
 
 Snapshot date: 2026-07-19 — refresh by re-verifying against official Claude Code docs before each release.
 
-This is the builder's *bundled* knowledge of the platform surface Keel compiles onto. It is
+This is the builder's *bundled* knowledge of the platform surface Cairn compiles onto. It is
 deliberately thin — every token here is a distractor token at build time (P1). It documents
 only what the kernel actually uses, exactly as the shipped `templates/hooks/*.py` use it. When
 in doubt, the scripts are authoritative; this file summarizes them.
@@ -28,8 +28,8 @@ Events wired, and the stdin fields each script actually reads:
 | `PreToolUse` | `Write\|Edit` | `guard_files.py` | `tool_name`, `tool_input.file_path`, `tool_input.content`, `cwd` | deny JSON or nothing |
 | `PreToolUse` | `Bash` | `guard_bash.py` | `tool_name`, `tool_input.command`, `cwd` | deny JSON or nothing |
 
-`cwd` is used to locate the instance root (walk up to a `manifest.json` carrying `keel_version`);
-if no root is found the hook exits silently — a hook outside a Keel instance is a no-op.
+`cwd` is used to locate the instance root (walk up to a `manifest.json` carrying `cairn_version`);
+if no root is found the hook exits silently — a hook outside a Cairn instance is a no-op.
 
 ### SessionStart I/O
 
@@ -39,8 +39,8 @@ Reads `cwd` + `session_id`. Side effects: appends a `session` start event (with 
 
 ```json
 {
-  "hookSpecificOutput": { "hookEventName": "SessionStart", "additionalContext": "keel boot: ..." },
-  "systemMessage": "keel boot: ..."
+  "hookSpecificOutput": { "hookEventName": "SessionStart", "additionalContext": "cairn boot: ..." },
+  "systemMessage": "cairn boot: ..."
 }
 ```
 
@@ -71,22 +71,22 @@ A block is exit 0 plus this exact JSON on stdout; anything else (allow) is exit 
 
 `guard_files.py` denies: any `Write`/`Edit` to `state/archive.jsonl` (append-only); a `Write`
 that *overwrites* an existing `state/working/*` file unless the review sentinel
-`.keel/review-in-progress` exists (`Edit` is always allowed — P2 write-through); and a `Write`
+`.cairn/review-in-progress` exists (`Edit` is always allowed — P2 write-through); and a `Write`
 whose `content` would exceed the file's hard size cap from `manifest.json` `caps`.
 `guard_bash.py` heuristically denies destructive shell forms (`rm`, single-`>` truncation,
 `truncate`/`shred`, `mv` of the archive) targeting `state/working`, `state/archive.jsonl`, or
 `telemetry/events.jsonl`. `>>` append to the archive is allowed. The Bash matcher is explicitly
-heuristic (spec §1.3); `/keel:review` re-validation is the real backstop.
+heuristic (spec §1.3); `/cairn:review` re-validation is the real backstop.
 
 ## Slash commands
 
 Two kinds, both plain markdown:
 
-- **Plugin commands** (`skills/*/SKILL.md` frontmatter `name:`) → `/keel:build`, `/keel:review`,
-  `/keel:upgrade`. These are the machinery; they live in the plugin, not the instance.
+- **Plugin commands** (`skills/*/SKILL.md` frontmatter `name:`) → `/cairn:build`, `/cairn:review`,
+  `/cairn:upgrade`. These are the machinery; they live in the plugin, not the instance.
 - **Instance commands** (`templates/instance/commands/*.md`, copied into `.claude/commands/`) →
   `/log`, `/suspend`, `/conclude`. Instance-local so they survive plugin uninstall (P13). Each
-  is prose that instructs the model to run a `keel_event.py` invocation via Bash to append a
+  is prose that instructs the model to run a `cairn_event.py` invocation via Bash to append a
   telemetry event. The builder selects the intent enum for `/log` from the closed trigger menu.
 
 ## Skills
@@ -103,11 +103,11 @@ Used as a fan-out/isolation primitive, not a scaffolded artifact (P3): the kerne
 (`CLAUDE.md.tmpl`, review skill) instructs spawning a subagent for noisy reads — archive scans,
 large searches — and returning only a condensed summary, to keep the main context budget lean.
 No subagent definitions are shipped; this is a usage convention encoded in the instance's
-`CLAUDE.md` and in `/keel:review` Stage 2.
+`CLAUDE.md` and in `/cairn:review` Stage 2.
 
 ## MCP presence-detection
 
-Keel ships **no** MCP servers and requires none. The builder may note whatever MCP servers the
+Cairn ships **no** MCP servers and requires none. The builder may note whatever MCP servers the
 user already has connected and reference them when shaping an instance, but the kernel runtime
 (hooks, telemetry, scaffolder) is pure `python3` stdlib and makes no MCP or network calls. MCP
 presence is therefore advisory context for the interview only — never a runtime dependency.

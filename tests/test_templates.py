@@ -17,4 +17,4 @@ def test_templates_exist_and_are_wired():
 
 def test_command_templates_carry_managed_header():
     for cmd in ["log.md", "suspend.md", "conclude.md"]:
-        assert "managed-by-keel" in (T / "commands" / cmd).read_text()
+        assert "managed-by-cairn" in (T / "commands" / cmd).read_text()

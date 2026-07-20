@@ -1,9 +1,9 @@
 ---
 name: build
-description: Interview the user and scaffold a personalized keel instance (artifact-driven; user authors the goals)
+description: Interview the user and scaffold a personalized cairn instance (artifact-driven; user authors the goals)
 ---
 
-# /keel:build — the builder
+# /cairn:build — the builder
 
 You are building a long-lived personal system for this user. Follow the stages IN ORDER. The
 evidence behind each rule is in ${CLAUDE_PLUGIN_ROOT}/docs/PRINCIPLES.md (P-refs inline).
@@ -43,7 +43,7 @@ Assemble the build-config JSON (exact shape documented at the top of skills/buil
 including a decisions[] entry for every design choice with its principle tag and grade
 (VERIFIED / PREPRINT / BET). Write it to a temp file and run:
     python3 "${CLAUDE_PLUGIN_ROOT}/skills/build/scaffold.py" <config.json> <target-dir>
-Then: `git init` the instance, commit "keel scaffold", run one boot (open a session or invoke
+Then: `git init` the instance, commit "cairn scaffold", run one boot (open a session or invoke
 session_start manually) to show the user their banner, and hand over with the three habits
 that matter: /log real work, trust the banner, expect the first review after the minimum
 telemetry window (not sooner — adoption verdicts wait ~2 months, P13).

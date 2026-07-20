@@ -23,7 +23,7 @@ def test_corrupt_archive_line(instance):
     assert any(x["check"] == "jsonl_integrity" for x in findings(instance))
 
 def test_stale_sentinel(instance):
-    s = instance / ".keel" / "review-in-progress"
+    s = instance / ".cairn" / "review-in-progress"
     s.write_text("")
     old = time.time() - 25 * 3600
     os.utime(s, (old, old))

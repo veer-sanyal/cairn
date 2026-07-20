@@ -27,7 +27,7 @@ def test_working_overwrite_denied_without_sentinel(instance):
 
 def test_working_overwrite_allowed_with_sentinel(instance):
     (instance / "state/working/notes.md").write_text("a")
-    (instance / ".keel/review-in-progress").write_text("")
+    (instance / ".cairn/review-in-progress").write_text("")
     assert not denied(hook(instance, "Write", "state/working/notes.md"))
 
 def test_working_new_file_write_allowed(instance):

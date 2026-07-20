@@ -26,10 +26,10 @@ def test_scaffold_layout(tmp_path):
     t = scaffold(tmp_path)
     for rel in ["CLAUDE.md", "manifest.json", "state/HOT.md", "state/archive.jsonl",
                 "telemetry/events.jsonl", ".claude/settings.json",
-                ".claude/hooks/session_start.py", ".claude/hooks/keel_lib.py",
+                ".claude/hooks/session_start.py", ".claude/hooks/cairn_lib.py",
                 ".claude/commands/log.md", ".claude/commands/suspend.md",
-                ".claude/commands/conclude.md", ".keel",
-                ".keel/.gitkeep", "state/working/.gitkeep"]:
+                ".claude/commands/conclude.md", ".cairn",
+                ".cairn/.gitkeep", "state/working/.gitkeep"]:
         assert (t / rel).exists(), rel
 
 def test_substitution_and_no_leftover_placeholders(tmp_path):
@@ -41,7 +41,7 @@ def test_substitution_and_no_leftover_placeholders(tmp_path):
 
 def test_manifest_carries_contract(tmp_path):
     m = json.loads((scaffold(tmp_path) / "manifest.json").read_text())
-    assert m["keel_version"] and m["metrics"]["north_star"]["name"] == "planned_sessions_done"
+    assert m["cairn_version"] and m["metrics"]["north_star"]["name"] == "planned_sessions_done"
     assert m["caps"]["CLAUDE.md"]["hard"] == 8192
 
 def test_scaffolded_instance_boots_clean(tmp_path):

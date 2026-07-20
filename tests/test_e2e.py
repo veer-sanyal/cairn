@@ -15,7 +15,7 @@ def test_full_session_lifecycle(tmp_path):
     assert hook(t, "guard_files.py", {"cwd": str(t), "tool_name": "Write",
         "tool_input": {"file_path": str(t / "state/archive.jsonl"), "content": "x"}}
         ).stdout.count("deny") == 1
-    subprocess.run([sys.executable, str(t / ".claude/hooks/keel_event.py"),
+    subprocess.run([sys.executable, str(t / ".claude/hooks/cairn_event.py"),
                     "intent", "intent=plan"], cwd=str(t))
     hook(t, "session_end.py", {"cwd": str(t), "session_id": "s1", "reason": "exit"})
     # session 2: boot again — no lapse (s1 had an intent), validator clean

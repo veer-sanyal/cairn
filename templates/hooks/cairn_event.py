@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
-"""CLI event writer: keel_event.py TYPE key=val ...  Used by scaffolded commands and hooks."""
+"""CLI event writer: cairn_event.py TYPE key=val ...  Used by scaffolded commands and hooks."""
 import sys, os
-from keel_lib import find_root, append_event
+from cairn_lib import find_root, append_event
 
 def main():
     try:

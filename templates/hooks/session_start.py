@@ -2,7 +2,7 @@
 """SessionStart: session event + gap look-back + banner from manifest trigger rules."""
 import json, sys, os, datetime, subprocess
 from pathlib import Path
-from keel_lib import find_root, manifest, append_event
+from cairn_lib import find_root, manifest, append_event
 
 def load_events(root):
     p = Path(root) / "telemetry" / "events.jsonl"
@@ -54,7 +54,7 @@ def main():
         if sessions:
             last = sessions[-1]
             last_id = last.get("session_id")
-            # runtime work events (via keel_event.py / /log) carry no session_id, so
+            # runtime work events (via cairn_event.py / /log) carry no session_id, so
             # associate by time: any real work event at/after the previous session started.
             last_start = parse_ts(last["ts"])
             worked = any(e for e in evs
@@ -73,7 +73,7 @@ def main():
         reviews = [e for e in evs if e["type"] == "proposal"]
         anchor = reviews[-1]["ts"] if reviews else evs[0]["ts"]
         if t and days_since(anchor) >= t.get("days", m.get("cadence", {}).get("review_days", 30)):
-            lines.append("A review is due — run /keel:review when convenient.")
+            lines.append("A review is due — run /cairn:review when convenient.")
         t = trig(m, "friction_accumulator")
         if t:
             recent = [e for e in evs if e["type"] == "outcome" and e.get("outcome") == "friction"
@@ -110,7 +110,7 @@ def main():
     for f in json.loads(v.stdout or "[]"):
         lines.append(f"validator[{f['level']}] {f['check']}: {f.get('file', '')}")
 
-    banner = "keel boot: " + (" | ".join(lines) if lines else "all clear")
+    banner = "cairn boot: " + (" | ".join(lines) if lines else "all clear")
     print(json.dumps({"hookSpecificOutput": {"hookEventName": "SessionStart",
                                              "additionalContext": banner},
                       "systemMessage": banner}))

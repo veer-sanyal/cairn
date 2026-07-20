@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Deterministic keel instance scaffolder. Usage: scaffold.py <build-config.json> <target-dir>
+"""Deterministic cairn instance scaffolder. Usage: scaffold.py <build-config.json> <target-dir>
 Plugin-side (not an instance hook): hard failures are correct here.
 
 Build-config JSON fields (all required unless noted):
@@ -20,7 +20,7 @@ from pathlib import Path
 
 REPO = Path(__file__).resolve().parents[2]
 T = REPO / "templates"
-KEEL_VERSION = json.loads((REPO / ".claude-plugin" / "plugin.json").read_text())["version"]
+CAIRN_VERSION = json.loads((REPO / ".claude-plugin" / "plugin.json").read_text())["version"]
 CAPS = {"CLAUDE.md": {"soft": 4096, "hard": 8192},
         "state/HOT.md": {"soft": 6144, "hard": 12288},
         "state/working/*": {"soft": 16384, "hard": 32768}}
@@ -40,7 +40,7 @@ def main():
         sys.exit(f"target {target} exists and is not empty — refusing (no silent overwrite)")
     today = datetime.date.today().isoformat()
     subs = {
-        "keel_version": KEEL_VERSION, "instance_name": cfg["instance_name"],
+        "cairn_version": CAIRN_VERSION, "instance_name": cfg["instance_name"],
         "one_line_purpose": cfg["one_line_purpose"], "today": today,
         "north_star_name": cfg["north_star"]["name"],
         "north_star_statement": cfg["north_star"]["statement"],
@@ -50,11 +50,11 @@ def main():
     }
     (target / "state" / "working").mkdir(parents=True)
     (target / "telemetry").mkdir()
-    (target / ".keel").mkdir()
+    (target / ".cairn").mkdir()
     (target / ".claude" / "hooks").mkdir(parents=True)
     (target / ".claude" / "commands").mkdir(parents=True)
-    # empty dirs don't survive git clone; review's sentinel touch needs .keel/ to exist
-    (target / ".keel" / ".gitkeep").write_text("")
+    # empty dirs don't survive git clone; review's sentinel touch needs .cairn/ to exist
+    (target / ".cairn" / ".gitkeep").write_text("")
     (target / "state" / "working" / ".gitkeep").write_text("")
     (target / "state" / "archive.jsonl").write_text("")
     (target / "telemetry" / "events.jsonl").write_text("")
@@ -67,7 +67,7 @@ def main():
     for hook in (T / "hooks").glob("*.py"):
         shutil.copy(hook, target / ".claude" / "hooks" / hook.name)
     manifest = {
-        "keel_version": KEEL_VERSION,
+        "cairn_version": CAIRN_VERSION,
         "instance": {"name": cfg["instance_name"], "created": today},
         "caps": CAPS,
         "cadence": {"review_days": 30, "min_sessions": 10, "min_days": 28},

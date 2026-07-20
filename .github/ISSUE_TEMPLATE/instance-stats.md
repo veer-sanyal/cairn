@@ -1,11 +1,11 @@
 ---
 name: Instance stats (opt-in outcome share)
-about: Share how a Keel instance is going, from your own locally-computed telemetry
+about: Share how a Cairn instance is going, from your own locally-computed telemetry
 title: "[stats] "
 labels: stats
 ---
 
-Keel collects **nothing** automatically — telemetry is local JSONL on your machine. This
+Cairn collects **nothing** automatically — telemetry is local JSONL on your machine. This
 template exists only so you can *voluntarily* paste your own numbers if you'd like to help the
 project understand real-world outcomes. Every field is optional; share only what you're
 comfortable with, and scrub anything personal first.

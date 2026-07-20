@@ -1,8 +1,8 @@
 #!/usr/bin/env python3
-"""Heuristic Bash guard for keel-protected paths. Known-incomplete by design (spec §1.3):
+"""Heuristic Bash guard for cairn-protected paths. Known-incomplete by design (spec §1.3):
 review re-validation is the real backstop. Patterns cover the common destructive forms."""
 import json, re, sys, os
-from keel_lib import find_root
+from cairn_lib import find_root
 
 PROTECTED = r"(state/(?:working|archive\.jsonl)|telemetry/events\.jsonl)"
 PATTERNS = [
@@ -25,9 +25,9 @@ def main():
                 "hookEventName": "PreToolUse",
                 "permissionDecision": "deny",
                 "permissionDecisionReason":
-                    "This command targets a keel-protected file (archive/working are guarded; "
-                    "archive is append-only — use >> or keel_event.py; working/ changes go "
-                    "through Edit or /keel:review)."}}))
+                    "This command targets a cairn-protected file (archive/working are guarded; "
+                    "archive is append-only — use >> or cairn_event.py; working/ changes go "
+                    "through Edit or /cairn:review)."}}))
             return
 
 if __name__ == "__main__":

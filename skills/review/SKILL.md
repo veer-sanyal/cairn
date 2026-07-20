@@ -1,16 +1,16 @@
 ---
 name: review
-description: Run a keel instance review — validator, memory consolidation (probe→repair→SKIP/MERGE/INSERT), telemetry-cited proposals with the user as gate
+description: Run a cairn instance review — validator, memory consolidation (probe→repair→SKIP/MERGE/INSERT), telemetry-cited proposals with the user as gate
 ---
 
-# /keel:review — the governor
+# /cairn:review — the governor
 
-Run from inside a keel instance (manifest.json with keel_version present — verify first).
+Run from inside a cairn instance (manifest.json with cairn_version present — verify first).
 
 ## Stage 0 — Gate check + sentinel
 Read manifest.json cadence. If total sessions < min_sessions AND instance age < min_days:
 say so, run ONLY Stage 1 (validation) and Stage 2 (memory lane), skip Stages 3-4 — adoption
-judgments before the window are noise (P13). Touch the sentinel file `.keel/review-in-progress`
+judgments before the window are noise (P13). Touch the sentinel file `.cairn/review-in-progress`
 NOW (empty file). You MUST delete it at the end — even on failure. A leftover sentinel is
 flagged by the validator as stale after 24h.
 
@@ -43,11 +43,11 @@ For each friction cluster or guardrail regression, draft a proposal. HARD RULES:
 - No proposal may regress the standing anti-bloat guardrails (boot_context_bytes, ceremony).
 - Present as BUILD / PARK / REJECT for the USER to decide — you never apply unasked (the
   self-correction literature is unambiguous: model self-review alone degrades systems).
-- Log every proposal + decision: `python3 .claude/hooks/keel_event.py proposal id=<n> status=<proposed|build|park|reject> cites="<event refs>"`
+- Log every proposal + decision: `python3 .claude/hooks/cairn_event.py proposal id=<n> status=<proposed|build|park|reject> cites="<event refs>"`
 - For BUILD decisions: apply, then validate empirically (validator clean + the cited friction
   should be re-checked at next review; note the check in the proposal event).
 
 ## Stage 5 — Close
-Delete `.keel/review-in-progress`. Log `python3 .claude/hooks/keel_event.py proposal id=review status=done`.
-Commit everything: "keel review <date>". Summarize for the user: what moved, what's parked,
+Delete `.cairn/review-in-progress`. Log `python3 .claude/hooks/cairn_event.py proposal id=review status=done`.
+Commit everything: "cairn review <date>". Summarize for the user: what moved, what's parked,
 when the next review is due.

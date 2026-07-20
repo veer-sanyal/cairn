@@ -1,7 +1,7 @@
 {
-  "name": "keel-marketplace",
+  "name": "cairn-marketplace",
   "owner": { "name": "Veer", "url": "https://github.com/veer-sanyal" },
   "plugins": [
-    { "name": "keel", "source": "./", "description": "Kernel + builder for personal agentic systems" }
+    { "name": "cairn", "source": "./", "description": "Kernel + builder for personal agentic systems" }
   ]
 }

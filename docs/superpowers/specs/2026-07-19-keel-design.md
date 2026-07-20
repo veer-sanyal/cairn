@@ -1,27 +1,27 @@
-# Keel — Design Spec
+# Cairn — Design Spec
 
 **Date:** 2026-07-19
 **Status:** Approved design, pre-implementation
 **Evidence base:** [docs/PRINCIPLES.md](../../PRINCIPLES.md) — 15 research-derived principles (P1–P15), each graded VERIFIED / PREPRINT / BET / REFUTED. Raw verified research: [docs/research/](../../research/). Every design decision below cites the principle(s) that justify it; decisions with no evidence either way are marked **[BET]**.
 
-## What Keel is
+## What Cairn is
 
 A Claude Code plugin that scaffolds resilient, long-lived, personalized agentic systems ("instances") — a PM tracker, a trading advisor, a study coach, any personal domain. It has three layers:
 
 1. **Kernel** — the shared runtime every instance gets: file-memory tiers, boot ritual, hook-enforced invariants, local telemetry.
-2. **Builder** (`/keel:build`) — an artifact-driven interview that produces a personalized instance with a metric contract.
-3. **Governor** (`/keel:review`) — a telemetry-cited, human-gated review and self-improvement loop.
+2. **Builder** (`/cairn:build`) — an artifact-driven interview that produces a personalized instance with a metric contract.
+3. **Governor** (`/cairn:review`) — a telemetry-cited, human-gated review and self-improvement loop.
 
-An instance is an ordinary directory + git repo that works with plain Claude Code. Keel is a dependency, not a cage: the scaffolder copies hooks and commands *into the instance's own `.claude/`* (instance-local, refreshed by `/keel:upgrade`), so an instance keeps its full runtime discipline even if the plugin is uninstalled — only the builder/governor/upgrade commands live in the plugin itself.
+An instance is an ordinary directory + git repo that works with plain Claude Code. Cairn is a dependency, not a cage: the scaffolder copies hooks and commands *into the instance's own `.claude/`* (instance-local, refreshed by `/cairn:upgrade`), so an instance keeps its full runtime discipline even if the plugin is uninstalled — only the builder/governor/upgrade commands live in the plugin itself.
 
 Prior-art position (P15): every individual capability exists scattered in the ecosystem (mobile-spine's interview, CCUsage's local telemetry, Bouncer's independent-model gate); no tool combines them. The integration is the product.
 
 ## Non-goals
 
 - No network telemetry, ever. Local JSONL only (P15: CCUsage's 11.5k stars validate local-only demand; P11 supplies the metadata-vs-content split, not locality).
-- No streak mechanics or gamification (P13: habit automaticity median 66 days, range 18–254; fixed streaks are ungrounded and guilt loops drive abandonment among exactly the behavior-change users Keel targets).
+- No streak mechanics or gamification (P13: habit automaticity median 66 days, range 18–254; fixed streaks are ungrounded and guilt loops drive abandonment among exactly the behavior-change users Cairn targets).
 - No autonomous kernel self-modification (P10). The kernel ships as versioned releases.
-- Not a coding-workflow framework (that's SuperClaude/Agent OS territory). Keel scaffolds *personal domain systems*.
+- Not a coding-workflow framework (that's SuperClaude/Agent OS territory). Cairn scaffolds *personal domain systems*.
 
 ## Component 1: Kernel
 
@@ -50,9 +50,9 @@ Prior-art position (P15): every individual capability exists scattered in the ec
 
 ### 1.2 Boot ritual
 
-SessionStart hook runs the **validator script** (the "lint" referenced throughout: one tested script checking file-size caps, staleness stamps, archive integrity; reused post-hoc by `/keel:review`) and emits a reconcile banner: HOT.md staleness stamp, git state, telemetry gap (a *look-back* — did the previous session log any non-session events?), validator status. Reconcile-against-reality before work (convergent with P2/P5; also the "welcome back" surface — see 3.3).
+SessionStart hook runs the **validator script** (the "lint" referenced throughout: one tested script checking file-size caps, staleness stamps, archive integrity; reused post-hoc by `/cairn:review`) and emits a reconcile banner: HOT.md staleness stamp, git state, telemetry gap (a *look-back* — did the previous session log any non-session events?), validator status. Reconcile-against-reality before work (convergent with P2/P5; also the "welcome back" surface — see 3.3).
 
-**Honesty about the surface:** SessionStart output is context injected for the model (plus `systemMessage` for user-visible text where the platform supports it), not a guaranteed user-facing display — banner *relay* is best-effort by the spec's own P8 standard. The raw validator/gap data therefore always lands in `telemetry/events.jsonl` where the user (and `/keel:review`) can read it deterministically.
+**Honesty about the surface:** SessionStart output is context injected for the model (plus `systemMessage` for user-visible text where the platform supports it), not a guaranteed user-facing display — banner *relay* is best-effort by the spec's own P8 standard. The raw validator/gap data therefore always lands in `telemetry/events.jsonl` where the user (and `/cairn:review`) can read it deterministically.
 
 ### 1.3 Enforced invariants (hooks, not prose — P8, P9)
 
@@ -65,11 +65,11 @@ Prose instructions measurably decay with turns (direction robust across 15 model
 | Protected-path Bash ops | PreToolUse on Bash | pattern-block redirects/truncation/`rm` targeting archive.jsonl and working/ — **explicitly heuristic**; Bash is the likelier bypass than out-of-band editors, and review re-validation is the real backstop |
 | Telemetry write-through | SessionStart (look-back) | if the *previous* session logged no non-session events, log a gap/lapse event and surface it in the banner |
 | Staleness stamp present/fresh | SessionStart | banner warning |
-| working/ destructive ops are pipeline-only (see 3.2) | PreToolUse | `Edit` (targeted fact write-through) always allowed — P2 requires it; block `Write`-overwrite of an existing working/ file and file deletion **unless the review sentinel is present** — hooks cannot see which command is active, so `/keel:review` writes `.keel/review-in-progress` (with timestamp TTL + cleanup on completion) and the hook checks for it |
+| working/ destructive ops are pipeline-only (see 3.2) | PreToolUse | `Edit` (targeted fact write-through) always allowed — P2 requires it; block `Write`-overwrite of an existing working/ file and file deletion **unless the review sentinel is present** — hooks cannot see which command is active, so `/cairn:review` writes `.cairn/review-in-progress` (with timestamp TTL + cleanup on completion) and the hook checks for it |
 
 Session-end records are written by the **SessionEnd** hook (which can write files but not feed context) — the Stop hook fires after *every* response turn, not at session end, and is not used for any of this.
 
-Hook runtime & fail-soft discipline: POSIX shell (+ python3 where jq-free parsing isn't enough); macOS/Linux for v1, Windows explicitly unsupported (declared in README, not silent). Deliberate blocks exit 2; every other failure path exits 0 with a warning line — a missing interpreter or crashed script must never brick a session. Belt-and-suspenders: `/keel:review` re-validates all invariants post-hoc, for three reasons — hook enforcement has had real field bugs (open Claude Code issues, P9 caveat), the Bash matcher is heuristic, and hooks only fire inside Claude Code (out-of-band edits bypass them entirely).
+Hook runtime & fail-soft discipline: POSIX shell (+ python3 where jq-free parsing isn't enough); macOS/Linux for v1, Windows explicitly unsupported (declared in README, not silent). Deliberate blocks exit 2; every other failure path exits 0 with a warning line — a missing interpreter or crashed script must never brick a session. Belt-and-suspenders: `/cairn:review` re-validates all invariants post-hoc, for three reasons — hook enforcement has had real field bugs (open Claude Code issues, P9 caveat), the Bash matcher is heuristic, and hooks only fire inside Claude Code (out-of-band edits bypass them entirely).
 
 Threshold values for caps are **[BET]** — no literature gives numbers; defaults chosen small (CLAUDE.md soft 4KB/hard 8KB; HOT.md soft 6KB/hard 12KB) and recorded in manifest as tunable.
 
@@ -85,14 +85,14 @@ Threshold values for caps are **[BET]** — no literature gives numbers; default
 | `lapse` — **typed: forgot / upkeep / skipped / suspended** (P13) | SessionStart hook on gap detection; cause confirmed conversationally, recoverable by design | deterministic detection, best-effort typing |
 | `intent` — what the user came to do (enum per instance) | scaffolded `/log` command; next-boot banner reminder as the fallback nudge | best-effort |
 | `outcome` — done / partial / friction (with reason) | same as intent | best-effort |
-| `metric` — north-star / input / guardrail observation | scaffolded commands at the moment the lever is pulled; `/keel:review` backfills | mixed |
-| `proposal` — governor lifecycle: proposed / validated / applied / discarded | `/keel:review` itself | deterministic |
+| `metric` — north-star / input / guardrail observation | scaffolded commands at the moment the lever is pulled; `/cairn:review` backfills | mixed |
+| `proposal` — governor lifecycle: proposed / validated / applied / discarded | `/cairn:review` itself | deterministic |
 
 The telemetry-gap check runs at the **next SessionStart** as a look-back counting non-session events from the previous session — hook-written `session` events don't satisfy it.
 
-Token/cost mechanics: hooks do not expose token counts. Boot context cost is estimated by the SessionStart hook from resident-file bytes (~bytes/4); per-session usage, where wanted, is parsed post-hoc from Claude Code's own transcript JSONL (the CCUsage-proven mechanism, P15). Cost derived from token counts (no OTel cost attribute exists — refuted claim). Metadata-only by default; prompt/content capture is per-instance opt-in (P11). Format is plain typed JSONL: borrow the handful of OTel GenAI names that genuinely fit (`gen_ai.usage.*`, `gen_ai.tool.name`); no semconv version-pin ceremony — nearly every Keel event is domain-specific and no OTel consumer will read this file.
+Token/cost mechanics: hooks do not expose token counts. Boot context cost is estimated by the SessionStart hook from resident-file bytes (~bytes/4); per-session usage, where wanted, is parsed post-hoc from Claude Code's own transcript JSONL (the CCUsage-proven mechanism, P15). Cost derived from token counts (no OTel cost attribute exists — refuted claim). Metadata-only by default; prompt/content capture is per-instance opt-in (P11). Format is plain typed JSONL: borrow the handful of OTel GenAI names that genuinely fit (`gen_ai.usage.*`, `gen_ai.tool.name`); no semconv version-pin ceremony — nearly every Cairn event is domain-specific and no OTel consumer will read this file.
 
-## Component 2: Builder (`/keel:build`)
+## Component 2: Builder (`/cairn:build`)
 
 Five stages, evidence-shaped (P14):
 
@@ -124,11 +124,11 @@ The complete parametrizable set stage 4 selects from — an implementer builds e
 
 Menu growth is a kernel-release matter (P10), not a per-instance one.
 
-## Component 3: Governor (`/keel:review`)
+## Component 3: Governor (`/cairn:review`)
 
 ### 3.1 Cadence
 
-Default monthly, tunable; never weekly-or-faster for adoption judgments (P13: habit horizon is months). Claude Code has no scheduler, so the **SessionStart banner is the sole trigger surface**: it nudges when a review is due by calendar or when behavioral signals fire — repeated friction events, guardrail regression, typed lapses; never turn counts (all turn-count thresholds were refuted, P8). A review only ever runs when the user invokes `/keel:review`.
+Default monthly, tunable; never weekly-or-faster for adoption judgments (P13: habit horizon is months). Claude Code has no scheduler, so the **SessionStart banner is the sole trigger surface**: it nudges when a review is due by calendar or when behavioral signals fire — repeated friction events, guardrail regression, typed lapses; never turn counts (all turn-count thresholds were refuted, P8). A review only ever runs when the user invokes `/cairn:review`.
 
 ### 3.2 The pipeline (P6, P10)
 
@@ -146,18 +146,18 @@ Intrinsic self-correction degrades performance; the workable pattern is proposal
 
 ## Kernel evolution & community
 
-- Kernel changes ship as versioned plugin releases; instances pin a version; `/keel:upgrade` migrates with a changelog diff. Never silent self-modification (P10).
-- **Upgrade merge semantics (no silent data loss inside a user's repo):** three file classes. (1) *Hook scripts* are plugin-owned and never user-edited → direct-copied over on upgrade (each replacement reported) — routing them through a header-based merge was found in build review to make upgrades a silent no-op, since scaffolded hooks carry no header. (2) *Command files* are managed-but-rendered → the new template is rendered with the instance's manifest values and merged: identical → no-op; user-modified → new version lands alongside as `<name>.keel-new` (latest `.keel-new` wins), user's file never overwritten. (3) *CLAUDE.md and HOT.md* are user-owned living documents after scaffold → never upgraded; their `managed-by-keel` header records provenance only.
-- Upstream learning: deferred past v1 (YAGNI — no community exists yet); a CONTRIBUTING.md line covers it until real users do. Because no-network telemetry means Keel's own north star is uncollectable in aggregate (the author only ever sees dogfood instances), the public feedback channel is an **opt-in issue template** asking users to paste their locally-computed stats.
+- Kernel changes ship as versioned plugin releases; instances pin a version; `/cairn:upgrade` migrates with a changelog diff. Never silent self-modification (P10).
+- **Upgrade merge semantics (no silent data loss inside a user's repo):** three file classes. (1) *Hook scripts* are plugin-owned and never user-edited → direct-copied over on upgrade (each replacement reported) — routing them through a header-based merge was found in build review to make upgrades a silent no-op, since scaffolded hooks carry no header. (2) *Command files* are managed-but-rendered → the new template is rendered with the instance's manifest values and merged: identical → no-op; user-modified → new version lands alongside as `<name>.cairn-new` (latest `.cairn-new` wins), user's file never overwritten. (3) *CLAUDE.md and HOT.md* are user-owned living documents after scaffold → never upgraded; their `managed-by-cairn` header records provenance only.
+- Upstream learning: deferred past v1 (YAGNI — no community exists yet); a CONTRIBUTING.md line covers it until real users do. Because no-network telemetry means Cairn's own north star is uncollectable in aggregate (the author only ever sees dogfood instances), the public feedback channel is an **opt-in issue template** asking users to paste their locally-computed stats.
 
 ## Repo shape (the published plugin)
 
 ```
-keel/
+cairn/
   .claude-plugin/plugin.json + marketplace.json   # self-hosted single-plugin marketplace;
-                                                  # install: /plugin marketplace add veer-sanyal/keel
-  skills/build/  skills/review/  skills/upgrade/  # plugin-resident: /keel:build /keel:review
-                                                  #   /keel:upgrade (the machinery)
+                                                  # install: /plugin marketplace add veer-sanyal/cairn
+  skills/build/  skills/review/  skills/upgrade/  # plugin-resident: /cairn:build /cairn:review
+                                                  #   /cairn:upgrade (the machinery)
   templates/                                      # instance scaffold (deterministic), INCLUDING
     hooks/                                        #   all runtime hooks — template payload copied
     commands/                                     #   into each instance's .claude/, INCLUDING
@@ -173,30 +173,30 @@ keel/
 
 The methodology ships inside the repo — people who want the ideas without the plugin get PRINCIPLES.md. README leads with a concrete before/after example (interview → a study coach that survives three months of real life), then the three differentiators: metric contract, typed-lapse abandonment model, human-gated governor.
 
-## Trust: what Keel executes on your machine
+## Trust: what Cairn executes on your machine
 
 Destined for the README, near the top — a stranger's first question about a plugin that writes hooks into their directories:
 
 - **What runs:** small POSIX-shell/python3 scripts, all readable in `templates/hooks/` before install and in your instance's `.claude/` after; nothing obfuscated, nothing compiled.
 - **When:** only inside instance directories you scaffolded (the plugin registers zero global hooks), at session start/end and before tool calls.
 - **Network: never.** No script makes a network call; telemetry is local JSONL you can `cat`.
-- **Removal:** uninstall the plugin and instances keep working (runtime is instance-local); delete an instance directory and Keel retains nothing about it.
+- **Removal:** uninstall the plugin and instances keep working (runtime is instance-local); delete an instance directory and Cairn retains nothing about it.
 
 ## Lifecycle (v1 scope declarations)
 
-- **First session after scaffold:** boot banner shows "new instance" state; `/keel:review` refuses to run adoption judgments until a minimum telemetry window exists (**[BET]**, ledgered: default 10 sessions or 4 weeks, manifest-tunable — and adoption *verdicts* specifically are deferred to the P13 habit horizon of ~2 months; the earlier window permits only invariant re-validation and memory-lane consolidation).
+- **First session after scaffold:** boot banner shows "new instance" state; `/cairn:review` refuses to run adoption judgments until a minimum telemetry window exists (**[BET]**, ledgered: default 10 sessions or 4 weeks, manifest-tunable — and adoption *verdicts* specifically are deferred to the P13 habit horizon of ~2 months; the earlier window permits only invariant re-validation and memory-lane consolidation).
 - **Single machine, single session at a time.** Multi-machine git sync is explicitly out of scope for v1: `events.jsonl`/`archive.jsonl` appends would union-merge, but `HOT.md` rewrites would not. Documented limitation, not a silent one.
-- **Offboarding:** `/keel:conclude` writes a final state summary to the archive and stamps the manifest; the instance directory remains a plain readable git repo forever — no lock-in to delete.
+- **Offboarding:** `/cairn:conclude` writes a final state summary to the archive and stamps the manifest; the instance directory remains a plain readable git repo forever — no lock-in to delete.
 
 ## Validation plan (pre-publish)
 
 1. Build kernel + templates; hook scripts and scaffolder covered by tests.
 2. **Dogfood migration:** migrate one existing real system (Veer PM) onto the kernel as test-user #1 — stress-tests the runtime against real accumulated state. Private; never enters the repo.
-3. **Greenfield build:** run `/keel:build` end-to-end for a new domain — stress-tests the interview.
-4. Run both for a telemetry-meaningful period; run one real `/keel:review` cycle.
+3. **Greenfield build:** run `/cairn:build` end-to-end for a new domain — stress-tests the interview.
+4. Run both for a telemetry-meaningful period; run one real `/cairn:review` cycle.
 5. Publish to GitHub (account: veer-sanyal) with the research corpus included.
 
-Keel's own success measures, computable locally by any user from their own telemetry: north star = instances still in active-or-concluded-successfully state at 3 months (P13 horizon); guardrails = boot context cost and upkeep-burden lapse rate.
+Cairn's own success measures, computable locally by any user from their own telemetry: north star = instances still in active-or-concluded-successfully state at 3 months (P13 horizon); guardrails = boot context cost and upkeep-burden lapse rate.
 
 ## Engineering posture
 

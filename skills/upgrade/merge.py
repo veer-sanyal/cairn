@@ -1,11 +1,11 @@
 #!/usr/bin/env python3
-"""Managed-file merge for /keel:upgrade. Usage: merge.py <new> <installed> [--original <shipped-at-install>]
+"""Managed-file merge for /cairn:upgrade. Usage: merge.py <new> <installed> [--original <shipped-at-install>]
 Rule (spec: no silent data loss): unmanaged or user-modified files are never overwritten —
-the new version lands as <installed>.keel-new instead. Prints the action taken."""
+the new version lands as <installed>.cairn-new instead. Prints the action taken."""
 import sys, re, shutil
 from pathlib import Path
 
-HEADER = re.compile(r"managed-by-keel:\s*([\d.]+)")
+HEADER = re.compile(r"managed-by-cairn:\s*([\d.]+)")
 
 def main():
     args = sys.argv[1:]
@@ -26,9 +26,9 @@ def main():
         shutil.copy(new, installed)
         print(f"replaced: {installed}")
     else:
-        # shutil.copy overwrites any stale .keel-new from a skipped upgrade — latest wins
-        shutil.copy(new, installed.with_name(installed.name + ".keel-new"))
-        print(f"kept, new version at {installed}.keel-new")
+        # shutil.copy overwrites any stale .cairn-new from a skipped upgrade — latest wins
+        shutil.copy(new, installed.with_name(installed.name + ".cairn-new"))
+        print(f"kept, new version at {installed}.cairn-new")
 
 if __name__ == "__main__":
     main()

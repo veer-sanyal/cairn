@@ -6,7 +6,7 @@ REPO = Path(__file__).resolve().parents[1]
 HOOKS = REPO / "templates" / "hooks"
 
 MANIFEST = {
-    "keel_version": "0.1.0",
+    "cairn_version": "0.1.0",
     "instance": {"name": "test-instance", "created": "2026-07-19"},
     "caps": {
         "CLAUDE.md": {"soft": 4096, "hard": 8192},
@@ -36,7 +36,7 @@ def instance(tmp_path):
     root = tmp_path / "inst"
     (root / "state" / "working").mkdir(parents=True)
     (root / "telemetry").mkdir()
-    (root / ".keel").mkdir()
+    (root / ".cairn").mkdir()
     (root / ".claude").mkdir()
     (root / "state" / "archive.jsonl").write_text("")
     (root / "telemetry" / "events.jsonl").write_text("")

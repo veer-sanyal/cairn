@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
-"""Keel validator ('lint'). Report-only: always exit 0. --json for machine output."""
+"""Cairn validator ('lint'). Report-only: always exit 0. --json for machine output."""
 import json, re, sys, os, time, fnmatch, datetime
-from keel_lib import find_root, manifest
+from cairn_lib import find_root, manifest
 
 SENTINEL_TTL_H = 24
 STAMP = re.compile(r"Last reconciled: (\d{4}-\d{2}-\d{2})")
@@ -46,16 +46,16 @@ def run(root):
                     except json.JSONDecodeError:
                         out.append({"check": "jsonl_integrity", "level": "hard", "file": rel, "line": i})
                         break
-    s = root / ".keel" / "review-in-progress"
+    s = root / ".cairn" / "review-in-progress"
     if s.exists() and time.time() - s.stat().st_mtime > SENTINEL_TTL_H * 3600:
-        out.append({"check": "stale_sentinel", "level": "soft", "file": ".keel/review-in-progress"})
+        out.append({"check": "stale_sentinel", "level": "soft", "file": ".cairn/review-in-progress"})
     return out
 
 def main():
     try:
         root = find_root(os.getcwd())
         if not root:
-            print("[]" if "--json" in sys.argv else "not a keel instance")
+            print("[]" if "--json" in sys.argv else "not a cairn instance")
             return
         out = run(root)
         if "--json" in sys.argv:
