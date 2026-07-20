@@ -31,6 +31,13 @@ def test_user_modified_file_gets_keel_new(tmp_path):
     assert "USER EDIT" in (tmp_path / "inst.md").read_text()          # never overwritten
     assert (tmp_path / "inst.md.keel-new").exists()                    # lands alongside
 
+def test_identical_managed_file_noop(tmp_path):
+    (tmp_path / "new.md").write_text(managed("0.2.0", "same"))
+    (tmp_path / "inst.md").write_text(managed("0.2.0", "same"))
+    r = run_merge(tmp_path / "new.md", tmp_path / "inst.md")
+    assert "identical" in r.stdout
+    assert not (tmp_path / "inst.md.keel-new").exists()
+
 def test_unmanaged_file_untouched(tmp_path):
     (tmp_path / "new.md").write_text(managed("0.2.0"))
     (tmp_path / "inst.md").write_text("no header — user's own file")

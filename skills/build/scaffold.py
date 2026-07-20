@@ -1,6 +1,20 @@
 #!/usr/bin/env python3
 """Deterministic keel instance scaffolder. Usage: scaffold.py <build-config.json> <target-dir>
-Plugin-side (not an instance hook): hard failures are correct here."""
+Plugin-side (not an instance hook): hard failures are correct here.
+
+Build-config JSON fields (all required unless noted):
+  instance_name      str   e.g. "study-coach"
+  one_line_purpose   str
+  north_star         {"name": str, "statement": str}  # user's own words
+  intents            [str, ...]
+  triggers           [{"template": str, ...params}, ...]
+  owner_map          [{"fact": str, "owner": str}, ...]  (optional)
+  inputs             [{"name": str}, ...]                (optional)
+  guardrails         [{"name": str, "max": num}, ...]    (optional)
+  decisions          [{"id","decision","principle","grade"}, ...]  (optional)
+  initial_now        str  (optional)
+  initial_next       str  (optional)
+"""
 import json, sys, shutil, datetime
 from pathlib import Path
 
