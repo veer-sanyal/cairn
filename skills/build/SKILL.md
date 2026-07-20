@@ -6,7 +6,7 @@ description: Interview the user and scaffold a personalized keel instance (artif
 # /keel:build — the builder
 
 You are building a long-lived personal system for this user. Follow the stages IN ORDER. The
-evidence behind each rule is in the plugin's docs/PRINCIPLES.md (P-refs inline).
+evidence behind each rule is in ${CLAUDE_PLUGIN_ROOT}/docs/PRINCIPLES.md (P-refs inline).
 
 ## Stage 1 — Orient, then show a draft (artifact-based elicitation, P14)
 Ask AT MOST three orienting questions (domain; what they're doing today without a system; how
@@ -42,7 +42,7 @@ trigger mechanics — menu growth is a kernel-release matter.
 Assemble the build-config JSON (exact shape documented at the top of skills/build/scaffold.py),
 including a decisions[] entry for every design choice with its principle tag and grade
 (VERIFIED / PREPRINT / BET). Write it to a temp file and run:
-    python3 <plugin>/skills/build/scaffold.py <config.json> <target-dir>
+    python3 "${CLAUDE_PLUGIN_ROOT}/skills/build/scaffold.py" <config.json> <target-dir>
 Then: `git init` the instance, commit "keel scaffold", run one boot (open a session or invoke
 session_start manually) to show the user their banner, and hand over with the three habits
 that matter: /log real work, trust the banner, expect the first review after the minimum

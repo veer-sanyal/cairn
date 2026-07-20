@@ -33,6 +33,8 @@ def main():
     if not root:
         return
     m = manifest(root)
+    if m.get("instance", {}).get("concluded"):
+        return  # concluded instances stay silent: readable, never nagging
     evs = load_events(root)
     lines = []
 
@@ -70,7 +72,7 @@ def main():
         t = trig(m, "review_due")
         reviews = [e for e in evs if e["type"] == "proposal"]
         anchor = reviews[-1]["ts"] if reviews else evs[0]["ts"]
-        if t and days_since(anchor) >= t.get("days", 30):
+        if t and days_since(anchor) >= t.get("days", m.get("cadence", {}).get("review_days", 30)):
             lines.append("A review is due — run /keel:review when convenient.")
         t = trig(m, "friction_accumulator")
         if t:
@@ -80,7 +82,9 @@ def main():
                 lines.append(f"{len(recent)} friction events in {t.get('window_days',14)} days — "
                              "a review could turn these into proposals.")
         t = trig(m, "suspend_suggestion")
-        if t and len([e for e in evs if e["type"] == "lapse"]) >= t.get("lapse_count", 3):
+        # typed lapses only: "didn't log" (untyped) is not evidence of abandoning
+        if t and len([e for e in evs if e["type"] == "lapse"
+                      and e.get("cause") != "untyped"]) >= t.get("lapse_count", 3):
             lines.append("Several lapses on record. If life has moved on, /suspend is an honorable "
                          "state — this system concluding is allowed to be success.")
 

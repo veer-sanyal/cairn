@@ -39,10 +39,17 @@ def test_new_instance_banner(instance):
 
 def test_suspend_suggestion_after_lapses(instance):
     for d in (30, 20, 10):
-        seed_event(instance, days_ago=d, type="lapse", cause="untyped")
+        seed_event(instance, days_ago=d, type="lapse", cause="skipped")
     seed_event(instance, days_ago=9, type="session", phase="start", session_id="s1")
     out = boot(instance)
     assert "/suspend" in ctx(out)
+
+def test_untyped_lapses_do_not_trigger_suspend(instance):
+    for d in (30, 20, 10):
+        seed_event(instance, days_ago=d, type="lapse", cause="untyped")
+    seed_event(instance, days_ago=9, type="session", phase="start", session_id="s1")
+    out = boot(instance)
+    assert "/suspend" not in ctx(out)
 
 def test_refire_same_session_id_no_false_lapse(instance):
     boot(instance)                      # first boot, session s2

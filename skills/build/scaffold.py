@@ -53,6 +53,9 @@ def main():
     (target / ".keel").mkdir()
     (target / ".claude" / "hooks").mkdir(parents=True)
     (target / ".claude" / "commands").mkdir(parents=True)
+    # empty dirs don't survive git clone; review's sentinel touch needs .keel/ to exist
+    (target / ".keel" / ".gitkeep").write_text("")
+    (target / "state" / "working" / ".gitkeep").write_text("")
     (target / "state" / "archive.jsonl").write_text("")
     (target / "telemetry" / "events.jsonl").write_text("")
     (target / "CLAUDE.md").write_text(render((T / "instance" / "CLAUDE.md.tmpl").read_text(), subs))

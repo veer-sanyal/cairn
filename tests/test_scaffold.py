@@ -28,7 +28,8 @@ def test_scaffold_layout(tmp_path):
                 "telemetry/events.jsonl", ".claude/settings.json",
                 ".claude/hooks/session_start.py", ".claude/hooks/keel_lib.py",
                 ".claude/commands/log.md", ".claude/commands/suspend.md",
-                ".claude/commands/conclude.md", ".keel"]:
+                ".claude/commands/conclude.md", ".keel",
+                ".keel/.gitkeep", "state/working/.gitkeep"]:
         assert (t / rel).exists(), rel
 
 def test_substitution_and_no_leftover_placeholders(tmp_path):
