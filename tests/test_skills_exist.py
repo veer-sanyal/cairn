@@ -3,8 +3,10 @@ from conftest import REPO
 
 def test_skills_have_frontmatter_and_load_bearing_content():
     for name, must_contain in {
-        "build": ["scaffold.py", "own words", "pairwise", "north star"],
-        "review": ["review-in-progress", "SKIP", "MERGE", "INSERT", "BUILD", "PARK", "REJECT"],
+        "build": ["scaffold.py", "own words", "pairwise", "north star",
+                  "RESEARCH.md", "REFUTE", "deep-research"],
+        "review": ["review-in-progress", "SKIP", "MERGE", "INSERT", "BUILD", "PARK", "REJECT",
+                   "RESEARCH.md"],
         "upgrade": ["merge.py", "managed-by-cairn", ".cairn-new"],
     }.items():
         p = REPO / "skills" / name / "SKILL.md"

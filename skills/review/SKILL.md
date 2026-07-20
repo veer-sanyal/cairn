@@ -46,6 +46,12 @@ For each friction cluster or guardrail regression, draft a proposal. HARD RULES:
 - Log every proposal + decision: `python3 .claude/hooks/cairn_event.py proposal id=<n> status=<proposed|build|park|reject> cites="<event refs>"`
 - For BUILD decisions: apply, then validate empirically (validator clean + the cited friction
   should be re-checked at next review; note the check in the proposal event).
+- **Research is a valid proposal.** If a friction cluster traces to a design decision the
+  manifest grades BET or THIN, propose a research run (the build skill's Stage 2.5 protocol:
+  frame the decision, search primary sources, adversarially verify, update docs/RESEARCH.md
+  and re-parametrize) instead of guessing a new value. Also flag docs/RESEARCH.md if its
+  date stamp is over a year old in a fast-moving domain — stale evidence is a BET wearing a
+  VERIFIED badge.
 
 ## Stage 5 — Close
 Delete `.cairn/review-in-progress`. Log `python3 .claude/hooks/cairn_event.py proposal id=review status=done`.

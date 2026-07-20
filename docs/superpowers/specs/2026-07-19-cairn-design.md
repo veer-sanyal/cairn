@@ -94,7 +94,21 @@ Token/cost mechanics: hooks do not expose token counts. Boot context cost is est
 
 ## Component 2: Builder (`/cairn:build`)
 
-Five stages, evidence-shaped (P14):
+Six stages, evidence-shaped (P14). Stage 2.5 — **unprompted domain research** — grounds the
+instance's parameters in domain evidence the way the kernel is grounded in agent-systems
+evidence: the builder identifies which of its design decisions are empirical questions
+(spacing parameters for a study coach, WIP limits for a project tracker), frames each as a
+decision-serving research question (directing-research discipline: frame before gathering,
+skip settled knowledge, scale effort to stakes), announces the plan (user may trim/skip;
+skipped items are graded BET), executes via the strongest available engine (a deep-research
+skill/workflow when the environment has one; otherwise a built-in fallback — multi-angle
+search subagents, primary sources, one adversarial verifier per load-bearing claim prompted
+to refute), and persists graded findings (VERIFIED / THIN / BET, plus refuted negatives) to
+the instance's `docs/RESEARCH.md` with a date stamp. Parameters cite findings in manifest
+decisions[]; a refuted or unverified claim never becomes a parameter. The governor may
+propose re-research when friction traces to a BET/THIN decision or the research is stale.
+
+The stages:
 
 1. **Domain + draft first.** Two or three orienting questions, then immediately generate a **draft scaffold sketch** (proposed files, commands, cadence) and iterate on it with the user — artifact-based elicitation beats question batteries (prototyping elicits most requirements; unstructured interviews least). Preference questions posed as pairwise choices where possible.
 2. **User-authored goals.** The user types the north star and what "working" means **in their own words**. The builder refines and structures; it never authors goals (P14: LLM-authored goals → 46.6% vs 72.8% follow-through). Enforced in the builder prompt: reflect-and-refine only.
