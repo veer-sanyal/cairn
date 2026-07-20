@@ -17,11 +17,12 @@ def load_events(root):
                 pass
     return out
 
-def days_since(ts):
+def parse_ts(ts):
     t = datetime.datetime.fromisoformat(ts)
-    if t.tzinfo is None:
-        t = t.replace(tzinfo=datetime.timezone.utc)
-    return (datetime.datetime.now(datetime.timezone.utc) - t).days
+    return t.replace(tzinfo=datetime.timezone.utc) if t.tzinfo is None else t
+
+def days_since(ts):
+    return (datetime.datetime.now(datetime.timezone.utc) - parse_ts(ts)).days
 
 def trig(m, name):
     return next((t for t in m.get("triggers", []) if t.get("template") == name), None)
@@ -49,8 +50,14 @@ def main():
         sessions = [e for e in evs if e["type"] == "session" and e.get("phase") == "start"
                     and e.get("session_id") != h.get("session_id", "")]
         if sessions:
-            last_id = sessions[-1].get("session_id")
-            worked = any(e for e in evs if e.get("session_id") == last_id and e["type"] != "session")
+            last = sessions[-1]
+            last_id = last.get("session_id")
+            # runtime work events (via keel_event.py / /log) carry no session_id, so
+            # associate by time: any real work event at/after the previous session started.
+            last_start = parse_ts(last["ts"])
+            worked = any(e for e in evs
+                         if e["type"] not in ("session", "lapse")
+                         and parse_ts(e["ts"]) >= last_start)
             if not worked:
                 append_event(root, "lapse", cause="untyped", about_session=last_id)
                 lines.append("Previous session logged no intent/outcome — cause unknown "
