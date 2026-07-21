@@ -11,7 +11,18 @@ Build-config JSON fields (all required unless noted):
   owner_map          [{"fact": str, "owner": str}, ...]  (optional)
   inputs             [{"name": str}, ...]                (optional)
   guardrails         [{"name": str, "max": num}, ...]    (optional)
-  decisions          [{"id","decision","principle","grade"}, ...]  (optional)
+  decisions          [{"id","decision","principle","grade","blast","one_way"}, ...] (optional)
+                     blast: "low"|"med"|"high" (what else changes if this flips);
+                     one_way: bool (irreversible within one review period?).
+                     Ids are immutable: the governor supersedes by appending a NEW entry
+                     with "supersedes" and annotating the old one with "status":
+                     "superseded" + "superseded_by" + "superseded_on" — never renumber,
+                     reuse, delete, or rewrite an entry in place. Optional "dissent":
+                     "<concern> — user proceeded <date>" when the call was made over a
+                     flagged second opinion (the trail survives without re-arguing).
+  auto_adopt         bool (optional, default false) — arm the governor's bounded
+                     auto-adopt lane (low-blast, two-way, VERIFIED-backed proposals
+                     apply with a 7-day boot-visible revert window)
   initial_now        str  (optional)
   initial_next       str  (optional)
 """
@@ -76,6 +87,7 @@ def main():
                     "guardrails": cfg.get("guardrails", [])},
         "triggers": cfg["triggers"],
         "privacy": {"capture_content": False},
+        "auto_adopt": {"armed": bool(cfg.get("auto_adopt", False))},
         "decisions": cfg.get("decisions", []),
     }
     (target / "manifest.json").write_text(json.dumps(manifest, indent=2) + "\n")

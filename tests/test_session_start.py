@@ -79,3 +79,28 @@ def test_guardrail_regression_metric_flagged(instance):
 def test_no_guardrail_flag_when_within_max(instance):
     out = boot(instance)   # fresh instance: tiny resident files, no metric events
     assert "guardrail regression" not in ctx(out)
+
+def _iso(days_from_now):
+    return (datetime.date.today() + datetime.timedelta(days=days_from_now)).isoformat()
+
+def test_auto_adopt_in_window_named_at_boot(instance):
+    seed_event(instance, days_ago=1, type="proposal", id="7", status="auto_adopted",
+               blast="low", door="two-way", revert_until=_iso(6))
+    seed_event(instance, days_ago=1, type="session", phase="start", session_id="s1")
+    out = boot(instance)
+    assert "auto-adopted #7" in ctx(out) and "revert" in ctx(out)
+
+def test_auto_adopt_silent_after_window_closes(instance):
+    seed_event(instance, days_ago=10, type="proposal", id="7", status="auto_adopted",
+               blast="low", door="two-way", revert_until=_iso(-3))
+    seed_event(instance, days_ago=1, type="session", phase="start", session_id="s1")
+    out = boot(instance)
+    assert "auto-adopted" not in ctx(out)
+
+def test_auto_adopt_silent_after_revert(instance):
+    seed_event(instance, days_ago=2, type="proposal", id="7", status="auto_adopted",
+               blast="low", door="two-way", revert_until=_iso(5))
+    seed_event(instance, days_ago=1, type="proposal", id="7", status="reverted_merits")
+    seed_event(instance, days_ago=1, type="session", phase="start", session_id="s1")
+    out = boot(instance)
+    assert "auto-adopted" not in ctx(out)

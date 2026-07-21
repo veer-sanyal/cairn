@@ -43,6 +43,7 @@ def test_manifest_carries_contract(tmp_path):
     m = json.loads((scaffold(tmp_path) / "manifest.json").read_text())
     assert m["cairn_version"] and m["metrics"]["north_star"]["name"] == "planned_sessions_done"
     assert m["caps"]["CLAUDE.md"]["hard"] == 8192
+    assert m["auto_adopt"] == {"armed": False}   # opt-in at build; default disarmed
 
 def test_scaffolded_instance_boots_clean(tmp_path):
     t = scaffold(tmp_path)

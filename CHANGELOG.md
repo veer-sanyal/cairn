@@ -1,5 +1,17 @@
 # Changelog
 
+## 0.2.0 — decision lifecycle, blast-ordered asks, bounded auto-adopt lane
+
+- **Decision lifecycle** — `manifest.json` `decisions[]` ids are now immutable stable keys: changing a decision appends a new entry with `supersedes` and annotates the old one (`status: superseded`, `superseded_by`, `superseded_on`) — never renumbered, reused, or rewritten in place. Keeps every proposal cite and RESEARCH.md reference valid forever.
+- **Blast + door tags with ask-order** — decisions and governor proposals carry `blast: low|med|high` and `one_way`/`door` tags; the builder interview and the governor both ask/present largest-blast-first, dependencies before size, one-way doors first among equals.
+- **Anti-re-litigation** — a REJECTed proposal only re-surfaces citing telemetry events newer than the rejection; the reject event is the memory.
+- **Four-clause research bar** (builder Stage 2.5) — research runs only when: load-bearing claim contested/unknown ∧ generalizable evidence plausibly exists ∧ blast ≥ med or one-way ∧ narrow enough for one run. Personal magic numbers stay measure-in-telemetry (BET + tune at review).
+- **Advise, don't menu** — every governor proposal carries 2-3 options and a recommended default with its grade, pre-chewed to yes/adjust.
+- **Fresh-context second opinion** — scoped to the two moments cairn decisions are expensive: the metric contract before scaffolding (one subagent call per build), and high-blast / one-way / contract-touching / override calls at review. Flag → warn once before recording; proceed-over-flag records `dissent` on the decisions[] entry. Low-blast two-way calls are judged inline, no ceremony.
+- **Bounded auto-adopt lane** (opt-in at build, `manifest.auto_adopt.armed`) — the governor auto-applies a proposal only when low-blast ∧ two-way ∧ VERIFIED-backed ∧ outside the metric contract/privacy/caps/money. Every adoption logs `revert_until` (+7d); the boot banner names each in-window adoption every session until closed or reverted; one misgrade revert (or two merits reverts in the last 10) self-suspends the lane until the user re-arms.
+
+Provenance: mechanisms adapted from the stick-dev advisor's decision engine (immutable-ID lifecycle, blast-first ask-order, challenge bar, standing-authorization tier).
+
 ## 0.1.0 — initial kernel, builder, governor, upgrade
 
 - **Kernel runtime** — instance-local `python3` hooks: SessionStart boot banner (validator + telemetry gap look-back + trigger rules), SessionEnd session record, PreToolUse Write/Edit and Bash invariant guards. All fail-soft (exit 0; deliberate blocks are JSON `permissionDecision: deny`).

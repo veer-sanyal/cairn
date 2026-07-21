@@ -88,6 +88,19 @@ def main():
             lines.append("Several lapses on record. If life has moved on, /suspend is an honorable "
                          "state — this system concluding is allowed to be success.")
 
+    # auto-adopt revert-window visibility: every in-window adoption is named every boot
+    # until the window closes or it's reverted — zero reverts must be distinguishable
+    # from zero scrutiny.
+    props = [e for e in evs if e["type"] == "proposal"]
+    reverted = {e.get("id") for e in props if str(e.get("status", "")).startswith("reverted")}
+    today = datetime.date.today().isoformat()
+    for e in props:
+        if (e.get("status") == "auto_adopted" and e.get("id") not in reverted
+                and str(e.get("revert_until", "")) >= today):
+            lines.append(f"auto-adopted #{e.get('id')} [blast={e.get('blast', '?')}, "
+                         f"door={e.get('door', '?')}] — revert window open to "
+                         f"{e.get('revert_until')}; say 'revert #{e.get('id')}' to undo.")
+
     # guardrail regression flag (spec §2.1): standing anti-bloat check
     for g in m.get("metrics", {}).get("guardrails", []):
         gmax = g.get("max")
