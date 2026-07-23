@@ -56,11 +56,13 @@ in agent-systems evidence — WITHOUT the user having to ask for research.
    pre-scaffold there is no instance copy yet). If the Workflow tool is unavailable, use
    that skill's degraded mode: 2-5 angle subagents, then per-claim adversarial verifiers
    prompted to REFUTE (≥2/3 refutations kill); degraded-mode grades cap at THIN.
-5. **Grade and persist.** Write `docs/RESEARCH.md` in the instance: each finding with
-   sources, a grade — VERIFIED (multi-source, survived refutation) / THIN (single source) /
-   BET (no usable evidence) — a date stamp, and the claims that were refuted (do-not-build-on
-   negatives). Every research-backed parameter in the scaffold cites its finding in the
-   manifest decisions[] entry.
+5. **Grade and persist.** Persist every run through doctrine_write.py (the /cairn:research
+   skill's Step 4): findings land in the instance's `docs/RESEARCH.md` graded VERIFIED
+   (survived refutation, high confidence) / THIN (weaker), with a date stamp, perishability
+   class, and the refuted claims (do-not-build-on negatives). BET is not a research grade —
+   it marks decisions in manifest decisions[] where evidence ran out or research was skipped.
+   Every research-backed parameter in the scaffold cites its finding in the manifest
+   decisions[] entry.
 
 Hard rule: a refuted or unverified claim never becomes a parameter. Where evidence ran out,
 say BET out loud — fake certainty is worse than a labeled guess.
