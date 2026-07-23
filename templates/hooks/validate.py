@@ -5,12 +5,48 @@ from cairn_lib import find_root, manifest
 
 SENTINEL_TTL_H = 24
 STAMP = re.compile(r"Last reconciled: (\d{4}-\d{2}-\d{2})")
+REFRESH = re.compile(r"Refresh-by: (\d{4}-\d{2}-\d{2})")
+CENSUS_STALE_DAYS = 180
 
 def cap_for(rel, caps):
     for pat, cap in caps.items():
         if rel == pat or fnmatch.fnmatch(rel, pat):
             return cap
     return None
+
+def sweeps(root, m, today):
+    """Doctrine-expiry sweeps (P22: structural triggers, never model memory). All soft."""
+    out = []
+    research = root / "docs" / "RESEARCH.md"
+    if research.is_file():
+        for d in REFRESH.findall(research.read_text()):
+            try:
+                if datetime.date.fromisoformat(d) < today:
+                    out.append({"check": "research_expired", "level": "soft",
+                                "file": "docs/RESEARCH.md", "refresh_by": d})
+            except ValueError:
+                pass
+    census = m.get("census")
+    if census:
+        try:
+            age = (today - datetime.date.fromisoformat(census.get("date", ""))).days
+            if age > CENSUS_STALE_DAYS:
+                out.append({"check": "census_stale", "level": "soft", "age_days": age})
+        except ValueError:
+            out.append({"check": "census_stale", "level": "soft", "detail": "unreadable census date"})
+    elif m.get("data_paths"):
+        out.append({"check": "census_stale", "level": "soft",
+                    "detail": "data_paths recorded but no census"})
+    last = m.get("metrics", {}).get("last_revalidated")
+    days = m.get("cadence", {}).get("proxy_revalidation_days")
+    if last and days:
+        try:
+            age = (today - datetime.date.fromisoformat(last)).days
+            if age > days:
+                out.append({"check": "proxy_revalidation_due", "level": "soft", "age_days": age})
+        except ValueError:
+            pass
+    return out
 
 def run(root):
     m = manifest(root)
@@ -49,6 +85,10 @@ def run(root):
     s = root / ".cairn" / "review-in-progress"
     if s.exists() and time.time() - s.stat().st_mtime > SENTINEL_TTL_H * 3600:
         out.append({"check": "stale_sentinel", "level": "soft", "file": ".cairn/review-in-progress"})
+    try:
+        out += sweeps(root, m, datetime.date.today())
+    except Exception:
+        pass  # ponytail: sweeps never break the validator's other findings
     return out
 
 def main():
