@@ -7,11 +7,14 @@ Research-derived design principles. Every principle carries an evidence grade:
 - **[BET]** — no surviving evidence either way; a reasoned design decision, labeled as such.
 - **[REFUTED]** — claims that FAILED verification and must not be cited or built on.
 
-Sources are listed per principle. Rounds: R1 = context/memory (103 agents, 19/25 claims confirmed), R2 = enforcement/self-improvement (103 agents, 16/25 confirmed), R3 = telemetry/abandonment + elicitation/prior art (pending).
+Every principle carries an annotation line: `Perishability: durable|semi-durable|perishable · Verified: YYYY-MM · Round: R<n>` — durable refreshes on contradiction only, semi-durable within ~2 releases, perishable is probe-not-recall (short windows). The governor's expiry sweep (SP3) reads these fields.
+
+Sources are listed per principle. Rounds: R1 = context/memory (103 agents, 19/25 claims confirmed), R2 = enforcement/self-improvement (103 agents, 16/25 confirmed), R3 = telemetry/abandonment + elicitation/prior art (pending); R5–R9 (failure/capability, verification/epistemics, objective design, human-agent boundary, orchestration/tiering) are pending synthesis — full provenance lands in a later task.
 
 ---
 
 ## 1. Context is a budgeted, degrading resource
+Perishability: semi-durable · Verified: 2026-07 · Round: R1
 
 **[VERIFIED]** Recall accuracy degrades non-uniformly and increasingly unreliably as input tokens grow, even at constant task complexity, across all 18 models tested; distractor content compounds degradation (1 distractor hurts, 4 hurt more).
 Sources: Chroma "Context Rot" (18-model primary study); Anthropic engineering blog (cites it as foundational). Caveat: Chroma sells retrieval infra (motive, not methodology, questioned).
@@ -21,6 +24,7 @@ Sources: Chroma "Context Rot" (18-model primary study); Anthropic engineering bl
 - Anything not needed this turn is a distractor — it actively hurts, it isn't neutral.
 
 ## 2. Fine-grained facts live in files, never in summarized history
+Perishability: semi-durable · Verified: 2026-07 · Round: R1
 
 **[VERIFIED]** Compaction halves peak context (169K vs 335K tokens in Anthropic's cookbook run) but is measurably lossy in a specific pattern: high-level facts survived 3/3 recall probes, obscure specifics 0/3. Tool-result clearing cut message-list size 67% at zero inference cost. Without management, a research agent hit a 200K hard limit mid-task at turn 3.
 Sources: Anthropic cookbook (context-engineering tools), Anthropic engineering blog. Caveat: single-vendor illustrative demo runs; treat magnitudes as illustrative, direction as solid.
@@ -32,6 +36,7 @@ Sources: Anthropic cookbook (context-engineering tools), Anthropic engineering b
 - Session boundaries are only survivable via files.
 
 ## 3. Sub-agent fan-out isolates context; returns are condensed
+Perishability: semi-durable · Verified: 2026-07 · Round: R1
 
 **[VERIFIED]** Sub-agents explore extensively (tens of thousands of tokens) in their own windows and return condensed summaries (often 1–2K tokens). Detailed search context stays isolated from the orchestrator.
 Source: Anthropic engineering blog ("often", not a hard constant).
@@ -39,6 +44,7 @@ Source: Anthropic engineering blog ("often", not a hard constant).
 **Design implication:** exploration/noisy reads are scaffolded as spawned agents with a summary-size norm on returns — never in the main session.
 
 ## 4. Index-first layout; progressive disclosure
+Perishability: semi-durable · Verified: 2026-07 · Round: R1
 
 **[VERIFIED]** Agents should hold lightweight identifiers (paths, stored queries, links) and load content just-in-time, exploiting cheap metadata: file size ≈ complexity, naming ≈ purpose, timestamps ≈ relevance.
 Source: Anthropic engineering blog. Tradeoff (noted by Cognition/Inkeep, undisputed): runtime exploration is slower.
@@ -50,6 +56,7 @@ Source: Anthropic engineering blog. Tradeoff (noted by Cognition/Inkeep, undispu
 - Naming/size/timestamp conventions are part of the API surface for the agent.
 
 ## 5. Tiered hot/cold memory with scored promotion/demotion — not deletion
+Perishability: durable · Verified: 2026-07 · Round: R1
 
 **[VERIFIED]** The convergent architecture across MemGPT → MemoryOS → HMO: a small active tier (recent sessions + top-K pivotal memories), a working/buffer tier (high-scoring overflow), and a full append-only archive, with promotion/relegation driven by relevance to an evolving user model.
 Sources: MemGPT (arXiv 2310.08560), HMO (arXiv 2604.01670), externalization survey (arXiv 2604.08224).
@@ -63,6 +70,7 @@ Sources: MemGPT (arXiv 2310.08560), HMO (arXiv 2604.01670), externalization surv
 - Demotion is scoring, not deletion; archive is append-only.
 
 ## 6. Consolidation is a verify-and-repair pipeline, not in-place rewriting
+Perishability: durable · Verified: 2026-07 · Round: R2
 
 **[PREPRINT]** MemMA pattern: after a session, synthesize probe QA pairs → test provisional memory → convert failures into repair proposals → consolidate each candidate fact via SKIP (redundant) / MERGE (complements) / INSERT (novel) against existing memory BEFORE committing. Beats strongest baseline by ~6 accuracy points (LoCoMo, GPT-4o-mini; one claim survived 2-1, resolved via raw-table inspection).
 Source: MemMA (arXiv 2603.18718). Benchmark-only, no deployment evidence.
@@ -70,6 +78,7 @@ Source: MemMA (arXiv 2603.18718). Benchmark-only, no deployment evidence.
 **Design implication:** the kernel's reflection/consolidation pass is proposal → verify → merge, never freeform rewriting of memory files.
 
 ## 7. Externalization is the unifying frame
+Perishability: durable · Verified: 2026-07 · Round: R1
 
 **[VERIFIED — medium; framing claim, single survey]** The field's convergent principle: progressively relocate cognitive burdens from model-internal computation into persistent, inspectable, reusable external structures — memory externalizes state, skills externalize procedure, protocols externalize interaction, harness engineering unifies them.
 Source: 21-author review preprint (arXiv 2604.08224, Apr 2026).
@@ -77,6 +86,7 @@ Source: 21-author review preprint (arXiv 2604.08224, Apr 2026).
 **Design implication:** every kernel component must produce inspectable files, not implicit model behavior. This is the theoretical justification for the kernel+builder shape.
 
 ## 8. Instruction drift is real, large, and mechanistic — prompts don't hold
+Perishability: perishable · Verified: 2026-07 · Round: R2
 
 **[VERIFIED]** Average 39% performance drop across 15 LLMs (200K+ simulated conversations) when instructions arrive across underspecified turns vs. single-turn fully-specified (Laban et al., "LLMs Get Lost in Multi-Turn Conversation", ICLR 2026). Independent study: GPT-4o 96%→63% instruction-following multi-turn; small models collapse to 24–27%.
 Caveat: one published critique argues the 39% magnitude is partly experimental-design artifact (extreme sharding; ablation recovered 15–20pp) — direction and mechanism robust, magnitude setting-dependent.
@@ -93,6 +103,7 @@ Caveat: one published critique argues the 39% magnitude is partly experimental-d
 - Trigger resets/re-clarification on behavioral signals (repeated failures), not turn counts — no reliable threshold exists.
 
 ## 9. Deterministic gates: hooks are the enforcement primitive
+Perishability: perishable · Verified: 2026-07 · Round: R2
 
 **[VERIFIED]** Claude Code PreToolUse hooks hard-block tool calls before execution (exit code 2 + stderr fed back, or JSON permissionDecision: deny), fire before permission-mode checks in every mode, and cannot be bypassed even by bypassPermissions / --dangerously-skip-permissions. Hooks can tighten policy but never loosen it.
 Source: Anthropic hooks docs (fetched live Jul 2026). Caveat: open GitHub issues (#37210, #24327) show hook deny enforcement has had real bugs → belt-and-suspenders post-hoc validation for must-never-violate invariants.
@@ -100,6 +111,7 @@ Source: Anthropic hooks docs (fetched live Jul 2026). Caveat: open GitHub issues
 **Design implication:** the kernel ships hooks for invariants (file-size caps, telemetry write-through, staleness stamps) and treats prose discipline as UX, not enforcement.
 
 ## 10. Self-improvement must be bounded by external, empirical validation
+Perishability: durable · Verified: 2026-07 · Round: R2
 
 **[VERIFIED]** Intrinsic self-correction without external feedback fails and can DEGRADE performance (GSM8K/GPT-3.5 accuracy fell monotonically across self-correction rounds: 75.9% → 75.1% → 74.7%; Huang et al., ICLR 2024). Models fail to recover from instruction mistakes ~70% of the time. The authors explicitly caution against optimism about autonomous self-improvement via self-review.
 
@@ -111,6 +123,7 @@ Source: Anthropic hooks docs (fetched live Jul 2026). Caveat: open GitHub issues
 - The governor is proposal → empirical validation → apply, with discard-on-failure.
 
 ## 11. Telemetry: adopt the standard schema, don't invent one
+Perishability: semi-durable · Verified: 2026-07 · Round: R3
 
 **[VERIFIED]** OpenTelemetry GenAI semantic conventions standardize the span-attribute vocabulary for LLM operations: `gen_ai.operation.name` + `gen_ai.provider.name` (required), `gen_ai.request.model`, `gen_ai.usage.input_tokens`/`output_tokens`, `gen_ai.response.finish_reasons`, `error.type`, `gen_ai.response.time_to_first_chunk`. Tool calls have a dedicated `execute_tool` span convention (`gen_ai.tool.name` required; arguments/result opt-in). Exactly two core client metrics are standardized: operation-duration histogram and token-usage histogram.
 Caveats: conventions carry **Development** (not Stable) maturity and were mid-repo-relocation during verification → pin a semconv version.
@@ -126,6 +139,7 @@ Caveats: conventions carry **Development** (not Stable) maturity and were mid-re
 - Typed events, session context stamped once.
 
 ## 12. Metric contract: north star as dependent variable, inputs as levers, guardrails as OEC components
+Perishability: durable · Verified: 2026-07 · Round: R3
 
 **[VERIFIED]** A valid North Star Metric (Amplitude playbook): represents user value, is influenceable, and is a LEADING indicator — lagging metrics (MRR/ARPU-style) are disqualified. Input metrics are the independent variables moved by daily work; the north star is a dependent outcome that should NEVER be targeted directly ("If you can move your North Star directly, it's probably not a good North Star").
 Caveat: playbook is marketing-adjacent — fine for framework definitions, not empirical proof NSM-driven products succeed.
@@ -137,6 +151,7 @@ Caveat: playbook is marketing-adjacent — fine for framework definitions, not e
 - Reviews act on inputs and guardrails; the north star is watched, not chased.
 
 ## 13. Abandonment is the dominant failure mode — and it is typed, often temporary, and not always failure
+Perishability: durable · Verified: 2026-07 · Round: R3
 
 **[VERIFIED]** Four distinct lapse causes in self-tracking: forgetting, upkeep burden, intentional skipping, deliberate suspending — and lapses are often temporary, not terminal. Upkeep burden ("too much work to keep up to date") is distinct from forgetting and disproportionately kills behavior-change trackers.
 
@@ -153,6 +168,7 @@ Caveat: playbook is marketing-adjacent — fine for framework definitions, not e
 - Reviews and self-improvement cadence calibrated in months, not weeks; a "suspend" state is first-class and honorable (systems can conclude successfully).
 
 ## 14. Elicitation: interview around artifacts; the user authors the goals
+Perishability: durable · Verified: 2026-07 · Round: R4
 
 **[VERIFIED]** Structured, artifact-based elicitation beats open-ended questioning: paper prototyping elicits the most requirements; unstructured interviews are fastest but elicit the fewest with the most redundancy (Rueda et al. 2020, 4 experiments, 167 subjects). Caveats: student subjects; some quality metrics non-significant.
 **[REFUTED — do not cite]** "Prototyping also best on completeness/quality/relevance" (0-3) — the advantage is quantity/significance on requirements count, not across all quality axes.
@@ -173,6 +189,7 @@ Caveat: playbook is marketing-adjacent — fine for framework definitions, not e
 - Prefer pairwise choices ("A or B?") over open ratings in the interview.
 
 ## 15. Prior art: the combination is unfilled (verified for the Claude Code ecosystem; presumptive beyond it)
+Perishability: perishable · Verified: 2026-07 · Round: R4
 
 **[VERIFIED]** Every individual capability exists, scattered: mobile-spine (6-question setup interview), CCUsage (11,500+ stars; fully local offline telemetry from session JSONL — proof of demand for local-only), Bouncer (independent-model audit via Stop hook), Review-squad (multi-perspective review panels). No verified tool combines interview-driven personalization + runtime discipline + local telemetry + guarded self-improvement.
 
