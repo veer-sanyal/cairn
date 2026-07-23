@@ -15,6 +15,21 @@ instance name, 2-4 working files with the owner map, intents enum, trigger sugge
 their parameters — and iterate on the draft with the user. React-to-artifact beats question
 batteries. Prefer pairwise choices ("weekly plan file, or per-topic files?") over open ratings.
 
+## Stage 1.5 — Environment census & data paths (P23)
+Enumerate what THIS machine can actually do, before designing around presence or absence:
+list the session's MCP servers/tools (and `claude mcp list` via Bash where available), and
+note surfaces (Chrome extension, computer use). Record in the build-config `census` field
+(date, mcp_servers, surfaces) — the scaffolder persists it to manifest.json.
+
+For each data need the draft surfaces, walk the data-access ladder and record the rung and
+reason in the build-config `data_paths` field:
+1 connected MCP/API → 2 connector exists but isn't installed (propose installing — discovery
+is manual, there is no registry-search API) → 3 browser automation on the authenticated web
+app → 4 screenshot + vision → 5 manual user entry.
+Landing below rung 1 is normal — the recorded rung is what lets the governor propose an
+upgrade the day a better path appears. Never design around an absence that is five minutes
+from fixable: rung 2 beats rung 4.
+
 ## Stage 2 — The user authors the goals (P14, PREPRINT-grade but load-bearing)
 Ask the user to state, in their own words: what "this system is working" looks like.
 You may refine wording for clarity and split compound statements — you MUST NOT write goals
@@ -67,6 +82,18 @@ in agent-systems evidence — WITHOUT the user having to ask for research.
 Hard rule: a refuted or unverified claim never becomes a parameter. Where evidence ran out,
 say BET out loud — fake certainty is worse than a labeled guess.
 
+## Stage 2.6 — Capability probes (P17): pass^k, not vibes
+List every load-bearing assumption of the form "the model can do X reliably" that the design
+commits to (parsing a format, grading an answer, extracting from a screenshot...). For each,
+run a small probe BEFORE scaffolding: k=5 repeated trials on 2-3 realistic task instances
+via cheap subagents. Reliability is pass^k — all trials pass — not pass@k; single-trial
+success is a coin-flip threshold, not a guarantee (P17). All-pass → record a decisions[]
+entry (grade VERIFIED-probed, date — probes are perishable, the governor re-probes on
+failure clusters). Any-fail → redesign: add a checked verifier, move the step below the
+autonomy line, or drop the feature. A $0.05 probe now beats a dead instance at review time.
+Skip probes only for capabilities the kernel itself already exercises (file edits, event
+logging).
+
 ## Stage 3 — Metric contract (P12)
 Findings from Stage 2.5 inform the metric DEFAULTS you propose (e.g., evidence-backed cadence
 values) — but the user still authors the goals (Stage 2 is untouched by research).
@@ -89,6 +116,18 @@ Then ONE pairwise governance question: "at review time, may the governor auto-ap
 low-stakes reversible tweaks (low-blast, two-way, VERIFIED-backed only — with a 7-day
 boot-visible revert window and a self-suspending tripwire), or should it ask about
 everything?" → build-config `auto_adopt: true|false`. Default false if they hesitate.
+
+### The boundary contract (P19)
+Set, with the user, blast-ordered largest first (build-config `boundary` field):
+- **autonomy table** — three lists: `act` (reversible-in-instance: do it, log it), `ask`
+  (hard-to-reverse or outward-facing: inhibitive confirm), `never` (irreversible + external:
+  never autonomous). Autonomy inversely proportional to irreversibility.
+- **ask_budget_per_session** — default 1. Asks are a rationed budget: ask FREQUENCY, not
+  per-ask depth, drives abandonment (P19). Every prompt the instance adds must name which
+  budget slot it spends.
+Enforcement in v1 is instructional + telemetry-audited (overreach events), not hook-gated —
+record this as a decisions[] entry graded BET so the governor can revisit it if overreach
+tags appear.
 
 ## Stage 4 — If-then compilation (P14)
 Convert their goals into if-then rules INTERACTIVELY ("when a week passes with no session,
