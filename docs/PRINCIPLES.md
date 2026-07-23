@@ -321,6 +321,54 @@ Sources: Microsoft Azure Architecture Center (updated 2026-05; 3-0, 2-1) + indep
 - Side-effectful work is single-writer by construction: spawn readers/advisors freely (P3's condensed-return fan-out), never parallel write authority.
 - When buying redundancy, prefer best-of-n from the strongest affordable model or a 2-model consistency switch over heterogeneous swarms or debate panels.
 
+## 21. Judges are instruments — rubric-first, calibrated, probabilistic
+Perishability: durable (methods) — magnitudes semi-durable · Verified: 2026-07 · Round: R6
+
+**[VERIFIED]** The rubric is the highest-leverage judge input — explicit evaluation criteria matter more than reference answers: removing the criteria drops GPT-4o's human correlation 0.666→0.591 vs 0.638 for removing the reference; both together are needed, and weaker judges degrade more (LLaMA3.1-70B: 0.641→0.555/0.581). For 1–5 scales, describing only the extreme scores (1 and 5) yields the highest human alignment — intermediate descriptions add little. (Yamauchi et al., ACL 2026 GEM / arXiv 2506.13639; 3-0 votes. Scoped to BIGGEN-Bench with two evaluator models — documented findings, not universal laws.)
+
+**[VERIFIED]** Judge nondeterminism is an asset if sampled and averaged, not a bug to suppress at temperature 0: sampled decoding with multiple scored samples beats greedy, and mean aggregation beats majority vote and median consistently across evaluators and settings (GPT-4o: greedy 0.635 vs mean 0.666). (Same paper; 3-0.)
+
+**[VERIFIED]** CoT adds little ONCE the rubric is good: with well-defined score descriptions already in the prompt, direct scoring performs comparably — rubric investment beats reasoning-trace investment. The conditionality is load-bearing: **[REFUTED — do not cite]** the unscoped version ("judge CoT adds negligible reliability" without the good-rubric condition) died 0-3 — CoT does help when criteria are missing.
+
+**[VERIFIED]** Judges import documented cognitive biases: position (prefer the first option in pairwise), verbosity (longer rated higher regardless of quality), self-preference (own model family rated higher — quantified for GPT-4, arXiv 2410.21819), and sycophancy (favoring confidently-stated or bias-confirming answers even when wrong). The existence of these biases is solid; precise magnitudes are not. **[REFUTED — do not cite]** "position bias swings 10–15 points" (0-3); "reordering swings judge agreement by 25pp" (0-3); "self-preference tracks perplexity, not self-recognition" (0-3); "binary pass/fail rubrics beat 1–5 Likert scales" (1-2 — common practitioner advice with no surviving evidence).
+
+**[VERIFIED — medium; 2-1, practitioner-corroborated]** Judge prompts are not reliable out of the box: they need iterative calibration against human expert judgments before being trusted, and show inconsistent strictness and overconfidence when rubrics are underspecified. **[PREPRINT]** Even ensembles only reach moderate reliability: a 3-model majority ensemble (GPT-4o, Gemini-2.5-Flash, GPT-4o-mini) hit kappa 0.432 (95% CI [0.239, 0.622]) against 100 human labels — below the 0.60 "substantial" bar — with a systematic conservative skew (25% of traces marked correct vs 38% by humans); naive substring matching is chance-level (kappa 0.049). The fix is a calibration transform: report P(human=correct|judge=correct)=0.76 and P(human=correct|judge=wrong)=0.25, never raw verdicts. (AgentProp-Bench, arXiv 2604.16706; 3-0 votes, but single-author unreviewed preprint, n=100 single-annotator labels, wide CIs.)
+
+**[PREPRINT]** Agent evaluation must decompose to trajectory/stage level: an injected parameter-level fault propagates to a wrong final answer with human-calibrated probability ≈0.62 (range 0.46–0.73 across models), and a single end-to-end outcome metric cannot localize where the pipeline failed. (Same preprint; the stage-decomposition argument survived 3-0, an unhedged variant of the 62% figure was separately refuted 1-2.) **[VERIFIED]** The tooling tradeoff (LangSmith/AgentEvals docs): deterministic trajectory-match evaluators are fast, cheap, and deterministic for well-defined workflows; LLM-judge trajectory evaluators buy qualitative assessment (efficiency, appropriateness) at the cost of an LLM call and nondeterminism.
+
+**[VERIFIED]** For binary verdicts, report Cohen's kappa plus one correlation figure and nothing more: Pearson's r, Spearman's rho, Kendall's tau-b, phi, and MCC all collapse to a single identical value on non-degenerate binary data; kappa is the only common coefficient that adds information. (arXiv 2606.00093; mathematical identity, independently confirmed numerically — not time-sensitive.)
+
+**Design implications:**
+- Judge-building starts at the rubric: explicit criteria + reference answer, extremes-only score descriptions, sampled scoring with mean aggregation — before any thought of fancier judges.
+- An instance that builds a judge owes a human-labeled calibration set — an ask-budget expense (P19) — and stores verdicts as P(correct) via the calibration transform, never as ground truth.
+- Default to deterministic trajectory checks; escalate to LLM judges only for qualitative criteria — and evaluate stages, not just outcomes, or failures can't be localized.
+- Verifiers must record WHAT they checked against the task objective (ties to P16's "a verifier ran is not evidence").
+
+## 22. Knowledge expires on events, not clocks — and models can't feel it
+Perishability: durable · Verified: 2026-07 · Round: R6
+
+**[VERIFIED]** The living-systematic-review (LSR) discipline is the canonical model for knowledge that must not rot: continual surveillance via ongoing pre-specified searches with timely incorporation, as distinct from one-off static publication — with a hard bound that new evidence be incorporated within a maximum of six months of becoming available (an upper limit expected to shrink). (Elliott et al. 2017, J Clin Epidemiol — foundational Cochrane methods paper, triangulated across Cochrane/AHRQ/F1000Research; 3-0.)
+
+**[VERIFIED]** Living mode has entry AND exit criteria — maintain a refresh loop only while all three hold: (1) the topic is a decision-making priority, (2) certainty in existing knowledge is low/very low, (3) new evidence is likely to emerge — and exit to static mode when any fails. A checkable per-entry rule for which cached knowledge deserves surveillance at all. (Elliott et al. 2017 + living-guideline follow-up; 3-0.)
+
+**[VERIFIED]** Re-verification is event-triggered, not clock-driven. Each surveillance pass has three outcomes: no new evidence → do nothing; new evidence that doesn't change conclusions → lightweight note; new evidence that changes conclusions or expands scope → full update. Mature LSRs also trigger on external events — a policy change (an FDA Emergency Use Authorization prompted an update) or completion of specific high-value studies (platform trials) — not calendar rules. (F1000Research + Cochrane case studies; core rule 3-0, external-event examples 2-1.)
+
+**[VERIFIED]** Cheap continuous surveillance is decoupled from expensive re-verification: over ~30 monthly search cycles, a Cochrane LSR published only 3 full updates — roughly 90% of surveillance passes found nothing warranting re-publication. The sustainable pattern is frequent low-cost checks gating rare high-cost refreshes.
+
+**[VERIFIED]** Two guardrails bound the event model: there is no universal quantitative staleness threshold (cadence depends on topic evolution, evidence volume, and capacity) — but a hard ceiling regardless: no living review goes longer than one year without a full re-review, even if zero new evidence was found, specifically as a check that living status and cadence are still warranted. Caveat: all cadence numbers are from medical evidence synthesis; applying them to technical knowledge is analogy — compress the windows for fast-moving domains.
+
+**[PREPRINT]** Models cannot self-detect stale knowledge: on the STALE benchmark the strongest model (Gemini-3.1-pro) scored only 55.2% overall at recognizing stale memories — near coinflip — with a reproducible explicit/implicit gap: 92.0% when asked directly whether a fact still holds, 30.0% when the query merely presupposes the stale state (some models drop 76%→4%). The useful staleness framing is structural, not temporal: "Implicit Conflict" — a later observation invalidating an earlier memory with no negation cue — split into Type I (same-attribute conflict) and Type II (an upstream change cascading through a dependency chain). (arXiv 2605.06527, 400 expert-validated scenarios, 1,200 queries; the gap 3-0, the 55.2% headline 2-1; unreviewed May 2026 preprint.)
+
+**[PREPRINT]** The same discipline framed for agent evals: static point-in-time evaluation is a "compliance fiction" — the illusion that a system evaluated at t0 remains compliant at t0+n; the alternative is a governed lifecycle with continuous score monitoring and automatic quarantine on drift. (arXiv 2605.24737; 3-0 as a characterization of the paper's argument; small unreviewed study.)
+
+**[REFUTED — do not build on]** "Cosine-similarity staleness detection is structurally infeasible (AUROC 0.59, near chance)" (0-3) and "a deterministic supersession/versioning layer drives RAG stale-fact serving from 15–40% to ~0%" (1-2) — neither embedding-similarity pessimism nor the supersession fix has surviving evidence; automated propagation-invalidation at knowledge-base scale is an open question.
+
+**Design implications:**
+- Expiry triggers must be structural — dated claims, dependency graphs, census diffs — never model self-assessment; staleness probes ask explicitly ("is X still true?"), because prompts that presuppose a stale fact are exactly where models comply with it.
+- The perishability annotations in THIS file and doctrine_write's Refresh-by dates are the structural triggers: the governor's expiry sweep (SP3) reads them as the cheap surveillance pass, escalating to full re-research only when new evidence changes conclusions — with an unconditional annual-ceiling audit of every entry.
+- Refresh loops are rationed by the entry/exit criteria: decision priority × low certainty × likely new evidence; anything failing them goes static.
+- By this principle's own logic, R6's judge magnitudes carry their own re-verification triggers — hence P21's semi-durable magnitudes.
+
 ---
 
 ## Research provenance

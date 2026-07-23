@@ -10,7 +10,7 @@ def blocks():
 
 def test_headers_present_and_unique():
     b = blocks()
-    for n in range(1, 21):          # extended to 25 by later tasks
+    for n in range(1, 23):          # extended to 25 by later tasks
         assert n in b, f"P{n} missing"
     nums = re.findall(r"\n## (\d+)\. ", TEXT)
     assert len(nums) == len(set(nums)), "duplicate principle number"
@@ -43,6 +43,13 @@ def test_p20_tokens():
     b = blocks()
     for tok in ["single-writer", "cascade", "15x", "escalate", "best-of-n"]:
         assert tok in b[20], f"P20 missing '{tok}'"
+
+def test_p21_p22_tokens():
+    b = blocks()
+    for tok in ["rubric", "kappa", "calibrat", "trajectory", "mean"]:
+        assert tok in b[21], f"P21 missing '{tok}'"
+    for tok in ["living", "event-triggered", "self-detect", "surveillance", "ceiling"]:
+        assert tok in b[22], f"P22 missing '{tok}'"
 
 def test_grade_vocabulary_defined():
     head = TEXT.split("## 1. ", 1)[0]
