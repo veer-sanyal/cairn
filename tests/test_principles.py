@@ -10,7 +10,7 @@ def blocks():
 
 def test_headers_present_and_unique():
     b = blocks()
-    for n in range(1, 16):          # extended to 25 by later tasks
+    for n in range(1, 18):          # extended to 25 by later tasks
         assert n in b, f"P{n} missing"
     nums = re.findall(r"\n## (\d+)\. ", TEXT)
     assert len(nums) == len(set(nums)), "duplicate principle number"
@@ -21,6 +21,13 @@ def test_every_principle_annotated():
         assert re.search(r"Perishability: (durable|semi-durable|perishable)", first_line), \
             f"P{n} missing/misplaced annotation line"
         assert re.search(r"Verified: 20\d\d-\d\d", first_line), f"P{n} missing Verified date"
+
+def test_p16_p17_tokens():
+    b = blocks()
+    for tok in ["MAST", "self-correct", "design", "compound"]:
+        assert tok in b[16], f"P16 missing '{tok}'"
+    for tok in ["pass^k", "coin-flip", "pilot", "probe"]:
+        assert tok in b[17], f"P17 missing '{tok}'"
 
 def test_grade_vocabulary_defined():
     head = TEXT.split("## 1. ", 1)[0]

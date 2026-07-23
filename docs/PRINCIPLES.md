@@ -202,6 +202,49 @@ Perishability: perishable · Verified: 2026-07 · Round: R4
 - Steal proven patterns: CCUsage's local-JSONL approach validates the telemetry design; Bouncer validates independent-model gating.
 - Differentiators to lead with: the metric contract, the typed-lapse abandonment model, and the human-gated governor (vs SuperClaude's ungated loop).
 
+## 16. Agentic failure is taxonomizable — and predominantly a design problem
+Perishability: durable (taxonomy) — magnitudes semi-durable · Verified: 2026-07 · Round: R5
+
+**[VERIFIED]** MAST is the canonical empirical failure taxonomy: 14 failure modes in 3 categories — system design issues, inter-agent misalignment, task verification — built via grounded-theory analysis of 150 traces (1,600+ trace corpus, 7 frameworks), inter-annotator kappa 0.88, peer-reviewed (NeurIPS 2025 Datasets & Benchmarks). Failure is common, not edge-case: 41–86.7% failure rates across 7 SOTA frameworks (ChatDev, MetaGPT, HyperAgent, AppWorld, AG2, Magentic-One, OpenManus) with GPT-4o/Claude-3.7 backends, and multi-agent gains over single-agent baselines are minimal.
+Sources: arXiv 2503.13657 / OpenReview fAjbYBmonr (eight merged claims; seven 3-0, one 2-1).
+
+**[VERIFIED — medium; 2-1 vote]** Failures trace predominantly to system/architecture design flaws rather than model limits, and single design fixes yield large gains with the same model and prompts: giving one agent final decision authority +9.4pp task success; adding a high-level verification step +15.6pp (ProgramDev). Caveats: "predominantly" is stronger than the paper's hedged wording; these are first-step interventions, not cures.
+
+**[VERIFIED]** Verifier-ran is a weak signal: task-verification failures are ~21–23.5% of MAST failures — No/Incomplete Verification (FM-3.2, 8.2%) and Incorrect Verification (FM-3.3, 9.1%) — and existing verifiers often perform only superficial checks (code compiles) while passing functionally broken output (ChatDev chess example). Only the FM-3.2/3.3 percentages survived verification.
+
+**[PREPRINT]** Agents rarely self-correct: across 20,574 real coding-agent sessions (1,639 repos, IDE+CLI), 91.49% of visible resolutions required explicit user correction; 90.50% of failure episodes cost only effort/trust (recoverable, not catastrophic). Misalignment takes 7 recurring forms, from project reading comprehension to progress reporting. (arXiv 2605.29442, all 3-0; fresh non-peer-reviewed preprint.)
+
+**[VERIFIED]** Errors compound and self-condition over horizon length: without decomposition/error-correction, success probability decays exponentially with step count, and marginal single-step accuracy gains compound into exponential task-length gains — so single-step benchmarks mask large gaps. Self-conditioning is a distinct mechanism: a model's own prior errors in context breed further errors (controlled counterfactual at fixed context length; scaling to 200B+ doesn't eliminate it). Three independent papers converge ("Illusion of Diminishing Returns" NeurIPS 2025, MAKER arXiv 2511.09030, HORIZON arXiv 2604.11978).
+
+**[PREPRINT]** Failures are gradual and silent, dominated by epistemic errors: 57.9% of failures in 63K+ annotated CLI coding-agent steps are knowledge/understanding errors (vs 32.8% competence), often hidden until unrecoverable. False success collapses from 45–48% of failures to 3% where something other than the agent can independently verify state (dual-control; observational, single domain). (arXiv 2607.09510, 2606.09863.)
+
+**[REFUTED — do not build on]** MAST sub-mode percentages beyond FM-3.2/3.3: "System Design Issues largest category (44.2%), Step Repetition 15.7%, Unaware of Termination Conditions 12.4%" (0-3). "TF-IDF detectors beat LLM-judge monitors, 3,300x faster" (0-3). "75.8% of AppWorld self-assessed status claims are false success" (1-2).
+
+**Design implications:**
+- Telemetry failure_mode tags (SP3) use MAST's category level plus FM-3.2/3.3; other mode-level percentages need per-figure re-verification before citing.
+- Correction loops are external by design — a human or an independent check, never agent self-review (converges with P10).
+- Verifiers must record WHAT they checked against the task objective; "a verifier ran" is not evidence. Prefer designs where something other than the agent can verify state.
+- Error-in-context is a leading indicator of further errors → checkpoint/reset after detected mistakes.
+
+## 17. The capability frontier is probed, never recalled
+Perishability: perishable · Verified: 2026-07 · Round: R5
+
+**[VERIFIED]** Capability ≠ reliability: probe with pass^k (ALL k trials succeed), never pass@k (any of k). On tau-bench, GPT-4o-based agents succeeded on <50% of tasks single-trial, but consistency across 8 repeats (pass^8) fell below 25% in the retail domain. (ICLR 2025, 3-0.) Caveat: GPT-4o-era (mid-2024) figures — the phenomenon persists in tau2/tau3 successors, the numbers do not transfer to current models.
+
+**[VERIFIED — medium]** METR time horizons are 50% coin-flip thresholds, not completion guarantees: the 80%-horizon is roughly 4–5x shorter for the same model (Claude 3.7 Sonnet: ~50 min at 50%). The ~7-month doubling trend passed 2-1 with a methodological critique on record (sparse data points, METR's own 1–4 doublings/year band, two-lab model concentration) — cite with error bars, never as a precise law; two adjacent framings of the same data were refuted in verification.
+Sources: metr.org/time-horizons, arXiv 2503.14499, METR "Time Horizon 1.1" (Jan 2026).
+
+**[PREPRINT]** Long-horizon difficulty is domain-structural, not human-duration-estimated: reliability decay is domain-stratified (software-engineering GDS drops 0.90→0.44 across the duration range while document-processing stays nearly flat, 0.74→0.71), and collapse thresholds differ sharply by domain (web agents collapse at small compositional depth; OS/database sustain longer). A duration-based capability estimate from another domain does not transfer. (arXiv 2603.29231 2-1 + HORIZON 3-0; both preprints, convergent.)
+
+**[PREPRINT]** Cheap pilots work: estimate per-step success rate p on a small random subset of steps with repeated trials across multiple models before committing to a design (MAKER's recommended method). Empirically: a 19-task, 12-model, 1,368-episode pilot cost $4.26 total and surfaced real failure modes (quota exhaustion inflating apparent pass@1 by up to 15%, dead provider endpoints, missing cost circuit-breakers) before a 23,392-episode study that itself cost $80–120. (arXiv 2511.09030, 2603.29231; both 3-0.)
+
+**[REFUTED — do not cite]** "Near-100% success on short tasks but under 10% beyond ~4 human-hours" (0-3); "12B Mistral Nemo beat 400B Llama 4 Maverick on long-horizon reliability" rank inversion (0-3); "a 1% per-step error rate fails at ~100 steps" (0-3); METR exponential-fit and 7-month-doubling-as-law framings (both 1-2).
+
+**Design implications:**
+- Frontier claims carry short refresh windows: every "the model can do X" is a dated claim, re-probed, never recalled from doctrine.
+- The builder runs a small pass^k probe — multi-trial, multi-model, in the actual target domain — before committing a design to "the model can do X" (SP3).
+- Probe results land in the manifest as dated claims with pass^k numbers, not booleans.
+
 ---
 
 ## Research provenance
