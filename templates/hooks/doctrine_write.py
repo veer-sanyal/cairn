@@ -17,15 +17,28 @@ from pathlib import Path
 GRADE = {"high": "VERIFIED", "medium": "THIN", "low": "THIN"}
 REFRESH_DAYS = {"durable": None, "semi-durable": 180, "perishable": 60}
 
+# claims come from adversarial web content: collapse whitespace so a newline
+# can't mint a fake **VERIFIED** bullet or ## header in RESEARCH.md
+def flat(s):
+    return " ".join(str(s).split())
+
+USAGE = ("usage: doctrine_write.py <result.json> <instance-root> --domain <name>"
+         " [--perishability durable|semi-durable|perishable]")
+
 def main():
     args = sys.argv[1:]
     perish = "semi-durable"
     if "--perishability" in args:
-        i = args.index("--perishability"); perish = args[i + 1]; del args[i:i + 2]
+        i = args.index("--perishability")
+        if i + 1 >= len(args):
+            sys.exit(USAGE)
+        perish = args[i + 1]; del args[i:i + 2]
     if "--domain" not in args or len(args) < 4:
-        sys.exit("usage: doctrine_write.py <result.json> <instance-root> --domain <name>"
-                 " [--perishability durable|semi-durable|perishable]")
-    i = args.index("--domain"); domain = args[i + 1]; del args[i:i + 2]
+        sys.exit(USAGE)
+    i = args.index("--domain")
+    if i + 1 >= len(args):
+        sys.exit(USAGE)
+    domain = flat(args[i + 1]); del args[i:i + 2]
     if perish not in REFRESH_DAYS:
         sys.exit(f"unknown perishability class: {perish} (want durable|semi-durable|perishable)")
     result = json.loads(Path(args[0]).read_text())
@@ -38,24 +51,27 @@ def main():
              f"Perishability: {perish} · Refresh-by: {refresh} · Engine: deep-research (3-vote adversarial)",
              ""]
     findings = result.get("findings") or []
+    confirmed = result.get("confirmed") or []
+    if not findings and not confirmed:
+        sys.exit("no findings and no confirmed claims — refusing to write an empty doctrine section")
     if result.get("synthesisDegraded") or not findings:
         # never lose the verified layer: fall back to raw confirmed claims
         lines.append("_Synthesis degraded — raw verified claims below._")
-        for c in result.get("confirmed") or []:
+        for c in confirmed:
             g = GRADE.get(c.get("confidence") or "low", "THIN")
-            lines.append(f"- **{g}** {c['claim']} (vote {c.get('vote', '?')}) — {c.get('source', '')}")
+            lines.append(f"- **{g}** {flat(c['claim'])} (vote {flat(c.get('vote', '?'))}) — {flat(c.get('source', ''))}")
     else:
         for f in findings:
             g = GRADE.get(f.get("confidence") or "low", "THIN")
-            lines.append(f"- **{g}** {f['claim']}")
+            lines.append(f"- **{g}** {flat(f['claim'])}")
             if f.get("evidence"):
-                lines.append(f"  - evidence: {f['evidence']} (vote {f.get('vote', '?')})")
-            lines.append(f"  - sources: {', '.join(f.get('sources') or [])}")
+                lines.append(f"  - evidence: {flat(f['evidence'])} (vote {flat(f.get('vote', '?'))})")
+            lines.append(f"  - sources: {', '.join(flat(s) for s in f.get('sources') or [])}")
     refuted = result.get("refuted") or []
     if refuted:
         lines += ["", "### Refuted — do not build on"]
         for r in refuted:
-            lines.append(f"- {r['claim']} (vote {r.get('vote', '?')}, {r.get('source', '')})")
+            lines.append(f"- {flat(r['claim'])} (vote {flat(r.get('vote', '?'))}, {flat(r.get('source', ''))})")
     if result.get("caveats"):
         lines += ["", "### Caveats", str(result["caveats"])]
     lines.append("")
