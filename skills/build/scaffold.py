@@ -77,6 +77,11 @@ def main():
         (target / ".claude" / "commands" / cmd.name).write_text(render(cmd.read_text(), subs))
     for hook in (T / "hooks").glob("*.py"):
         shutil.copy(hook, target / ".claude" / "hooks" / hook.name)
+    # research engine: instances get /deep-research natively (plugins can't ship
+    # saved workflows, so the scaffolder installs the vendored script per-instance)
+    (target / ".claude" / "workflows").mkdir(parents=True)
+    shutil.copy(REPO / "skills" / "research" / "deep-research.js",
+                target / ".claude" / "workflows" / "deep-research.js")
     manifest = {
         "cairn_version": CAIRN_VERSION,
         "instance": {"name": cfg["instance_name"], "created": today},

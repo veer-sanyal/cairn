@@ -29,7 +29,9 @@ def test_scaffold_layout(tmp_path):
                 ".claude/hooks/session_start.py", ".claude/hooks/cairn_lib.py",
                 ".claude/commands/log.md", ".claude/commands/suspend.md",
                 ".claude/commands/conclude.md", ".cairn",
-                ".cairn/.gitkeep", "state/working/.gitkeep"]:
+                ".cairn/.gitkeep", "state/working/.gitkeep",
+                ".claude/hooks/doctrine_write.py",
+                ".claude/workflows/deep-research.js"]:
         assert (t / rel).exists(), rel
 
 def test_substitution_and_no_leftover_placeholders(tmp_path):
