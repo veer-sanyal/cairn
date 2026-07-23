@@ -36,6 +36,10 @@ From telemetry/events.jsonl compute and show: north star trend (watched, not cha
 input metric, each guardrail (flag regressions), lapse events BY TYPE (forgot/upkeep/skipped/
 suspended — upkeep lapses are kernel bugs: propose removing the demanding step, not nagging
 the user), friction outcomes with notes.
+Also report: failure_mode tag frequencies from events since the last review (spec / verify /
+context / overreach / tooling / upkeep — P16), and asks-per-session against
+manifest.boundary.ask_budget_per_session (P19). An overreach tag is a boundary-contract
+violation — always surfaced, never averaged away.
 
 ## Stage 4 — System lane: proposals with the user as gate (P10)
 For each friction cluster or guardrail regression, draft a proposal. HARD RULES:
@@ -43,6 +47,20 @@ For each friction cluster or guardrail regression, draft a proposal. HARD RULES:
 - **No re-litigation.** Before drafting, scan prior proposal events. A proposal the user
   REJECTed may only return if it cites telemetry events NEWER than the rejection — new
   evidence, not a re-argument. Otherwise don't surface it; the reject event IS the memory.
+- **Sweep findings become proposals, not chores.** Stage 1's validator now emits doctrine
+  sweeps (P22 structural triggers): `research_expired` → propose a re-research run via the
+  /cairn:research skill for that section (cite the Refresh-by date); `census_stale` → re-run
+  the census (session tools + `claude mcp list`), diff against manifest.census, and where a
+  recorded data_paths rung can improve ("rung 1 appeared for X; instance is on rung 4"),
+  propose the upgrade; `proxy_revalidation_due` → walk each input lever's causal link to the
+  north star against P18's four Goodhart mechanisms (regressional noise, extremal breakdown,
+  causal validity, adversarial gaming), then stamp manifest.metrics.last_revalidated with
+  today's date whatever the outcome — the check is the event, not the change.
+- **De-automation rule (P16/P17).** If the same task class carries the same failure_mode tag
+  ≥3 times since the last review, propose de-automating that task — move it below the
+  autonomy line (act → ask, or ask → never) or add a checked verifier — citing the events. Agents rarely
+  self-correct (91.49% of resolutions needed explicit user correction); the correction loop
+  is the human plus this rule, not model self-review.
 - **Tag and order by blast.** Every proposal carries `[blast: low|med|high]` (how many
   other decisions / manifest fields / files would have to change if it were adopted then
   flipped) and `[door: one-way|two-way]` (recoverable within one review period?). Present

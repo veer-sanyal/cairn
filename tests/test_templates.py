@@ -18,3 +18,9 @@ def test_templates_exist_and_are_wired():
 def test_command_templates_carry_managed_header():
     for cmd in ["log.md", "suspend.md", "conclude.md"]:
         assert "managed-by-cairn" in (T / "commands" / cmd).read_text()
+
+def test_log_template_documents_failure_mode_tags():
+    text = (T / "commands" / "log.md").read_text()
+    assert "failure_mode" in text
+    for tag in ["spec", "verify", "overreach"]:
+        assert tag in text
