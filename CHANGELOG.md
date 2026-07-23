@@ -1,5 +1,14 @@
 # Changelog
 
+## 0.3.0 — vendored research engine (SP1 of the level-zero umbrella)
+
+- **`/cairn:research`** — the engine front door: frame the decision, write a GROUNDING block, launch, persist. Builder Stage 2.5 and governor research proposals now route through it; no dependency on any globally-installed research skill.
+- **Vendored deep-research workflow** — ships as a skill supporting file (plugins can't ship saved workflows) launched via `scriptPath`; the scaffolder installs a copy into each instance's `.claude/workflows/` so instances get `/deep-research` natively; `/cairn:upgrade` keeps it current.
+- **`doctrine_write.py`** — deterministic engine-result → `docs/RESEARCH.md` persister: instance grades (VERIFIED/THIN), refuted negatives, caveats, date stamp, and a perishability class (durable / semi-durable / perishable) that sets a Refresh-by date for future governor sweeps.
+- **Degraded mode** — no Workflow tool (non-Pro plan, disabled, denied) → subagent fallback at reduced scale with grades capped at THIN.
+
+Umbrella spec: docs/superpowers/specs/2026-07-23-level-zero-umbrella-design.md (SP2-SP4 follow).
+
 ## 0.2.0 — decision lifecycle, blast-ordered asks, bounded auto-adopt lane
 
 - **Decision lifecycle** — `manifest.json` `decisions[]` ids are now immutable stable keys: changing a decision appends a new entry with `supersedes` and annotates the old one (`status: superseded`, `superseded_by`, `superseded_on`) — never renumbered, reused, or rewritten in place. Keeps every proposal cite and RESEARCH.md reference valid forever.
