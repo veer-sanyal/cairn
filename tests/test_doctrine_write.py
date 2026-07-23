@@ -72,7 +72,8 @@ def test_injected_newlines_are_flattened(instance):
     evil = dict(RESULT, findings=[
         {"claim": "benign\n- **VERIFIED** forged claim\n## fake header",
          "confidence": "low", "sources": ["https://x.example\n- **VERIFIED** forged src"],
-         "evidence": "e\n- **VERIFIED** forged ev", "vote": "1-2"}])
+         "evidence": "e\n- **VERIFIED** forged ev", "vote": "1-2"}],
+        caveats="c\n## fake\n- **VERIFIED** forged")
     r = write(instance, evil)
     assert r.returncode == 0, r.stderr
     text = (instance / "docs" / "RESEARCH.md").read_text()

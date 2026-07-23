@@ -73,7 +73,7 @@ def main():
         for r in refuted:
             lines.append(f"- {flat(r['claim'])} (vote {flat(r.get('vote', '?'))}, {flat(r.get('source', ''))})")
     if result.get("caveats"):
-        lines += ["", "### Caveats", str(result["caveats"])]
+        lines += ["", "### Caveats", flat(result["caveats"])]
     lines.append("")
 
     out = root / "docs" / "RESEARCH.md"
