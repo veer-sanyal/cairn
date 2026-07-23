@@ -1,0 +1,637 @@
+{
+  "question": "R9 for Cairn's level-zero doctrine: When should an agentic system fan out into multiple agents vs stay single-threaded, which orchestration topology fits which task shape, and when do cheap-model swarms beat one expensive model? Decision served: doctrine for an orchestration+model-tiering selector that a builder agent uses to design each instance's execution patterns.\n\nGROUNDING:\n- Breadth: standard\n- Sub-areas needing verified coverage: (1) orchestration topologies \u2014 orchestrator-worker, sequential pipeline, debate/judge panel, parallel fan-out with barriers \u2014 with evidence on which wins for which task classes; (2) parallelism economics \u2014 quantified evidence on when multi-agent beats single-agent (token cost multipliers, coordination overhead, when parallelism actively hurts); (3) model tiering and cascade routing \u2014 FrugalGPT-style cascades, router models, cost-quality frontier evidence, when N cheap-model samples + selection beat one strong-model call (best-of-n, self-consistency, mixture-of-agents); (4) context isolation via subagents \u2014 evidence for condensed-return fan-out as a context-budget tool.\n- Key terms/entities: orchestrator-worker pattern (Anthropic multi-agent research system post: ~15x token usage, 90% variance from token budget), FrugalGPT, LLM cascades, mixture-of-agents, self-consistency, best-of-n sampling, router/cascade cost-quality curves, \"don't build multi-agent\" (Cognition) counter-position.\n- Known primary sources worth fetching: Anthropic \"How we built our multi-agent research system\" engineering post, FrugalGPT (arXiv 2305.05176), Mixture-of-Agents paper, Cognition \"Don't Build Multi-Agents\" essay.\n- Already known / do not research: subagent context isolation basics already graded VERIFIED in Cairn R1 (principle 3) \u2014 extend with WHEN-to-use selection criteria, don't re-verify the isolation mechanism itself.",
+  "synthesisDegraded": false,
+  "summary": "Default single-threaded, escalate on evidence: the verified doctrine is a complexity ladder (direct call \u2192 single agent with tools \u2192 multi-agent), taking the lowest rung that reliably works, because every fan-out adds coordination overhead, latency, and a ~4x\u2192~15x token multiplier. Fan out only when the task shape genuinely demands it \u2014 heavy parallelizable breadth (research-style), information exceeding one context window, or many complex tool surfaces \u2014 and note that multi-agent's advantage is mostly a token-spend effect (token budget alone explains ~80% of performance variance), not architectural magic; coding and other write-heavy tasks are a poor fit, where the safe pattern is many readers/advisors but a single writer. For model tiering, cascade routing (cheap model first, escalate on low confidence) is the strongest-evidenced economic lever: FrugalGPT-style cascades matched GPT-4 accuracy at 50\u201398% cost reduction, and modern two-stage cascades stay within ~1\u20132pp of the strongest model while the cheap model absorbs ~60% of queries. For cheap-model swarms, the evidence favors quality over diversity: repeated sampling from one strong model (Self-MoA) beats mixing diverse models, and multi-model consistency-switching (ModelSwitch) matches self-consistency with ~34% fewer samples and beats debate/judge topologies outright on knowledge tasks \u2014 so the selector should prefer best-of-n from the best affordable model, or a 2-model consistency switch, over heterogeneous swarms or debate panels.",
+  "findings": [
+    {
+      "claim": "Use the lowest complexity level that reliably meets requirements: the prescribed ladder is direct model call \u2192 single agent with tools \u2192 multi-agent orchestration, with single-agent-with-tools as the default for enterprise work because decision-making/flow-control overhead often exceeds the benefit of splitting the task; escalate to multi-agent only when measurement shows context limits, parallelism needs, or specialization gains justify the coordination cost.",
+      "confidence": "high",
+      "sources": [
+        "https://learn.microsoft.com/en-us/azure/architecture/ai-ml/guide/ai-agent-design-patterns",
+        "https://www.glukhov.org/ai-systems/architecture/multi-agent-orchestration-patterns/"
+      ],
+      "evidence": "Microsoft Azure Architecture Center (updated 2026-05): 'Use the lowest level of complexity that reliably meets your requirements' and 'Decision-making and flow-control overhead often exceed the benefits of breaking the task into multiple agents' (claims 0, 1; votes 3-0 and 2-1). Independent practitioner guidance corroborates: 'Escalate to multi-agent only when measurement says you must' (claim 29, 3-0).",
+      "vote": "3-0 / 2-1 / 3-0 (merged claims 0, 1, 29)"
+    },
+    {
+      "claim": "Multi-agent (orchestrator-worker) pays off on research-shaped tasks but at a steep token premium, and its advantage is mostly extra token spend, not a distinct architectural trick: Anthropic's Opus-4-lead + Sonnet-4-subagents system beat single-agent Opus 4 by 90.2% on their internal research eval, but agents use ~4x and multi-agent ~15x the tokens of a chat interaction, and token usage alone explained 80% of performance variance (3 factors: 95%); upgrading the model beat doubling the token budget.",
+      "confidence": "high",
+      "sources": [
+        "https://www.anthropic.com/engineering/built-multi-agent-research-system"
+      ],
+      "evidence": "Primary Anthropic engineering post, all figures verified verbatim (claims 2, 3, 4; votes 3-0, 3-0, 2-1). The 90.2% headline must be read jointly with the 15x cost multiplier and the token-variance finding: fan-out is a way to spend more tokens in parallel context, justified only when task value covers the cost.",
+      "vote": "3-0 / 3-0 / 2-1 (merged claims 2, 3, 4)"
+    },
+    {
+      "claim": "Task-shape selection rule for fan-out: multi-agent architectures fit tasks with heavy parallelization, information exceeding a single context window, and many complex tool interfaces; coding is explicitly a poor fit because it has fewer truly parallelizable subtasks and agents are not yet good at real-time delegation to other agents.",
+      "confidence": "high",
+      "sources": [
+        "https://www.anthropic.com/engineering/built-multi-agent-research-system"
+      ],
+      "evidence": "Anthropic scopes multi-agent explicitly: 'multi-agent systems excel at valuable tasks that involve heavy parallelization, information that exceeds single context windows, and interfacing with numerous complex tools'; 'most coding tasks involve fewer truly parallelizable tasks than research' (claim 14, 3-0, corroborated by Anthropic's companion 'When to use multi-agent systems' post).",
+      "vote": "3-0 (claim 14)"
+    },
+    {
+      "claim": "The single-writer principle: parallel multi-agent writes fail because context isn't shared thoroughly enough and independent actions encode implicit decisions that conflict; multi-agent works when additional agents contribute intelligence/analysis (review, research, second opinions) while a single agent retains sole write/action authority.",
+      "confidence": "medium",
+      "sources": [
+        "https://cognition.com/blog/dont-build-multi-agents",
+        "https://cognition.com/blog/multi-agents-working"
+      ],
+      "evidence": "Cognition's diagnosis: 'Actions carry implicit decisions, and conflicting decisions carry bad results' (claim 27, 2-1); their 2026 follow-up narrows rather than retracts: 'multi-agent systems work best today when writes stay single-threaded and the additional agents contribute intelligence rather than actions' (claim 28, 3-0). Blog-quality sources but primary for what Cognition argues, and consistent with Anthropic's coding-is-a-poor-fit finding. Medium because it is practitioner doctrine, not benchmarked.",
+      "vote": "2-1 / 3-0 (merged claims 27, 28)"
+    },
+    {
+      "claim": "Subagent delegation criteria (when to isolate context via condensed-return fan-out): delegate for multi-step tasks that would clutter main context, specialized domains needing custom instructions/tools, tasks requiring different model capabilities, and to keep the main agent on high-level coordination; do NOT delegate simple single-step tasks, tasks needing maintained intermediate context, or when delegation overhead outweighs the benefit.",
+      "confidence": "medium",
+      "sources": [
+        "https://docs.langchain.com/oss/python/deepagents/subagents"
+      ],
+      "evidence": "Official LangChain deepagents docs list both the four positive criteria and the three explicit anti-patterns verbatim (claims 10, 11; both 3-0). Single source, but primary official documentation stating its own guidance; extends the already-VERIFIED context-isolation mechanism from R1 with WHEN-to-use selection criteria.",
+      "vote": "3-0 / 3-0 (merged claims 10, 11)"
+    },
+    {
+      "claim": "Cost/variance profile differs by topology: sequential/handoff patterns accumulate cost per step but limit concurrent resource spikes; concurrent (parallel fan-out) patterns spike resource usage from simultaneous model calls; magentic (dynamic-planning) orchestration has the least predictable total cost because the manager iterates until a viable plan emerges.",
+      "confidence": "medium",
+      "sources": [
+        "https://learn.microsoft.com/en-us/azure/architecture/ai-ml/guide/ai-agent-design-patterns"
+      ],
+      "evidence": "Verbatim from Microsoft's Cost optimization section (claim 12, 3-0). Single primary source, qualitative guidance \u2014 useful as a selector heuristic for budget predictability per topology.",
+      "vote": "3-0 (claim 12)"
+    },
+    {
+      "claim": "Racing parallel teams with early stopping buys wall-clock speed, not accuracy, at proportional cost: running 3\u20135 parallel multi-agent teams on the same task with first-success-halts-rest achieves up to 2.2x wall-clock speedup at unchanged accuracy, for 1.7x\u20132.6x token cost depending on team count (GAIA benchmark, GPT-4o).",
+      "confidence": "medium",
+      "sources": [
+        "https://arxiv.org/pdf/2507.08944"
+      ],
+      "evidence": "ICML 2025 paper (M1-Parallel): 3 teams \u2192 1.6\u20131.8x speedup at 1.7\u20131.8x cost; 5 teams \u2192 1.8\u20132.2x speedup at 2.2\u20132.6x cost, accuracy preserved (claim 13, 2-1). Note the sibling aggregation-mode (best-of-k) claim was REFUTED \u2014 only the early-stopping/latency framing survived. Single benchmark, single model.",
+      "vote": "2-1 (claim 13)"
+    },
+    {
+      "claim": "Cascade routing (cheap model first, confidence-gated escalation to expensive models) can match or beat the best single model at a fraction of the cost, but savings vary strongly by task domain: FrugalGPT matched GPT-4 accuracy with up to 98% cost reduction or beat GPT-4 accuracy by up to 4% at equal cost; per-domain savings to match GPT-4 were 98.3% (HEADLINES/finance), 73.3% (OVERRULING/legal), 59.2% (COQA/reading comprehension). Concrete example: a GPT-J \u2192 J1-Large \u2192 GPT-4 cascade with reliability thresholds 0.96/0.37 hit 0.872 accuracy vs GPT-4's 0.857 at $6.5 vs $33.1 (80% cheaper, one-fifth the budget).",
+      "confidence": "high",
+      "sources": [
+        "https://arxiv.org/pdf/2305.05176",
+        "https://ar5iv.labs.arxiv.org/html/2305.05176"
+      ],
+      "evidence": "FrugalGPT (Stanford, TMLR 2024 peer-reviewed); all figures verified against abstract and Table 3 (claims 5, 6, 7, 15, 16; votes 3-0, 3-0, 3-0, 3-0, 2-1 \u2014 merged as one finding since 5/16 and 6/15 are near-duplicates). Selector implication: cascade effectiveness depends on what fraction of queries the cheap model can answer \u2014 high for classification-like domains, lower for open reasoning.",
+      "vote": "3-0 x4, 2-1 x1 (merged claims 5, 6, 7, 15, 16)"
+    },
+    {
+      "claim": "Modern two-stage cascades (cluster-based routing + quality-estimation escalation) stay within ~1\u20132pp of always-using-the-strongest-model while being faster, with the cheap model absorbing the majority of traffic; the escalation classifier and confidence calibration are where the value is: AIME 2024 \u2014 88.4% vs 89.1% accuracy, 18% faster; TeleQnA \u2014 74.3% vs 76.4%, cheap model handles 59% of queries; Stage-2 escalation recovers 2.0pp (AIME) and 3.1pp (TeleQnA) over routing alone; per-class isotonic calibration of stage confidences adds a further small-but-reliable gain (production-validated on 150M+ annotations).",
+      "confidence": "medium",
+      "sources": [
+        "https://arxiv.org/html/2606.27457",
+        "https://arxiv.org/pdf/2606.25871"
+      ],
+      "evidence": "Cluster-Route-Escalate (ADAPT/Huawei, June 2026) figures verified verbatim (claims 17, 18, 19; votes 2-1, 2-1, 3-0); AutoRelAnnotator confirms calibration quality, not just cascade depth, drives routing accuracy (claim 20, 3-0). Medium confidence: recent unreplicated preprints on narrow benchmarks (AIME is 30 queries; TeleQnA is telecom QA; calibration paper is search-relevance classifiers, not agents).",
+      "vote": "2-1 / 2-1 / 3-0 / 3-0 (merged claims 17, 18, 19, 20)"
+    },
+    {
+      "claim": "Layered cheap-model swarms (Mixture-of-Agents: parallel proposer layers + aggregator layer) can beat a strong single model on cost-quality \u2014 MoA-Lite outperformed GPT-4 Turbo by ~4% on AlpacaEval 2.0 at less than half the cost \u2014 BUT the follow-up Self-MoA result shows the gain comes from quality, not diversity: repeated sampling from the single best model beats mixing diverse models by 6.6pp on AlpacaEval 2.0 (65.7 vs 59.1 LC win rate) and by 3.8% average across MMLU/CRUX/MATH; regression analysis shows output quality dominates diversity (\u03b1 > \u03b2 on all datasets, p<0.001), with optimal performance in the high-quality/low-diversity regime \u2014 mixing in weaker models for diversity actively hurts.",
+      "confidence": "high",
+      "sources": [
+        "https://proceedings.iclr.cc/paper_files/paper/2025/file/5434be94e82c54327bb9dcaf7fca52b6-Paper-Conference.pdf",
+        "https://arxiv.org/html/2502.00674v1"
+      ],
+      "evidence": "MoA architecture and MoA-Lite cost win verified from ICLR 2025 paper (claims 8, 9; 2-1 each); Self-MoA rebuttal verified with exact Table 1 numbers and the quality-vs-diversity regression (claims 21, 22, 23; all 3-0). Selector rule: for best-of-n patterns, sample the strongest affordable model repeatedly rather than assembling heterogeneous cheap swarms. Note the refuted sibling claim: 'open-source swarm beats GPT-4o by a large margin' did NOT survive (0-3).",
+      "vote": "2-1 x2, 3-0 x3 (merged claims 8, 9, 21, 22, 23)"
+    },
+    {
+      "claim": "Multi-model consistency-switching (ModelSwitch: repeated sampling that switches between 2 comparable cheap models, stopping when answers agree) matches or beats single-model self-consistency at a fraction of the sample budget \u2014 81% on MATH with 35 samples vs Gemini 1.5 Flash's 79.8% at 512 samples (~14x efficiency); 34% average sample savings across 6 benchmarks (up to 43% on GSM8K) \u2014 and on MMLU-Pro it substantially beats debate/judge orchestration topologies: 63.2% vs MAD 45%, AgentVerse 38%, ChatEval 43%, MoA 50.8% at a unified sampling budget.",
+      "confidence": "high",
+      "sources": [
+        "https://arxiv.org/pdf/2504.00762"
+      ],
+      "evidence": "AAAI 2026 peer-reviewed (claims 24, 25, 26; votes 3-0, 3-0, 2-1). Selector implication: for verifiable/answer-checkable task classes, simple cross-model sampling+voting dominates heavier debate topologies at equal budget. Caveat on claim 26: debate baselines were author-reproduced, and the stronger multi-LLM MAD variant (50.2%) was omitted from the headline comparison \u2014 though 63.2% still clearly beats it.",
+      "vote": "3-0 / 3-0 / 2-1 (merged claims 24, 25, 26)"
+    }
+  ],
+  "caveats": "Key uncertainties: (1) Several quantitative results are single-paper, single-benchmark, unreplicated \u2014 the Cluster-Route-Escalate cascade numbers (AIME n=30, telecom QA), M1-Parallel (GAIA + GPT-4o only), and the calibration finding (search-relevance classifiers, not agentic LLM systems). (2) Absolute dollar/price figures from FrugalGPT (2023) and the MoA vs GPT-4 Turbo comparison (mid-2024) are stale as prices; only the structural findings (cascades can match top-model accuracy cheaply; quality beats diversity) should be carried into doctrine. (3) Anthropic's 90.2%/15x/80%-variance figures are from one deployment context (their research agent, BrowseComp-style evals) \u2014 'in our data', not a universal law. (4) Cognition's single-writer principle is practitioner doctrine from blogs, not benchmarked. (5) Notably, almost every specific numeric multiplier circulating in secondary/blog sources was REFUTED in verification (fan-out costs 4-5x, swarm 2-10x, 40% pilot failure rate, Princeton 64% study, 40-60% tiering savings, (N+1)x supervisor overhead) \u2014 the doctrine must not cite these; and the seemingly obvious claim 'Microsoft recommends per-agent model tiering' was also refuted (0-3), so cross-agent model-tiering as vendor-prescribed guidance currently lacks a verified source, even though the cascade literature supports the underlying economics. (6) Debate/judge topology coverage is thin and mostly negative (ModelSwitch beats MAD/ChatEval; corroborating literature says MAD often fails to beat CoT/self-consistency) \u2014 no verified positive case for debate survived.",
+  "openQuestions": [
+    "What task-value threshold justifies the ~15x multi-agent token premium \u2014 is there any quantified break-even framework beyond Anthropic's qualitative 'task value must justify token cost'?",
+    "Is there any task class where debate/judge-panel topology verifiably beats cheaper alternatives (sampling+voting, single-writer review loops) at equal budget? Verified evidence here was uniformly negative.",
+    "How should cascade escalation thresholds be set without labeled calibration data (FrugalGPT and AutoRelAnnotator both required training data for their scorers) \u2014 what is the cold-start recipe for a builder agent configuring a cascade per instance?",
+    "Does the single-writer constraint generalize beyond coding to other side-effectful domains (email, deployments, DB writes), and at what point does parallel write partitioning (disjoint ownership) become safe?"
+  ],
+  "confirmed": [
+    {
+      "claim": "Microsoft's Azure Architecture Center prescribes a three-level complexity ladder \u2014 direct model call, single agent with tools, multiagent orchestration \u2014 and instructs architects to use the lowest level that reliably meets requirements, since each added level introduces coordination overhead, latency, and cost.",
+      "source": "https://learn.microsoft.com/en-us/azure/architecture/ai-ml/guide/ai-agent-design-patterns",
+      "quality": "primary",
+      "quote": "Agent architectures exist on a spectrum of complexity, and each level introduces coordination overhead, latency, and cost. Use the lowest level of complexity that reliably meets your requirements.",
+      "confidence": "high",
+      "evidence": "Fetched the primary source directly (learn.microsoft.com/en-us/azure/architecture/ai-ml/guide/ai-agent-design-patterns, ms.date 2026-02-12, updated 2026-05-12). It contains a section literally titled \"Start with the right level of complexity\" with the exact quoted sentence: \"Agent architectures exist on a spectrum of complexity, and each level introduces coordination overhead, latency, and cost. Use the lowest level of complexity that reliably meets your requirements.\" This is immediately followed by a 3-row table with columns Level/Description/When to use/Considerations, whose three rows are exactly: (1) \"Direct model call\" \u2014 single LLM call, well-crafted prompt, no agent logic/tool access; (2) \"Single agent with tools\" \u2014 one agent reasoning and choosing tools, described as \"often the right default for enterprise use cases\"; (3) \"Multiagent orchestration\" \u2014 multiple specialized agents coordinated by an orchestrator, with the table explicitly noting it \"adds coordination overhead, latency, and failure modes.\" This matches the claim's description of a three-level ladder and the \"lowest level that reliably meets requirements\" instruction word-for-word. No overreach, no contradicting evidence needed since this is a direct primary-source confirmation of a plainly documented, current, official Microsoft guidance page \u2014 well within source-quality expectations for this claim's strength (it's a descriptive claim about what a specific doc says, not an empirical/quantitative claim).",
+      "vote": "3-0"
+    },
+    {
+      "claim": "Single-agent-with-tools is framed as the default for enterprise use cases specifically because multiagent decision/flow-control overhead often exceeds its benefits when one agent can reliably solve the task.",
+      "source": "https://learn.microsoft.com/en-us/azure/architecture/ai-ml/guide/ai-agent-design-patterns",
+      "quality": "primary",
+      "quote": "If a single agent can reliably solve your scenario, consider adopting that approach. Decision-making and flow-control overhead often exceed the benefits of breaking the task into multiple agents.",
+      "confidence": "high",
+      "evidence": "Fetched the primary source directly (learn.microsoft.com/en-us/azure/architecture/ai-ml/guide/ai-agent-design-patterns, ms.date 2026-02-12, updated_at 2026-05-12 \u2014 current). Verified both halves of the claim appear in the source: (1) the pattern-comparison table's row for \"Single agent with tools\" states verbatim \"Often the right default for enterprise use cases. Simpler to debug and test than multiagent setups, but still supports dynamic logic.\" (2) The \"Single agent, multitool\" section states verbatim: \"If a single agent can reliably solve your scenario, consider adopting that approach. Decision-making and flow-control overhead often exceed the benefits of breaking the task into multiple agents.\" The claim synthesizes these two adjacent statements from the same document/same recommendation (prefer single-agent) into one sentence linking the \"default for enterprise\" framing to the overhead rationale \u2014 this is a faithful synthesis of the source's overall thesis, not an overreach, since both statements support the identical recommendation and appear under the same topic. A supplementary WebSearch found no credible source disputing this specific framing; one vendor blog (Redis) argues multi-agent has payoffs at scale, but doesn't contradict what Microsoft's doc says or claim Microsoft's guidance is wrong. Source is official first-party Microsoft architecture documentation, not marketing/press-release material, and is recent (updated within the last ~2 months of the current date), matching the claim's moderate strength (a stated design default, not an extraordinary empirical/statistical claim).",
+      "vote": "2-1"
+    },
+    {
+      "claim": "A multi-agent system (Claude Opus 4 lead + Claude Sonnet 4 subagents) outperformed a single-agent Claude Opus 4 by 90.2% on Anthropic's internal research evaluation.",
+      "source": "https://www.anthropic.com/engineering/built-multi-agent-research-system",
+      "quality": "primary",
+      "quote": "multi-agent system with Claude Opus 4 as the lead agent and Claude Sonnet 4 subagents outperformed single-agent Claude Opus 4 by 90.2% on our internal research eval",
+      "confidence": "high",
+      "evidence": "Direct WebFetch of the primary source (anthropic.com/engineering/built-multi-agent-research-system) confirms the exact sentence: \"We found that a multi-agent system with Claude Opus 4 as the lead agent and Claude Sonnet 4 subagents outperformed single-agent Claude Opus 4 by 90.2% on our internal research eval.\" The claim under review is a verbatim, correctly-attributed quote from Anthropic's own primary engineering post \u2014 not a paraphrase or overreach. Multiple independent secondary sources (Simon Willison's blog, ZenML LLMOps database, ByteByteGo) cite the identical 90.2% figure without disputing it; WebSearch surfaced no contradicting or debunking source. The source itself does immediately qualify the number with cost caveats (~15x token usage vs. single chat calls, ~80% of performance variance explained by token budget alone, and a statement that multi-agent only pays off when task value justifies the token cost) \u2014 this is a completeness/context nuance for how the doctrine should USE the figure, not a refutation of the figure's accuracy. Source is a primary, first-party engineering post (not a press release or forum claim), and it remains the current, unsuperseded reference for this specific eval result as of my knowledge and search results.",
+      "vote": "3-0"
+    },
+    {
+      "claim": "Agentic (single-agent) systems typically use ~4x more tokens than a normal chat interaction, and multi-agent systems use ~15x more tokens than chat interactions \u2014 establishing the cost multiplier of fanning out.",
+      "source": "https://www.anthropic.com/engineering/built-multi-agent-research-system",
+      "quality": "primary",
+      "quote": "agents typically use about 4\u00d7 more tokens than chat interactions, and multi-agent systems use about 15\u00d7 more tokens than chats",
+      "confidence": "high",
+      "evidence": "Verified via direct fetch of the primary source (anthropic.com/engineering/built-multi-agent-research-system): the article states verbatim \"In our data, agents typically use about 4\u00d7 more tokens than chat interactions, and multi-agent systems use about 15\u00d7 more tokens as chats.\" The claim under review is an accurate paraphrase (single-agent=agents; ~4x/~15x figures match exactly; hedged with \"typically\"/\"about\" matching the source's own hedging). This is Anthropic's own internal telemetry reported in a technical engineering postmortem (not a press release), presented alongside acknowledged downsides (cost, coordination overhead) rather than as unqualified marketing \u2014 it appears specifically in a \"when multi-agent systems don't work well\" / economics-of-deployment discussion, which argues against cherry-picking. Multiple independent secondary sources (Constellation Research, ByteByteGo, AI Engineer Substack, etc.) corroborate the same figures with no contradicting numbers found in search. No sign of retraction or supersession; still the standard citation for this figure as of mid-2026. One minor note: the source's claim is scoped to \"in our data\" (Anthropic's own research-agent workload), so it's an empirical observation from one deployment context, not a universal law \u2014 but the claim under review only asserts what the quote supports (\"agents typically use,\" \"multi-agent systems use,\" both hedged), so this scoping does not constitute overreach.",
+      "vote": "3-0"
+    },
+    {
+      "claim": "Token usage alone explains 80% of performance variance across agent runs in their eval (three factors together explain 95%), meaning multi-agent's advantage is largely a function of the extra tokens/parallel context it burns, not a distinct architectural trick \u2014 and model upgrade beats simply doubling token budget.",
+      "source": "https://www.anthropic.com/engineering/built-multi-agent-research-system",
+      "quality": "primary",
+      "quote": "three factors explained 95% of the performance variance...token usage by itself explains 80% of the variance",
+      "confidence": "high",
+      "evidence": "Verified against the primary source (Anthropic, \"How we built our multi-agent research system,\" engineering blog) via WebFetch plus independent WebSearch corroboration from multiple secondary analyses.\n\n1. \"Token usage alone explains 80%... three factors together explain 95%\": Confirmed verbatim \u2014 the post states \"three factors explained 95% of the performance variance in the BrowseComp evaluation\" (token usage, number of tool calls, model choice) and \"token usage by itself explains 80% of the variance.\" This is scoped to the BrowseComp eval, which the claim correctly reflects by saying \"in their eval.\"\n\n2. \"Multi-agent's advantage is largely a function of the extra tokens it burns, not a distinct architectural trick\": This is a faithful paraphrase of the post's own words \u2014 Anthropic states \"Multi-agent systems work mainly because they help spend enough tokens to solve the problem.\" Independent corroboration: a third-party analysis (gravity7.com) titled \"multi-agent-research-performance-is-primarily-a-token-spending-function\" independently summarizes the same post the same way, and states Anthropic's systems work \"not because they coordinate intelligently\" \u2014 matching the claim's framing almost exactly, reducing the risk this is a WebFetch-summarizer hallucination.\n\n3. \"Model upgrade beats simply doubling token budget\": Confirmed via independent WebSearch turning up the near-exact original sentence quoted by a second unrelated source: \"upgrading to Claude Sonnet 4 is a larger performance gain than doubling the token budget on Claude Sonnet 3.7\" \u2014 directly from the same Anthropic post.\n\nAll three sub-claims trace to the named primary source, are internally consistent with each other, and are corroborated by independent secondary sources rather than resting on a single fetch. The source (Anthropic's own engineering post, not a press release) is appropriately authoritative for a claim about their own eval methodology. No contradicting evidence found in search. Not outdated (June 2025 post, findings not superseded). This survives scrutiny as voter 2/3.",
+      "vote": "2-1"
+    },
+    {
+      "claim": "FrugalGPT (an LLM cascade that adaptively routes queries through progressively more expensive LLMs) can match the accuracy of the best individual LLM (GPT-4) while reducing cost by up to 98%, or improve accuracy over GPT-4 by up to 4% at the same cost.",
+      "source": "https://arxiv.org/pdf/2305.05176",
+      "quality": "primary",
+      "quote": "Our experiments show that FrugalGPT can match the performance of the best individual LLM (e.g. GPT-4) with up to 98% cost reduction or improve the accuracy over GPT-4 by 4% with the same cost.",
+      "confidence": "high",
+      "evidence": "Verified against two independent renderings of the primary source (arxiv.org/abs/2305.05176 abstract page, and the ar5iv full-text HTML version of arXiv 2305.05176). The abstract states verbatim: \"FrugalGPT can match the performance of the best individual LLM (e.g. GPT-4) with up to 98% cost reduction or improve the accuracy over GPT-4 by 4% with the same cost.\" The claim under review paraphrases this accurately, including hedging both figures as ceiling cases (\"up to\"), which correctly reflects that the 98% cost-reduction figure comes from a single dataset (HEADLINES, $33.1\u2192$0.6 per Table 3) rather than an average across all three tested benchmarks (OVERRULING: 73.3% savings/1% accuracy gain; COQA: 59.2% savings). This dataset-specific origin is a caveat on generalizability, not a misrepresentation \u2014 the claim's own \"up to\" phrasing already signals best-case rather than typical-case. Source quality is high for the claim's strength: primary source, Stanford authors (Chen, Zaharia, Zou), later published in peer-reviewed TMLR (2024) with an expanded model set (Claude 3.5, Gemini 1.5). No contradicting or debunking coverage found via web search. The 2023 vintage is a minor staleness concern for absolute dollar figures given fast model-price changes, but the claim is used as qualitative doctrinal evidence that cascade/router architectures can match top-model accuracy at a fraction of cost \u2014 a structural finding that doesn't depend on today's specific price points, and the paper's own TMLR update confirms the pattern held with newer models.",
+      "vote": "3-0"
+    },
+    {
+      "claim": "On the HEADLINES financial-news dataset, a 3-stage cascade (GPT-J \u2192 J1-Large \u2192 GPT-4, with reliability-score thresholds of 0.96 and 0.37 gating escalation) achieved both higher accuracy (0.872 vs 0.857) and 80% lower cost ($6.5 vs $33.1) than calling GPT-4 alone.",
+      "source": "https://arxiv.org/pdf/2305.05176",
+      "quality": "primary",
+      "quote": "Overall, we observe that FrugalGPT reduces the cost by 80%, while improves the accuracy by 1.5% compared to GPT-4.",
+      "confidence": "medium",
+      "evidence": "Attempted refutation via WebSearch and WebFetch (ar5iv HTML render of arXiv 2305.05176, plus OpenReview/TMLR PDF attempts). Could not access exact decimal-level table values (0.872/0.857/$6.5/$33.1) due to PDF text-extraction limits, but multiple independent extractions corroborate the claim's core structure: (1) ar5iv fetch confirms verbatim the supporting quote \"its cost is reduced by 80%, while the accuracy is even 1.5% higher\" for the HEADLINES case study; (2) ar5iv and WebSearch both independently confirm the exact cascade order (GPT-J -> J1-Large -> GPT-4) and exact reliability thresholds (0.96, 0.37) for escalation gating; (3) ar5iv confirms \"$6.5, which is one-fifth of GPT-4's cost,\" consistent with $6.5 vs ~$32.5-33.1; (4) the claimed 0.872 vs 0.857 accuracy figures are arithmetically exact for a \"1.5% higher\" statement (0.872-0.857=0.015), and $6.5/$33.1 arithmetically yields a 80.4% cost reduction, matching \"80%\" precisely \u2014 strong internal consistency across two independently-sourced quotes rather than a single unverifiable number. No contradicting evidence found in search (e.g., no rebuttal, erratum, or replication failure surfaced for this specific HEADLINES result). Source is the primary FrugalGPT paper (arXiv 2305.05176 / TMLR 2024), an appropriate-quality, well-cited primary source for a specific benchmark claim of this kind, and the result is presented as a historical empirical case study (dated May 2023) rather than a claim about current SOTA, so it is not \"outdated\" in a way that undermines its use as doctrine evidence for cascade routing economics.",
+      "vote": "3-0"
+    },
+    {
+      "claim": "Cost savings from LLM cascading are not uniform across task domains: measured savings to match the best individual model's accuracy were 98.3% on HEADLINES (finance), 73.3% on OVERRULING (legal), and only 59.2% on COQA (reading comprehension), indicating cascade effectiveness depends on task shape/domain.",
+      "source": "https://arxiv.org/pdf/2305.05176",
+      "quality": "primary",
+      "quote": "Table 3 displays the overall cost savings of FrugalGPT, which range from 50% to 98%. This is feasible because FrugalGPT identifies the queries that can be accurately answered by smaller LLMs",
+      "confidence": "medium",
+      "evidence": "Verified via ar5iv.labs.arxiv.org/html/2305.05176 (rendered version of the primary FrugalGPT paper) that Table 3 reports exact per-dataset cost savings: HEADLINES 98.3%, OVERRULING 73.3%, COQA 59.2%, explicitly defined as \"the cost to reach the same accuracy\" as the best individual LLM (i.e., matching best-model accuracy) \u2014 this matches the claim's numbers and framing exactly. Independent WebSearch snippets corroborate the 98.3% HEADLINES figure and the general 50-98% range cited in the abstract. The claim's core assertion (savings are non-uniform across task domains, ranging from ~59% to ~98%, implying dependence on task shape/domain) is directly supported by the primary source's own table, not just inferred from the narrower supporting quote provided in the task.",
+      "vote": "3-0"
+    },
+    {
+      "claim": "A layered orchestrator-worker/fan-out topology (Mixture-of-Agents), where each layer of multiple LLM 'proposer' agents runs in parallel and a subsequent layer of 'aggregator' agents synthesizes their outputs, is the architecture under test.",
+      "source": "https://proceedings.iclr.cc/paper_files/paper/2025/file/5434be94e82c54327bb9dcaf7fca52b6-Paper-Conference.pdf",
+      "quality": "primary",
+      "quote": "we construct a layered MoA architecture wherein each layer comprises multiple LLM agents. Each agent takes all the outputs from agents in the previous layer as auxiliary information in generating its response.",
+      "confidence": "high",
+      "evidence": "The claim is a straightforward architectural description, not a superiority claim, and it holds up. (1) Quote match: the supporting quote \u2014 \"we construct a layered MoA architecture wherein each layer comprises multiple LLM agents. Each agent takes all the outputs from agents in the previous layer as auxiliary information in generating its response\" \u2014 is corroborated verbatim by independent search results describing the ICLR 2025 paper \"Mixture-of-Agents Enhances Large Language Model Capabilities\" (Duke/Together AI/UChicago/Stanford authors). (2) Proposer/aggregator terminology confirmed via the co-author-affiliated Together AI blog post (together.ai/blog/together-moa): \"Proposers generate initial responses... Aggregators synthesize multiple proposer responses into refined outputs,\" with proposers in a layer operating in parallel before hand-off to the aggregator layer \u2014 matching the claim's \"layer of proposer agents runs in parallel / subsequent layer of aggregator agents synthesizes.\" (3) Confirmed as the primary/main architecture under test, not a minor ablation: the Together AI blog states plainly \"this layered proposer-aggregator design represents the main experimental architecture,\" and the WebSearch summary notes \"All the curves use the same 6 proposer agents; they only differ in the choice of the final aggregator\" \u2014 i.e., the layered proposer/aggregator design is the fixed backbone across the paper's experiments (AlpacaEval 2.0, Arena-Hard, MT-Bench, FLASK). (4) Source quality is appropriate: primary peer-reviewed source (ICLR 2025 proceedings) for a factual architecture-description claim, not an extraordinary quantitative claim needing extra scrutiny. (5) Not outdated \u2014 ICLR 2025 is current for a foundational orchestration-topology reference as of July 2026. (6) No contradicting evidence found; this is a descriptive claim about what MoA is, not a claim that MoA universally wins, so it isn't undercut by the Cognition \"don't build multi-agents\" counter-position, which argues a different point (parallel subagents writing code independently, not read/synthesize ensembling). One soft caveat: labeling MoA as \"orchestrator-worker/fan-out\" is the doctrine document's own taxonomic framing (MoA is a fixed layered ensemble, not a dynamic central-orchestrator-delegates-to-workers pattern) \u2014 but this is presented as the claim author's categorization, not something attributed to the source, so it doesn't misrepresent the cited paper.",
+      "vote": "2-1"
+    },
+    {
+      "claim": "A cost-optimized cascade variant (fewer layers, cheaper aggregator) delivers a quantified cost/performance win over a strong single model: it beats GPT-4 Turbo on quality by ~4% while costing less than half as much per query.",
+      "source": "https://proceedings.iclr.cc/paper_files/paper/2025/file/5434be94e82c54327bb9dcaf7fca52b6-Paper-Conference.pdf",
+      "quality": "primary",
+      "quote": "It outperforms GPT-4 Turbo by approximately 4% while being more than twice as cost-effective.",
+      "confidence": "high",
+      "evidence": "Verified against the primary source (fetched arxiv.org/html/2406.04692, the HTML mirror of the ICLR 2025 paper at the cited proceedings.iclr.cc PDF URL). The paper's exact text reads: \"MoA-Lite can match GPT-4o's cost while achieving higher level of quality. Notably, it outperforms GPT-4 Turbo by approximately 4% while being more than twice as cost-effective.\" This is a near-verbatim match to the claim's supporting quote. Concretely: MoA-Lite (2-layer MoA, 6 open-source proposers \u2014 Qwen1.5-110B/72B-Chat, WizardLM-8x22B, LLaMA-3-70B-Instruct, Mixtral-8x22B, dbrx-instruct \u2014 aggregated by Qwen1.5-72B-Chat) scores 59.3% LC win rate on AlpacaEval 2.0 vs. GPT-4 Turbo's 55.0% (~4pp gap), per Figure 5(a) cost/quality plot in the paper. Source is a primary, peer-reviewed ICLR 2025 paper (not marketing/blog), matching the claim's strength. Two caveats worth flagging for the doctrine write-up rather than grounds for refutation: (1) the ~4% figure is specific to one benchmark (AlpacaEval 2.0 LC win rate), not \"quality\" broadly \u2014 a follow-up paper (Self-MoA, arXiv 2502.00674, ICML-track) shows MoA-style diversity gains don't hold uniformly across MMLU/MATH/CRUX and that same-model self-aggregation often beats cross-model MoA, questioning the generality (not the specific number) of the result; (2) the comparison target (GPT-4 Turbo, benchmarked mid-2024) is now dated for a document about current model-tiering economics, though the claim doesn't assert current SOTA status, only reports what the paper found. Neither issue contradicts the quoted figures themselves.",
+      "vote": "2-1"
+    },
+    {
+      "claim": "The docs give explicit selection criteria for when to delegate to subagents: multi-step tasks that would clutter main context, specialized domains needing custom instructions/tools, tasks requiring different model capabilities, and when the main agent should stay focused on high-level coordination.",
+      "source": "https://docs.langchain.com/oss/python/deepagents/subagents",
+      "quality": "primary",
+      "quote": "Multi-step tasks that would clutter the main agent's context",
+      "confidence": "high",
+      "evidence": "Fetched the primary source directly (https://docs.langchain.com/oss/python/deepagents/subagents) rather than relying solely on the single supplied quote. The full page confirms all four criteria in the claim, nearly verbatim: (1) context bloat \u2014 \"Subagents solve the context bloat problem. When agents use tools with large outputs... the context window fills up quickly with intermediate results\"; (2) specialization \u2014 \"specialized domains that need custom instructions or tools\"; (3) model capabilities \u2014 \"tasks requiring different model capabilities\"; (4) coordination \u2014 use subagents \"when you want to keep the main agent focused on high-level coordination.\" The docs also give explicit negative criteria (simple single-step tasks, need to maintain intermediate context, overhead outweighs benefits), which the claim doesn't misstate or contradict. The claim is a straightforward, accurate description of what a current, official, primary-source documentation page says \u2014 not an empirical/generalizable performance claim requiring stronger evidentiary backing, so source quality matches claim strength. No contradiction found; the claim is fully supported by content beyond just the one supplied supporting quote.",
+      "vote": "3-0"
+    },
+    {
+      "claim": "The docs explicitly warn against using subagents for simple single-step tasks, tasks needing maintained intermediate context, or cases where delegation overhead outweighs the benefit.",
+      "source": "https://docs.langchain.com/oss/python/deepagents/subagents",
+      "quality": "primary",
+      "quote": "Simple, single-step tasks",
+      "confidence": "high",
+      "evidence": "Direct verbatim fetch of https://docs.langchain.com/oss/python/deepagents/subagents (confirmed twice, independently, with identical text) shows a \"When NOT to use subagents\" section listing exactly three bullet points: \"\u274c Simple, single-step tasks\", \"\u274c When you need to maintain intermediate context\", \"\u274c When the overhead outweighs benefits\". This is a one-to-one match with the claim's three conditions (simple single-step tasks; tasks needing maintained intermediate context; delegation overhead outweighing benefit), sitting opposite a parallel \"When to use subagents\" section (multi-step tasks, specialized domains, different model capabilities, keeping main agent focused on coordination) \u2014 confirming the doc frames these three as explicit anti-patterns, not incidental phrasing. Source is the primary, official LangChain docs page itself (not a secondary summary/blog), and the claim only asserts what the docs say (not an independent empirical claim), so source quality matches claim strength. No contradicting or qualifying treatment found.",
+      "vote": "3-0"
+    },
+    {
+      "claim": "Cost/variance profile differs by orchestration topology: sequential/handoff patterns accumulate cost per step but limit concurrent resource spikes, concurrent (parallel fan-out) patterns spike resource usage from simultaneous model calls, and magentic (dynamic planning) orchestration has the least predictable total cost because the manager iterates until a viable plan emerges.",
+      "source": "https://learn.microsoft.com/en-us/azure/architecture/ai-ml/guide/ai-agent-design-patterns",
+      "quality": "primary",
+      "quote": "Sequential and handoff patterns invoke agents individually, which limits concurrent resource usage but accumulates cost across each step. Concurrent patterns increase throughput but they might spike resource consumption when multiple agents invoke models simultaneously. Magentic orchestrations are the most variable because the manager agent continues to iterate until it builds a viable plan, which makes it hard to predict the total cost.",
+      "confidence": "high",
+      "evidence": "Verified by direct WebFetch of the live page: the quoted text appears verbatim under a \"Cost optimization\" heading (\"Sequential and handoff patterns invoke agents individually, which limits concurrent resource usage but accumulates cost across each step. Concurrent patterns increase throughput but they might spike resource consumption when multiple agents invoke models simultaneously. Magentic orchestrations are the most variable because the manager agent continues to iterate until it builds a viable plan, which makes it hard to predict the total cost.\"). Page metadata: ms.date 2026-02-12, updated_at 2026-05-12 \u2014 current, not stale. Source is Microsoft's official Azure Architecture Center (primary, authoritative for architectural/design guidance). The claim is a faithful, non-overreaching paraphrase: each of the three sub-claims (sequential/handoff = per-step accumulation, low concurrent spikes; concurrent = simultaneous-call spikes; magentic = least predictable due to manager iteration) maps 1:1 to a clause in the quote, with no added quantitative specificity beyond what the source states. WebSearch corroborates the magentic-variability point independently (multiple MS Learn/devblog sources describe the magentic manager as iterating/backtracking until a viable plan is built, driving unpredictable token/cost consumption) and found no contradicting evidence. The claim is qualitative design guidance, not an extraordinary quantitative claim, so an official vendor architecture guide is adequate sourcing for its strength.",
+      "vote": "3-0"
+    },
+    {
+      "claim": "Running multiple parallel multi-agent teams on the same task with early-stopping (first team to succeed halts the rest) achieves up to 2.2x wall-clock speedup versus a single-team sequential baseline while preserving task completion accuracy, at the cost of a 1.7x-2.6x increase in token/dollar cost depending on team count (3 vs 5 parallel teams).",
+      "source": "https://arxiv.org/pdf/2507.08944",
+      "quality": "primary",
+      "quote": "1.6\u00d7 to 1.8\u00d7 speedup ... up to 2.2\u00d7 speedup while preserving accuracy ... 1.7\u00d7 to 1.8\u00d7 increase in cost [for three teams] ... 2.2\u00d7 to 2.6\u00d7 [for five teams]",
+      "confidence": "high",
+      "evidence": "Verified directly against the paper text (arXiv 2507.08944v1, \"Optimizing Sequential Multi-Step Tasks with Parallel LLM Agents,\" Zhang et al., published at ICML 2025 \u2014 peer-reviewed). Page 5: \"parallel agents with early stopping achieves 1.6\u00d7 to 1.8\u00d7 speedup, while maintaining the task completion rate... M1-Parallel also leads to a 1.7\u00d7 to 1.8\u00d7 increase in cost\" (this is for the default 3-team setting on GAIA vs. Magentic-One baseline). Page 6: \"M1-Parallel with five teams obtains 1.8\u00d7 to 2.2\u00d7 speedup compared with Magentic-One... the cost increase is only 2.2\u00d7 to 2.6\u00d7 compared with Magentic-One.\" Abstract states \"M1-Parallel with early termination achieves up to 2.2\u00d7 speedup while preserving accuracy,\" matching the claim's \"up to 2.2x\" framing (max of the two team-count settings). All specific numbers in the claim (1.6-1.8x and 1.8-2.2x speedup; 1.7-1.8x and 2.2-2.6x cost for 3 vs 5 teams respectively) match the source exactly \u2014 no misread or overreach found. Magentic-One (the baseline) is accurately characterized as a single sequential multi-agent team (orchestrator + 4 specialized agents run once, iteratively) vs. M1-Parallel's concurrent multiple-team early-stopping mode. \"Preserving accuracy\" is directly supported (\"while maintaining the task completion rate\" stated for both 3-team and 5-team configurations). WebSearch for independent replications/critiques found none disputing these numbers \u2014 only restatements of the same paper's results, with no contradicting evidence surfaced. Source is a primary, peer-reviewed (ICML 2025) academic paper appropriate in rigor for this quantitative claim; not marketing or cherry-picked forum content. Not outdated (2025 publication, current methodology). One minor scope caveat not stated in the claim: results are specific to the GAIA benchmark using GPT-4o as the underlying model, not a universal finding \u2014 but this doesn't make the claim as worded inaccurate, since it doesn't claim universality.",
+      "vote": "2-1"
+    },
+    {
+      "claim": "Anthropic explicitly scopes multi-agent architectures to tasks with heavy parallelization, information exceeding a single context window, and many complex tool interfaces \u2014 and states coding tasks are a poor fit because they involve fewer truly parallelizable subtasks and agents aren't yet good at real-time delegation to other agents.",
+      "source": "https://www.anthropic.com/engineering/built-multi-agent-research-system",
+      "quality": "primary",
+      "quote": "most coding tasks involve fewer truly parallelizable tasks than research, and LLM agents are not yet great at coordinating and delegating to other agents in real time",
+      "confidence": "high",
+      "evidence": "Direct WebFetch of the primary source (anthropic.com/engineering/built-multi-agent-research-system) confirms the claim verbatim: \"multi-agent systems excel at valuable tasks that involve heavy parallelization, information that exceeds single context windows, and interfacing with numerous complex tools\" and, on coding, \"most coding tasks involve fewer truly parallelizable tasks than research, and LLM agents are not yet great at coordinating and delegating to other agents in real time.\" A follow-up WebSearch corroborates via independent secondary coverage (Slashdot: \"Anthropic Deploys Multiple Claude Agents for 'Research' Tool - Says Coding is Less Parallelizable\"; Anthropic's own companion post \"When to use multi-agent systems (and when not to)\") with no contradicting evidence found. The claim's paraphrase tracks the quote closely without overreach \u2014 it doesn't add unsupported specifics.",
+      "vote": "3-0"
+    },
+    {
+      "claim": "On the HEADLINES benchmark, FrugalGPT's cascade matched or exceeded GPT-4's accuracy while spending only about one-fifth of GPT-4's cost (overall budget $6.5), giving a concrete cost-quality frontier number for cascade routing vs a single expensive-model call.",
+      "source": "https://ar5iv.labs.arxiv.org/html/2305.05176",
+      "quality": "primary",
+      "quote": "with overall budget $6.5, one fifth of GPT-4's cost",
+      "confidence": "high",
+      "evidence": "Primary source (arXiv 2305.05176, ar5iv HTML, HEADLINES case study section) confirms verbatim: \"We set the budget to be $6.5, which is one-fifth of GPT-4's cost.\" and separately: \"FrugalGPT results in both accuracy gains and cost reduction. As illustrated in Figure 3(c), its cost is reduced by 80%, while the accuracy is even 1.5% higher [than GPT-4].\" Table 3 in the paper corroborates: FrugalGPT reaches GPT-4's accuracy at $0.6 vs GPT-4's $33.1 (98.3% reduction) on HEADLINES, and at the $6.5/one-fifth budget point specifically, the cascade exceeds GPT-4's accuracy by 1.5%. The claim's phrasing \"matched or exceeded\" is well-supported (source shows it actually exceeded) and the quoted \"$6.5, one fifth of GPT-4's cost\" is an exact match to the source text. No contradicting evidence found via source inspection; this is the FrugalGPT paper itself (primary source), appropriate for a specific quantitative benchmark claim.",
+      "vote": "3-0"
+    },
+    {
+      "claim": "Across the datasets tested, FrugalGPT-style cascades produced cost reductions ranging from 50% to as much as 98%, with accuracy gains of up to 4% over using GPT-4 alone \u2014 quantifying how large the savings can be when cascade/routing replaces a single strong-model call.",
+      "source": "https://ar5iv.labs.arxiv.org/html/2305.05176",
+      "quality": "primary",
+      "quote": "Cost reduction | Up to 98% savings (HEADLINES dataset)",
+      "confidence": "high",
+      "evidence": "Verified against the primary source (ar5iv.labs.arxiv.org/html/2305.05176, published at TMLR 2024). The abstract states verbatim: \"FrugalGPT can match the performance of the best individual LLM (e.g. GPT-4) with up to 98% cost reduction or improve the accuracy over GPT-4 by 4% with the same cost.\" Table 3 reports per-dataset cost savings of 98.3% (HEADLINES), 73.3% (OVERRULING), and 59.2% (COQA) \u2014 all within a 50-98% band \u2014 and the paper itself states \"Table 3 displays the overall cost savings of FrugalGPT, which range from 50% to 98%,\" directly matching the claim's phrasing. The 4% accuracy-gain figure is also a direct abstract quote, not an extrapolation. WebSearch turned up no credible source disputing these specific figures; the only caveats found (need for labeled training data for the cascade, quality-metric limitations, narrow 3-dataset scope acknowledged by the authors themselves) qualify generalizability but do not contradict the reported numbers. Source is a primary, peer-reviewed (TMLR) paper, which is adequate rigor for this claim's strength, and the claim is presented as \"quantifying how large savings can be\" (i.e., a historical evidence point from this paper), not as a current universal benchmark, so the 2023 publication date does not make it outdated for its stated purpose.",
+      "vote": "2-1"
+    },
+    {
+      "claim": "On AIME 2024, the two-stage cascade (clustering-based routing + quality-estimation escalation) achieves 88.4% accuracy at 9.7 ms TPOT, versus 89.1% at 11.8 ms TPOT for always using the strongest model (Q3-30B) \u2014 i.e., within 0.7 percentage points of the strong-model baseline while being 18% faster.",
+      "source": "https://arxiv.org/html/2606.27457",
+      "quality": "primary",
+      "quote": "within 0.7 pp of always using Q3-30B while being 2.1 ms (18%) faster",
+      "confidence": "high",
+      "evidence": "WebFetch of the primary source (https://arxiv.org/html/2606.27457, \"Cluster, Route, Escalate: Cascaded Framework for Cost-Aware LLM Serving\") confirms the exact numbers: on AIME 2024 (30-query fixed set), the Stage 1+2 cascade (clustering-based routing + quality-estimation escalation) achieves 88.4% accuracy at 9.7 ms TPOT, while the \"Always Q3-30B\" baseline achieves 89.1% accuracy at 11.8 ms TPOT. Math checks out: 89.1\u221288.4 = 0.7pp gap; 11.8\u22129.7 = 2.1ms, and 2.1/11.8 \u2248 17.8% \u2248 18% faster \u2014 matching the claim's \"within 0.7 pp ... while being 2.1 ms (18%) faster\" framing exactly. Independent WebSearch corroborates the paper's existence, title, authors, and abstract describing exactly this two-stage cascade methodology (clustering-based routing in Stage 1, quality-estimation escalation in Stage 2), consistent with the FrugalGPT-style cascade literature this research question is grounded in. This is a primary arXiv source (dated ~June 2026, very recent/current for a fast-moving subfield), not a marketing claim, and the specificity of the claim matches the specificity/quality of the source. No contradicting evidence found.",
+      "vote": "2-1"
+    },
+    {
+      "claim": "On TeleQnA, the cascaded system achieves 74.3% accuracy at 23.8 ms TPOT vs. 76.4% at 24.5 ms for always-strongest-model, and the efficient (cheap) model alone handles 59% of queries without escalation.",
+      "source": "https://arxiv.org/html/2606.27457",
+      "quality": "primary",
+      "quote": "within 2.1% of always using G-26B while remaining 0.7 ms faster",
+      "confidence": "medium",
+      "evidence": "Fetched the primary source directly (arxiv.org/html/2606.27457, \"Cluster, Route, Escalate: Cascaded Framework for Cost-Aware LLM Serving\"). The page confirms all four numbers in the claim verbatim/near-verbatim: \"Stage 1+2 achieves 74.3% at 23.8 ms\" vs. \"Always G-26B\" at \"76.4%\"/\"24.5 ms\" TPOT on TeleQnA, and \"Q3-4B [handles] 59% of queries\" in the relevant cluster/config without escalation. The supporting quote's arithmetic checks out exactly against these figures: 76.4\u221274.3=2.1 percentage points, 24.5\u221223.8=0.7 ms. An independent WebSearch also surfaced the same paper and the same 74.3%/76.4%/23.8ms/24.5ms figures, corroborating the WebFetch extraction. The paper is genuinely indexed on arXiv (both /html/ and /pdf/ versions found alongside other distinct papers with neighboring arXiv IDs from the same submission window), and is dated June 2026 \u2014 current relative to the July 2026 research date, not stale. This is a specific, falsifiable benchmark claim from a primary academic source rather than a marketing/press claim, and no contradicting source surfaced. One caveat: the WebSearch tool's own prose summary computed a slightly different escalation-rate derivation (~34% escalated \u2192 ~66% non-escalated) from a \"202.4/590 queries\" figure that appears to reference a different run/config than the 59% figure quoted directly from the page text \u2014 this looks like an extraction-summarization artifact in the search tool's synthesis rather than a contradiction of the primary source, since the WebFetch call quoted \"59% of queries\" directly from the paper for the specific Stage 1+2 configuration at \u03bb=0.07 that matches the claim's setup.",
+      "vote": "2-1"
+    },
+    {
+      "claim": "The second-stage quality-estimation classifier (escalation trigger) recovers accuracy cheaply: on AIME it recovers 2.0 percentage points of accuracy for only 0.2 ms of additional per-token latency, and on TeleQnA it recovers 3.1 percentage points over routing alone.",
+      "source": "https://arxiv.org/html/2606.27457",
+      "quality": "primary",
+      "quote": "Stage 2 recovers 2.0% accuracy at only 0.2 ms additional cost",
+      "confidence": "high",
+      "evidence": "Fetched arxiv.org/html/2606.27457 (\"Cluster, Route, Escalate: Cascaded Framework for Cost-Aware LLM Serving,\" ADAPT Centre Trinity College Dublin + Huawei Research). The paper's actual text reads: \"Stage 2 recovers 2.0% accuracy at a cost of only 0.2 ms additional TPOT\" (AIME 2024 result \u2014 combined system 88.4% at 9.7ms TPOT vs. Stage-1-only 86.4% at 9.5ms), and \"Stage 2 recovers 3.1% accuracy over Stage 1 alone at a cost of 4.7 ms additional TPOT\" (TeleQnA: 74.3% at 23.8ms vs. Stage 1's 71.2% at 19.1ms). Both numbers in the claim (2.0pp/0.2ms on AIME; 3.1pp on TeleQnA) match the primary source verbatim in substance \u2014 the claim is a faithful paraphrase, not an overreach (it correctly does not attach the AIME 0.2ms figure to the TeleQnA result, where the actual added latency is 4.7ms). Confirmed via WebSearch that the paper exists, is current (2026), and comes from a named academic/industry research group rather than a marketing source \u2014 appropriate sourcing strength for a specific quantified benchmark claim about the authors' own system.",
+      "vote": "3-0"
+    },
+    {
+      "claim": "Per-class isotonic calibration of cascade-stage confidence scores (used to decide whether to halt or escalate to the next stage) adds a further, reliable accuracy gain on top of the cascade and fine-tuning gains \u2014 evidence that calibration quality, not just cascade depth, matters for cascade routing decisions.",
+      "source": "https://arxiv.org/pdf/2606.25871",
+      "quality": "primary",
+      "quote": "per-class isotonic calibration adds a small but reliable gain on top",
+      "confidence": "high",
+      "evidence": "Verified via two independent tool paths. (1) WebFetch of https://arxiv.org/abs/2606.25871 returned a detailed, specific summary of \"AutoRelAnnotator: Calibrated Model Cascades for Cost-Efficient Relevance Evaluation in Sponsored Search\" \u2014 a cascade that routes query-item pairs through three progressively larger fine-tuned classifiers (184M cross-encoder \u2192 LoRA 2B \u2192 LoRA 8B), where a confidence score gates whether to halt or escalate. (2) A separate WebSearch independently surfaced the same paper (title + arxiv PDF URL matching exactly) and returned the near-verbatim supporting quote: \"per-class isotonic calibration adds a small but reliable gain on top\" of the cascade's fine-tuning (~20 accuracy points) and cascading (cost-halving, accuracy-neutral) components, quantified as \"+0.6 points over the strongest calibration baseline,\" described as statistically significant, and validated in production across six use cases on 150M+ annotations. The claim under review matches this finding precisely: it correctly characterizes the gain as small-but-reliable (not overstated as large), correctly attributes it to per-class isotonic calibration of the routing/confidence signal used for halt-vs-escalate decisions, and correctly frames it as additive on top of (not a substitute for) cascade depth and fine-tuning gains. No overreach found \u2014 the claim does not inflate the magnitude or generalize beyond what the ablation shows. No contradicting evidence surfaced in search (adjacent papers on cascade calibration, e.g. UCCI arXiv:2605.18796, are consistent in spirit \u2014 isotonic calibration reliably improving cascade routing \u2014 not contradictory). Source is a specific, recent (June 2026), production-validated technical paper with a stated ablation and significance test, which is proportionate for a narrowly-scoped claim about calibration's incremental contribution (not an extraordinary or field-wide claim). Domain is search-relevance classifier cascades rather than agentic LLM orchestration specifically, but this is a fair, directly relevant example for the doctrine's \"model tiering and cascade routing\" subarea, which is scoped generally rather than agent-specific.",
+      "vote": "3-0"
+    },
+    {
+      "claim": "Self-MoA (repeated sampling from a single top-performing LLM) outperforms Mixed-MoA (aggregating outputs from multiple different LLMs) by 6.6% on AlpacaEval 2.0, and by an average of 3.8% across MMLU, CRUX, and MATH benchmarks.",
+      "source": "https://arxiv.org/html/2502.00674v1",
+      "quality": "primary",
+      "quote": "Self-MoA achieves an average of 3.8% improvement across various benchmarks, including MMLU, CRUX, and MATH",
+      "confidence": "high",
+      "evidence": "Verified directly against the primary source (arXiv 2502.00674v1, \"Rethinking Mixture-of-Agents: Is Mixing Different Large Language Models Beneficial?\"). Fetched paper content confirms: (1) AlpacaEval 2.0 \u2014 \"Self-MoA demonstrates remarkable effectiveness in this task, outperforming the Mixed-MoA baseline by 6.6 point,\" with Mixed-MoA (2-Layer) at 59.1 LC Win Rate vs Self-MoA (2-Layer + WizardLM) at 65.7 \u2014 exactly matching the claimed 6.6% figure. (2) The paper's own text states verbatim: \"Self-MoA achieves an average of 3.8% improvement across various benchmarks, including MMLU, CRUX, and MATH\" \u2014 an exact match to the claim, not a paraphrase or extrapolation. Independent WebSearch also surfaced the arXiv abstract itself using near-identical phrasing (\"Self-MoA achieves a 6.6% improvement over MoA on the AlpacaEval 2.0 benchmark, and an average of 3.8% improvement across various benchmarks, including MMLU, CRUX, and MATH\"), corroborating the figures came straight from the paper's abstract rather than a misreading. The self-MoA result also generalized: paper notes it beat all 13 Mixed-MoA configurations tested on the specialized-model benchmarks, so the comparison is not a cherry-picked single baseline. No contradicting or qualifying evidence found in search (no follow-up critique, no rebuttal). Caveat: this is an arXiv preprint (Feb 2025), not peer-reviewed, but that matches the evidence tier expected for this fast-moving sub-area and was pre-identified as a known primary source in the grounding.",
+      "vote": "3-0"
+    },
+    {
+      "claim": "On AlpacaEval 2.0, Self-MoA combined with WizardLM-2-8x22B achieves a 65.7 length-controlled win rate versus 59.1 for the best Mixed-MoA configuration, directly contradicting the assumption that mixing diverse models beats sampling one strong model.",
+      "source": "https://arxiv.org/html/2502.00674v1",
+      "quality": "primary",
+      "quote": "Self-MoA + WizardLM-2-8x22B: 65.7 LC Win Rate vs. Mixed-MoA's 59.1",
+      "confidence": "high",
+      "evidence": "Verified directly against the primary source (arxiv.org/html/2502.00674v1, \"Rethinking Mixture-of-Agents: Is Mixing Different Large Language Models Beneficial?\"). Table 1 in the paper shows \"2-Layer Self-MoA + WizardLM\" = 65.7 LC win rate on AlpacaEval 2.0, versus the \"2-Layer MoA (Wang et al.)\" mixed-model baseline = 59.1 \u2014 an exact match to the quoted numbers. Independent web search corroborates: multiple secondary summaries (rohan-paul.com, emergentmind, OpenReview listing) describe the identical 6.6-point gap and the paper's own stated conclusion that ensembling multiple samples from one strong model can outperform mixing diverse models, directly supporting the claim's framing as the paper's own headline finding (not a misread by the claim's author). The paper went through OpenReview (forum id ioprnwVrDH), giving it more credibility than a preprint-only or blog source, appropriate for a numeric benchmark claim. The claim is properly scoped to \"On AlpacaEval 2.0\" rather than over-generalizing to all settings \u2014 and the paper itself hedges elsewhere (noting scenarios where mixing still helps), so the claim doesn't overstate beyond what's quoted. Recency is fine: Feb 2025 publication, no superseding contradiction found in search. One minor imprecision: the claim's \"Mixed-MoA\" label is the paper's baseline-comparison shorthand (Wang et al.'s original MoA), not a term the paper coins verbatim as \"Mixed-MoA\" in Table 1's row name \u2014 but this is a benign paraphrase, not a misrepresentation of the number or its meaning.",
+      "vote": "3-0"
+    },
+    {
+      "claim": "The paper's statistical analysis of what drives Mixture-of-Agents performance finds output quality has a substantially stronger effect than model/output diversity, and that optimal MoA performance occurs in the high-quality, low-diversity regime -- i.e. mixing in weaker models for diversity actively hurts.",
+      "source": "https://arxiv.org/html/2502.00674v1",
+      "quality": "primary",
+      "quote": "MoA is quite sensitive to variations in quality, with optimal performance typically occurring in regions characterized by high quality and relatively low diversity.",
+      "confidence": "high",
+      "evidence": "Fetched the primary source (arxiv.org/html/2502.00674v1) directly and verified all three components of the claim against the paper's actual text, not just the supplied quote:\n\n1. Statistical analysis exists and quantifies effect sizes: the paper fits t = \u03b1\u00b7q + \u03b2\u00b7d + \u03b3 (quality vs. diversity/Vendi-score regression) and reports \u03b1 > \u03b2 across all three datasets tested (MMLU: 2.558 vs 1.841; CRUX: 4.548 vs 1.421; MATH: 4.719 vs 2.839), all p<0.001, and explicitly states \"\u03b1 is greater than \u03b2 across all three datasets. In particular, for CRUX and MATH, the gap between these two measures is even more pronounced\" \u2014 directly supporting \"substantially stronger effect,\" with the two harder-reasoning datasets showing ~3x gaps.\n\n2. Optimal high-quality/low-diversity regime: paper states \"the best performance of MoA is typically observed in the bottom right of each subplot, indicating a strong sensitivity to quality\" \u2014 matches the supplied quote and the claim.\n\n3. \"Mixing weaker models for diversity hurts\": paper explicitly states this as its causal explanation, not just an inference \u2014 \"pursuing cross-model diversity may inadvertently include low-quality models, resulting in a quality-diversity trade-off\" and \"simply aiming for greater diversity in the proposer mixture can result in lower overall quality, which may negatively impact MoA's performance.\" This is used to explain why Self-MoA (single best model repeated) beats mixed-model MoA.\n\nWebSearch turned up no contradicting or rebuttal source; results (OpenReview listing, EmergentMind summary) corroborate the same finding with no dispute. Minor honest caveat the claim omits: the paper itself notes narrow exceptions (similar-quality-high-diversity mixes yield small 0.17-0.35% gains; specialized complementary-skill mixtures can slightly beat Self-MoA) \u2014 but these are edge cases the paper itself frames as exceptions to, not refutations of, the general quality>diversity finding, so they don't undermine the claim as stated.",
+      "vote": "3-0"
+    },
+    {
+      "claim": "ModelSwitch (multi-LLM repeated sampling with consistency-based switching) matches or beats a single strong model's self-consistency sampling while using far fewer total samples \u2014 on MATH it reaches 81% accuracy with only 35 samples versus Gemini 1.5 Flash's 79.8% accuracy at 512 samples, a ~14x efficiency gain.",
+      "source": "https://arxiv.org/pdf/2504.00762",
+      "quality": "primary",
+      "quote": "achieves 81% accuracy with only 35 samples, outperforming Gemini 1.5 Flash (79.8% accuracy with 512 samples) while being 14\u00d7 more efficient",
+      "confidence": "high",
+      "evidence": "The claim is a near-verbatim quote from the paper's own Figure 1 caption: \"On MATH, ModelSwitch achieves 81% accuracy with only 35 samples, outperforming Gemini 1.5 Flash (79.8% accuracy with 512 samples) while being 14\u00d7 more efficient.\" Confirmed independently via WebSearch snippet and via WebFetch of the HTML version (arxiv.org/html/2504.00762v1), which also clarified that ModelSwitch here is a 2-model ensemble (Gemini 1.5 Flash + GPT-4o mini) switching based on consistency, and that the general finding (fewer samples needed via multi-model consistency-based switching) replicates across all six evaluated datasets (GSM8K, MATH, MathBench, MGSM, DATE, MMLU-Pro) with reported average sampling reduced to ~9-13 samples per query (34% average savings) \u2014 so the MATH/14x figure is the flagship number, not an isolated cherry-pick unsupported by the rest of the paper. The claim is correctly scoped (\"on MATH\") and does not overgeneralize the 14x figure to all benchmarks. No contradicting evidence, critique, or rebuttal was found in search. Source is a primary arXiv paper (Apr 2025, v3 exists as of search results), directly on-topic for the research question's sub-area on best-of-n/self-consistency vs multi-model cascades. Paper is ~15 months old as of the current date, which is reasonably current for this fast-moving area, and doctrine claim is appropriately hedged to the specific benchmark reported.",
+      "vote": "3-0"
+    },
+    {
+      "claim": "Averaged across six benchmark datasets (GSM8K, MATH, MathBench, MGSM, DATE, MMLU-Pro), switching sampling across several comparable weaker/cheaper LLMs cuts the total sample budget needed relative to single-model self-consistency, saving 34% of samples on average and up to 43% on GSM8K.",
+      "source": "https://arxiv.org/pdf/2504.00762",
+      "quality": "primary",
+      "quote": "ModelSwitch saves 34% samples on average, and saves up to 43% on GSM8K",
+      "confidence": "medium",
+      "evidence": "Verified directly against the primary source (arXiv 2504.00762 / AAAI 2026 paper \"Do We Truly Need So Many Samples? Multi-LLM Repeated Sampling Efficiently Scales Test-Time Compute\"). The paper's HTML full text contains the near-verbatim sentence: \"Overall, ModelSwitch saves 34% samples on average, and saves up to 43% on GSM8K and 41% on MGSM, respectively,\" in Section 4.2, with the six datasets matching exactly: GSM8K, MATH, MathBench, MGSM, DATE, MMLU-Pro (500-1319 examples each). The comparison is against single-model self-consistency using the same nominal budget K=16: single-model SC always spends the full 16 samples, while ModelSwitch's consistency-based early-stopping across models cuts the average actual sample count to 9.2-13.4 (i.e., ~66% of budget = the 34% average saving), while simultaneously improving accuracy over either individual model's self-consistency \u2014 so the saving is not bought at an accuracy cost. Google/web search confirms this is a peer-reviewed AAAI paper (not a preprint-only or marketing claim), with a public GitHub repo, and no contradicting reproduction or critique was found.\n\nOne caveat worth flagging: the headline 34%/43% figures specifically come from switching between exactly two models (GPT-4o mini and Gemini 1.5 Flash) in the main experiment, not \"several\" (3+) models as the claim's phrasing implies \u2014 the paper does test 3-6 model combinations in ablations but the flagship saving numbers are from a pair. This is a minor wording imprecision, not a factual error, since the paper does frame its general method as \"incorporating multiple models\" and explicitly notes gains are best with \"few, comparable\" models rather than many. The dataset list, the percentage figures, the comparison basis (vs. single-model self-consistency), and the accuracy-not-sacrificed framing are all accurate and well-supported by the primary, peer-reviewed source.",
+      "vote": "3-0"
+    },
+    {
+      "claim": "On MMLU-Pro, the multi-model consistency-switching approach (63.2% accuracy, beating the best single LLM by 10.2 points) substantially outperforms established multi-agent orchestration baselines \u2014 multi-agent debate (MAD, 45%), AgentVerse (38%), ChatEval (43%), and Mixture-of-Agents (MOA, 50.8%) \u2014 suggesting simple cross-model sampling/voting can beat heavier debate-style orchestration topologies on this task class.",
+      "source": "https://arxiv.org/pdf/2504.00762",
+      "quality": "primary",
+      "quote": "ModelSwitch achieves an impressive 63.2% accuracy...surpassing the best single LLM by 10.2 points",
+      "confidence": "medium",
+      "evidence": "Verified via two independent fetches (ar5iv HTML extraction + WebSearch aggregation) of arXiv 2504.00762 (\"Do We Truly Need So Many Samples? Multi-LLM Repeated Sampling Efficiently Scales Test-Time Compute,\" published in AAAI 2026 Proceedings \u2014 peer-reviewed, not just a preprint). All cited figures match exactly: ModelSwitch 63.2% on MMLU-Pro vs. best single LLM 53% (10.2-pt gap confirmed), MAD 45%, AgentVerse 38%, ChatEval 43%, MOA 50.8%, all evaluated under a stated \"unified sampling budget\" of 15 samples for fairness. The claim's inference (\"simple cross-model sampling/voting can beat heavier debate-style orchestration on this task class\") is independently corroborated by separate literature found via search \u2014 notably arXiv 2502.08788 (\"Stop Overvaluing Multi-Agent Debate \u2014 We Must Rethink Evaluation and Embrace Model Heterogeneity\"), which reports that MAD \"often fails to outperform simple single-agent baselines such as Chain-of-Thought and Self-Consistency, even when consuming significantly more inference-time computation\" and that outcomes are \"highly task- and dataset-dependent.\" This is a recognized pattern in the field, not an isolated/cherry-picked result. Two caveats keep confidence at medium rather than high: (1) the baseline numbers for MAD/AgentVerse/ChatEval/MOA were reproduced by the ModelSwitch paper's own authors rather than taken from each method's original paper, which is a known source of favorable-to-self bias in ML benchmark comparisons; (2) the claim cites only the weaker single-LLM MAD variant (45%) and omits the paper's own multi-LLM MAD variant (50.2%, much closer to MOA) \u2014 though even against that stronger number, \"substantially outperforms\" still roughly holds (63.2% vs 50.2%). The claim is appropriately scoped (\"on this task class,\" i.e., MMLU-Pro-style multiple-choice knowledge tasks) rather than over-generalized to all agentic task shapes.",
+      "vote": "2-1"
+    },
+    {
+      "claim": "The root cause of multi-agent failure is framed as dispersed decision-making: context isn't shared thoroughly enough between agents, and independent actions encode implicit decisions that conflict when made in parallel.",
+      "source": "https://cognition.com/blog/dont-build-multi-agents",
+      "quality": "blog",
+      "quote": "Actions carry implicit decisions, and conflicting decisions carry bad results.",
+      "confidence": "high",
+      "evidence": "Verified against the Cognition \"Don't Build Multi-Agents\" post directly (fetched cognition.com/blog/dont-build-multi-agents) and corroborating secondary summaries (Jason Zhou's tweet thread, Jason Liu's \"Why Cognition does not use multi-agent systems\"). The post's two core principles map exactly onto the claim's two clauses: Principle 1 = \"Share context, and share full agent traces, not just individual messages\" (sub-agents otherwise have no context of each other's work \u2014 supports \"context isn't shared thoroughly enough between agents\"); Principle 2 = \"Actions carry implicit decisions, and conflicting decisions carry bad results\" / \"Edits carry implicit judgments on style, code patterns, and edge case handling. If parallel agents write at the same time, those judgments split and the deliverables become fragile\" (supports \"independent actions encode implicit decisions that conflict when made in parallel\" \u2014 this is the exact supplied quote). The claim's synthesis of these two principles into one \"dispersed decision-making\" framing is an accurate, non-overreaching paraphrase of the source's actual argument, not a misread. Caveat: Cognition later published a follow-up (\"Multi-Agents: What's Actually Working,\" ~10 months later) softening the blanket \"don't build\" prescription to allow a narrower pattern (agents contribute intelligence, writes stay single-threaded) \u2014 but this follow-up doesn't contradict the root-cause diagnosis itself (implicit-decision conflicts in parallel writes), it just narrows the prescriptive conclusion. The claim under review only characterizes the failure-mode diagnosis, correctly attributed as this source's framing (\"is framed as\"), not asserted as universal fact, and the source type (blog) matches the claim's own citation and epistemic weight.",
+      "vote": "2-1"
+    },
+    {
+      "claim": "Cognition argues multi-agent systems work well only in a specific narrower configuration: multiple agents contribute intelligence/analysis to a task, but a single agent retains sole write/action authority (no concurrent multi-agent writes).",
+      "source": "https://cognition.com/blog/multi-agents-working",
+      "quality": "blog",
+      "quote": "multi-agent systems work best today when writes stay single-threaded and the additional agents contribute intelligence rather than actions.",
+      "confidence": "high",
+      "evidence": "Verified via WebFetch on the primary source (cognition.com/blog/multi-agents-working) and cross-checked against two independent secondary sources (a Note.com analysis explicitly titled \"The Single Writer Principle from Cognition,\" and a separate WebSearch summary of the same article). All three independently reproduce the exact quote given: \"Multi-agent systems work best today when writes stay single-threaded and the additional agents contribute intelligence rather than actions.\" The secondary sources elaborate consistently with the claim: \"One agent handles all code modifications and commits... owns the writing decisions\"; additional agents \"provide analysis, review, and guidance... Do not directly modify code themselves.\" Cognition frames this as their \"Single Writer Principle,\" with a stated rationale (\"Actions carry implicit decisions\" that fragment/conflict if multiple agents write concurrently \u2014 illustrated with a \"three chefs salting the same pot\" analogy) and cites three approved patterns (Code-Review-Loop, Smart Friend, map-reduce-and-manage/manager-child delegation) that all preserve unified write authority while distributing only intelligence/analysis across agents. This is a primary source (Cognition's own engineering blog, an appropriate source for a claim about what Cognition itself argues) and appears current \u2014 it's an explicit 2026 revision/successor to Cognition's earlier 2025 \"Don't Build Multi-Agents\" essay, not outdated. No credible contradicting source surfaced; this reading is corroborated rather than disputed. The claim's characterization (\"single agent retains sole write/action authority, no concurrent multi-agent writes\") accurately matches the source's own framing, not an overreach.",
+      "vote": "3-0"
+    },
+    {
+      "claim": "The article recommends defaulting to the simplest single-agent pattern and escalating to multi-agent topologies only when measurement shows a single agent's context window, parallelism needs, or specialization gains justify the added coordination cost.",
+      "source": "https://www.glukhov.org/ai-systems/architecture/multi-agent-orchestration-patterns/",
+      "quality": "blog",
+      "quote": "Start with the simplest pattern that fits your problem. Most teams over-architect toward multi-agent topologies long before the single-agent approach has been genuinely exhausted.",
+      "confidence": "medium",
+      "evidence": "Two independent checks corroborate the claim. (1) WebFetch of the article itself surfaces the exact supporting quote given in the claim (\"Start with the simplest pattern that fits your problem. Most teams over-architect toward multi-agent topologies long before the single-agent approach has been genuinely exhausted.\") plus a second, more decisive line the claim is actually built on: \"Escalate to multi-agent only when measurement says you must,\" alongside explicit named criteria \u2014 context window limitations, parallelism requirements (wall-clock constraints), and specialization gains (measurable quality improvements) \u2014 which map directly onto the claim's \"context window, parallelism needs, or specialization gains justify the added coordination cost.\" (2) An independent WebSearch snippet (not sourced from the same fetch) returns the same article and paraphrases the identical gating principle as \"Escalate to multi-agent only when measurement demands it,\" confirming this isn't a single-tool hallucination. The claim is not an overreach of the cited quote \u2014 it accurately synthesizes the article's stated decision rule, which goes beyond the one sentence quoted in the task but is present in the same piece. Content is generic architectural doctrine (not a time-sensitive benchmark claim), consistent with independently known counter-position sources (e.g., Cognition's \"Don't Build Multi-Agents,\" Anthropic's own reported multi-agent token/coordination overhead), so nothing found contradicts it. Caveat: source is an individual technical blog rather than a primary/peer-reviewed source, which is adequate for a general doctrine-level claim like this one but would not be sufficient if the claim were quantitative or extraordinary.",
+      "vote": "3-0"
+    }
+  ],
+  "refuted": [
+    {
+      "claim": "Model tiering across agents is recommended as a cost-control lever: assign each agent a model matched to task complexity, since classification/extraction/formatting subtasks can use smaller, cheaper models without quality loss.",
+      "vote": "0-3",
+      "source": "https://learn.microsoft.com/en-us/azure/architecture/ai-ml/guide/ai-agent-design-patterns"
+    },
+    {
+      "claim": "A swarm of only open-source (cheaper) models, combined via this fan-out+aggregation architecture, beats a single top-tier proprietary model (GPT-4 Omni) on a standard human-preference benchmark by a large margin.",
+      "vote": "0-3",
+      "source": "https://proceedings.iclr.cc/paper_files/paper/2025/file/5434be94e82c54327bb9dcaf7fca52b6-Paper-Conference.pdf"
+    },
+    {
+      "claim": "Aggregation mode (running parallel teams to completion and selecting/combining the best of their diverse solutions, i.e. a best-of-k pattern) improves task completion rate over a single-agent baseline on the GAIA benchmark, but the accuracy gain is small relative to the cost paid: only 3 extra solved tasks out of 53 at difficulty level 1, 5 extra out of 86 at level 2, and 1 extra at level 3, while costing roughly 2.5x-3.4x the baseline.",
+      "vote": "1-2",
+      "source": "https://arxiv.org/pdf/2507.08944"
+    },
+    {
+      "claim": "FrugalGPT's LLM cascade strategy routes queries sequentially through multiple LLMs, starting with cheap models and only escalating to expensive ones when the cheaper model's response is judged insufficient \u2014 directly instantiating the 'N-cheap-samples/cascade beats one expensive call' pattern the doctrine needs.",
+      "vote": "0-3",
+      "source": "https://ar5iv.labs.arxiv.org/html/2305.05176"
+    },
+    {
+      "claim": "A calibrated model cascade that routes queries through progressively larger fine-tuned classifiers is approximately accuracy-neutral relative to using the largest model alone, while cutting compute cost roughly in half \u2014 direct quantified evidence that cascade routing beats a single expensive model call on cost with no quality loss.",
+      "vote": "0-3",
+      "source": "https://arxiv.org/pdf/2606.25871"
+    },
+    {
+      "claim": "Splitting a single task into parallel subagents without shared context produces incompatible outputs \u2014 demonstrated concretely: a 'build a Flappy Bird clone' task split into a background subagent and a bird subagent yielded a Super Mario-style background and a bird that neither looks nor moves like a Flappy Bird asset.",
+      "vote": "0-3",
+      "source": "https://cognition.com/blog/dont-build-multi-agents"
+    },
+    {
+      "claim": "The documentation recommends deploying sub-agents once context utilization approaches 60%, targeting a 40-60% utilization band to preserve reasoning quality.",
+      "vote": "0-3",
+      "source": "https://deepwiki.com/humanlayer/advanced-context-engineering-for-coding-agents/4.3-sub-agents-and-context-isolation"
+    },
+    {
+      "claim": "Token cost multipliers vary by orchestration topology, with Fan-Out/Fan-In costing 4-5x a single agent and Swarm topologies costing 2-10x.",
+      "vote": "0-3",
+      "source": "https://www.glukhov.org/ai-systems/architecture/multi-agent-orchestration-patterns/"
+    },
+    {
+      "claim": "A multi-agent workflow that costs $0.50 in testing can scale to $50,000/month in production at 100K executions.",
+      "vote": "0-3",
+      "source": "https://www.glukhov.org/ai-systems/architecture/multi-agent-orchestration-patterns/"
+    },
+    {
+      "claim": "40% of multi-agent pilots fail within six months of production deployment.",
+      "vote": "0-3",
+      "source": "https://www.glukhov.org/ai-systems/architecture/multi-agent-orchestration-patterns/"
+    },
+    {
+      "claim": "A Princeton NLP study found a single agent matched or outperformed multi-agent systems on 64% of benchmarked tasks when given the same tools and context, with multi-agent adding only 2.1 percentage points of accuracy at roughly double the cost.",
+      "vote": "0-3",
+      "source": "https://beam.ai/agentic-insights/multi-agent-orchestration-patterns-production"
+    },
+    {
+      "claim": "A three-agent sequential pipeline consumes roughly 2.9x the tokens of an equivalent single-agent approach (29,000 vs 10,000 tokens).",
+      "vote": "0-3",
+      "source": "https://beam.ai/agentic-insights/multi-agent-orchestration-patterns-production"
+    },
+    {
+      "claim": "Using a capable model for the orchestrator and cheaper task-specific models for workers in an orchestrator-worker topology cuts costs 40-60% versus using capable models throughout.",
+      "vote": "0-3",
+      "source": "https://beam.ai/agentic-insights/multi-agent-orchestration-patterns-production"
+    },
+    {
+      "claim": "The supervisor/hierarchical-delegation pattern is presented as the default recommended topology, with cost overhead scaling roughly linearly as (N+1)x the single-call cost (N = number of subagents), and swarm should only be adopted once concurrent task population exceeds 50 agents.",
+      "vote": "0-3",
+      "source": "https://www.digitalapplied.com/blog/multi-agent-orchestration-5-patterns-that-work"
+    },
+    {
+      "claim": "The fan-out (parallel scatter-gather) pattern is contraindicated whenever subtasks have dependencies on each other \u2014 it only pays off for genuinely independent branches \u2014 while pipeline is contraindicated when stages are actually parallelizable.",
+      "vote": "1-2",
+      "source": "https://www.digitalapplied.com/blog/multi-agent-orchestration-5-patterns-that-work"
+    }
+  ],
+  "sources": [
+    {
+      "url": "https://www.glukhov.org/ai-systems/architecture/multi-agent-orchestration-patterns/",
+      "quality": "blog",
+      "angle": "orchestration-topologies",
+      "claimCount": 5
+    },
+    {
+      "url": "https://beam.ai/agentic-insights/multi-agent-orchestration-patterns-production",
+      "quality": "blog",
+      "angle": "orchestration-topologies",
+      "claimCount": 5
+    },
+    {
+      "url": "https://learn.microsoft.com/en-us/azure/architecture/ai-ml/guide/ai-agent-design-patterns",
+      "quality": "primary",
+      "angle": "orchestration-topologies",
+      "claimCount": 5
+    },
+    {
+      "url": "https://arxiv.org/pdf/2507.08944",
+      "quality": "primary",
+      "angle": "orchestration-topologies",
+      "claimCount": 4
+    },
+    {
+      "url": "https://www.digitalapplied.com/blog/multi-agent-orchestration-5-patterns-that-work",
+      "quality": "blog",
+      "angle": "orchestration-topologies",
+      "claimCount": 5
+    },
+    {
+      "url": "https://www.runpod.io/articles/guides/multi-agent-orchestration-and-architecture",
+      "quality": "blog",
+      "angle": "orchestration-topologies",
+      "claimCount": 5
+    },
+    {
+      "url": "https://www.anthropic.com/engineering/built-multi-agent-research-system",
+      "quality": "primary",
+      "angle": "parallelism-economics",
+      "claimCount": 5
+    },
+    {
+      "url": "https://simonwillison.net/2025/Jun/14/multi-agent-research-system/",
+      "quality": "blog",
+      "angle": "parallelism-economics",
+      "claimCount": 5
+    },
+    {
+      "url": "https://arxiv.org/pdf/2305.05176",
+      "quality": "primary",
+      "angle": "cascades-and-tiering",
+      "claimCount": 5
+    },
+    {
+      "url": "https://ar5iv.labs.arxiv.org/html/2305.05176",
+      "quality": "primary",
+      "angle": "cascades-and-tiering",
+      "claimCount": 4
+    },
+    {
+      "url": "https://www.tmls.nyc/research/model-routing-cascades",
+      "quality": "blog",
+      "angle": "cascades-and-tiering",
+      "claimCount": 5
+    },
+    {
+      "url": "https://arxiv.org/html/2606.27457",
+      "quality": "primary",
+      "angle": "cascades-and-tiering",
+      "claimCount": 5
+    },
+    {
+      "url": "https://arxiv.org/pdf/2606.25871",
+      "quality": "primary",
+      "angle": "cascades-and-tiering",
+      "claimCount": 4
+    },
+    {
+      "url": "https://leanlm.ai/blog/llm-model-routing",
+      "quality": "blog",
+      "angle": "cascades-and-tiering",
+      "claimCount": 4
+    },
+    {
+      "url": "https://proceedings.iclr.cc/paper_files/paper/2025/file/5434be94e82c54327bb9dcaf7fca52b6-Paper-Conference.pdf",
+      "quality": "primary",
+      "angle": "cheap-swarms-vs-strong-model",
+      "claimCount": 5
+    },
+    {
+      "url": "https://arxiv.org/html/2502.00674v1",
+      "quality": "primary",
+      "angle": "cheap-swarms-vs-strong-model",
+      "claimCount": 5
+    },
+    {
+      "url": "https://arxiv.org/pdf/2504.00762",
+      "quality": "primary",
+      "angle": "cheap-swarms-vs-strong-model",
+      "claimCount": 4
+    },
+    {
+      "url": "https://cognition.com/blog/dont-build-multi-agents",
+      "quality": "blog",
+      "angle": "contrarian-single-agent",
+      "claimCount": 5
+    },
+    {
+      "url": "https://cognition.com/blog/multi-agents-working",
+      "quality": "blog",
+      "angle": "contrarian-single-agent",
+      "claimCount": 5
+    },
+    {
+      "url": "https://www.ctol.digital/news/ai-leaders-clash-agent-architecture-cognition-anthropic-strategies/",
+      "quality": "unreliable",
+      "angle": "contrarian-single-agent",
+      "claimCount": 0
+    },
+    {
+      "url": "https://deepwiki.com/humanlayer/advanced-context-engineering-for-coding-agents/4.3-sub-agents-and-context-isolation",
+      "quality": "blog",
+      "angle": "subagent-selection-criteria",
+      "claimCount": 5
+    },
+    {
+      "url": "https://agentpatterns.ai/multi-agent/sub-agents-fan-out/",
+      "quality": "blog",
+      "angle": "subagent-selection-criteria",
+      "claimCount": 5
+    },
+    {
+      "url": "https://www.mindstudio.ai/blog/claude-code-sub-agents-explained",
+      "quality": "blog",
+      "angle": "subagent-selection-criteria",
+      "claimCount": 5
+    },
+    {
+      "url": "https://www.builder.io/blog/subagents",
+      "quality": "blog",
+      "angle": "subagent-selection-criteria",
+      "claimCount": 5
+    },
+    {
+      "url": "https://docs.langchain.com/oss/python/deepagents/subagents",
+      "quality": "primary",
+      "angle": "subagent-selection-criteria",
+      "claimCount": 4
+    },
+    {
+      "url": "https://arxiv.org/pdf/2607.00151",
+      "quality": "primary",
+      "angle": "subagent-selection-criteria",
+      "claimCount": 3
+    }
+  ],
+  "stats": {
+    "angles": 6,
+    "sourcesFetched": 26,
+    "claimsExtracted": 117,
+    "claimsVerified": 45,
+    "confirmed": 30,
+    "killed": 15,
+    "urlDupes": 0,
+    "budgetDropped": 10,
+    "agentCalls": 169,
+    "afterSynthesis": 11
+  }
+}

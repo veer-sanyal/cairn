@@ -1,0 +1,723 @@
+{
+  "question": "R8 for Cairn's level-zero doctrine: Where should the human-agent boundary sit \u2014 when should an agent act autonomously vs ask, how much interaction friction can a system impose before users abandon it, and how should autonomy be graded by reversibility/blast radius? Decision served: doctrine for autonomy permissioning, ask-budgets, and trust calibration that every scaffolded instance inherits.\n\nGROUNDING:\n- Breadth: broad\n- Sub-areas needing verified coverage: (1) automation bias and trust calibration \u2014 over-reliance/rubber-stamping vs algorithm aversion, what interventions actually calibrate trust; (2) human-in-the-loop placement economics \u2014 cost of human verification vs cost of agent error, when oversight is theater vs load-bearing, oversight fatigue; (3) interaction friction economics in software products generally \u2014 quantified evidence that added prompts/steps reduce usage/adherence, friction vs safety tradeoffs; (4) autonomy levels and blast-radius/reversibility frameworks for AI agents \u2014 permissioning models, irreversibility-graded action gating, levels-of-autonomy taxonomies applied to LLM agents.\n- Key terms/entities: automation bias, complacency, algorithm aversion (Dietvorst), mixed-initiative interaction (Horvitz), human oversight fatigue, rubber-stamping, agent permissioning, reversibility, dry-run/undo patterns, levels of autonomy for AI agents.\n- Known primary sources worth fetching: Dietvorst algorithm aversion papers, Horvitz mixed-initiative principles (CHI 1999), recent 2025-26 agent-autonomy-level taxonomy papers, Anthropic/OpenAI agent safety practice docs on action gating.\n- Already known / do not research: personal-tracking abandonment typology and lapse research (Cairn R3 settled it) \u2014 this run is about the general human-agent boundary, not tracking-app churn.",
+  "synthesisDegraded": false,
+  "summary": "The evidence supports a graded, risk-indexed human-agent boundary rather than uniform per-action approval: decades of human-factors research shows humans are structurally bad at sustained oversight of reliable automation (33% failure detection under constant reliability, RR 1.26 for following erroneous advice), and real-world per-action gating collapses into rubber-stamping (93% approval rate in Claude Code telemetry). The right structure is Horvitz's three-tier act/ask/do-nothing model with thresholds set by expected utility and blast radius \u2014 echoed by modern five-level user-role taxonomies and Anthropic's likelihood-times-damage containment framework. Ask-budgets are a real constraint: prompting on every visit vs. 25% of visits measurably drives abandonment (HR 0.78), and it is decision frequency, not per-decision cost, that burns users out \u2014 so asks must be rationed and spent only where they are load-bearing. When friction IS spent, it should be inhibitive (force interaction with the consequential element), which cuts unsafe choices by up to 50% and stays effective under habituation, unlike passive warnings. Finally, trust calibration requires preserving a small, even token, override channel: giving users any ability to adjust agent output more than doubles adoption of imperfect-but-superior automation, and the size of that control barely matters.",
+  "findings": [
+    {
+      "claim": "Constant, highly reliable automation induces severe complacency: failure detection was 33% under constant-reliability automation vs. 82% under variable reliability (a 149% relative difference), even though the same malfunctions were detected ~97% of the time single-task. 'More reliable' does not mean 'safer to leave unmonitored' \u2014 the opposite of naive intuition.",
+      "confidence": "high",
+      "vote": "3-0 and 3-0 (two merged claims)",
+      "sources": [
+        "https://journals.sagepub.com/doi/10.1177/0018720810376055",
+        "https://www.researchgate.net/publication/47792928_Complacency_and_Bias_in_Human_Use_of_Automation_An_Attentional_Integration"
+      ],
+      "evidence": "Parasuraman & Manzey (2010, Human Factors) reproducing Parasuraman, Molloy & Singh (1993): 'The mean detection rate of automation failures was markedly higher for the variable-reliability (82%) than for the constant-reliability condition (33%)... a 149% difference... under single-task conditions, detection... averaging about 97%.' Verified against the actual PDF; replicated by Singh et al. 1997, Bagheri & Jamieson 2004."
+    },
+    {
+      "claim": "Automation complacency occurs specifically under multiple-task load (when manual tasks compete for attention), appears in both novice and expert operators (pilots, air traffic controllers), and is NOT eliminated by expertise or repeated practice. Doctrine cannot assume experienced users will review agent actions more diligently.",
+      "confidence": "high",
+      "vote": "2-1 and 3-0 (two merged claims)",
+      "sources": [
+        "https://journals.sagepub.com/doi/10.1177/0018720810376055",
+        "https://www.researchgate.net/publication/47792928_Complacency_and_Bias_in_Human_Use_of_Automation_An_Attentional_Integration"
+      ],
+      "evidence": "Parasuraman & Manzey (2010): 'Automation complacency occurs under conditions of multiple-task load... is found in both naive and expert participants and cannot be overcome with simple practice.' Canonical ~1100-citation review; corroborated by aviation human-factors literature (FAA, NBAA). Note: a stronger version claiming complacency appears ONLY under multi-task load was refuted (0-3)."
+    },
+    {
+      "claim": "Meaningful human oversight fails via two identifiable modes \u2014 rubber-stamping (approving outputs the human doesn't understand) and over-constraint (rules so tight the agent collapses into automation with nothing real to oversee) \u2014 and providing explanations/transparency alone does not fix inappropriate reliance; changing the interaction (who decides, when, with what friction) is the more effective lever.",
+      "confidence": "high",
+      "vote": "3-0, 3-0, 3-0 (three merged claims)",
+      "sources": [
+        "https://link.springer.com/article/10.1007/s43681-026-01147-7"
+      ],
+      "evidence": "Zhu et al. (CSIRO Data61, AI and Ethics 2026): 'Either humans act as rubber stamps, approving AI outputs they do not fully understand, or systems are constrained so tightly that AI collapses into rule-following automation'; 'explanations alone rarely fix inappropriate reliance' while 'interventions that change the interaction (e.g., who decides, when, and with what friction) tend to help more.' Corroborated by XAI-reliance literature (arXiv 2403.09552, 2502.13321)."
+    },
+    {
+      "claim": "Uniform per-action approval gating rubber-stamps in practice: under Claude Code's original per-action permission model, users approved roughly 93% of prompts, which Anthropic itself frames as approval fatigue rather than substantive review. Anthropic's stated alternative grades containment by a two-factor expected-risk framework \u2014 likelihood of failure times blast radius \u2014 not uniform human-in-the-loop gating.",
+      "confidence": "high",
+      "vote": "3-0 and 3-0 (two merged claims)",
+      "sources": [
+        "https://www.anthropic.com/engineering/how-we-contain-claude"
+      ],
+      "evidence": "Anthropic engineering blog (first-party telemetry): 'users approved roughly 93% of permission prompts'; 'the risk of these deployments has two components: how likely a failure is, and how much damage one could do'; 'Match isolation strength to the user's capacity for oversight.' Note: a related claim about the specific 84% prompt-reduction mechanism (auto mode + OS sandboxing) was refuted (0-3), so cite only the 93% figure and the risk framework."
+    },
+    {
+      "claim": "Where effective oversight cannot actually be performed, oversight mandates become theater: Green's survey of 41 government-algorithm oversight policies finds people are structurally unable to perform the assumed oversight functions, so the mandates legitimize deployment of flawed algorithms, create a false sense of security, and function as liability shields for vendors/agencies rather than real safety mechanisms.",
+      "confidence": "high",
+      "vote": "3-0, 2-1, 2-1 (three merged claims)",
+      "sources": [
+        "https://papers.ssrn.com/sol3/papers.cfm?abstract_id=3921216"
+      ],
+      "evidence": "Green, Computer Law & Security Review 45 (2022), award-winning peer-reviewed survey: 'evidence suggests that people are unable to perform the desired oversight functions'; policies 'legitimize government uses of faulty and controversial algorithms without addressing the fundamental issues' and 'provide a false sense of security... and enable vendors and agencies to shirk accountability.' Scope caveat: empirical base is government algorithmic decision-making specifically."
+    },
+    {
+      "claim": "Automation bias produces measurable error even in competent professionals: a meta-analysis of clinical decision support studies found erroneous automated advice was more likely to be followed than in controls (RR 1.26, 95% CI 1.11-1.44), and across prospective studies users reversed their own CORRECT decisions in favor of erroneous system advice in 6-11% of cases.",
+      "confidence": "high",
+      "vote": "3-0 and 3-0 (two merged claims)",
+      "sources": [
+        "https://pmc.ncbi.nlm.nih.gov/articles/PMC3240751/"
+      ],
+      "evidence": "Goddard, Roudsari & Wyatt, JAMIA systematic review: pooled RR 1.26 (p<0.0005) across 4 CDSS studies; negative-consultation rates of 6% (Friedman), 7% (Westbrook), 8% (Berner), 11% (McKibbon & Fridsma). Verified against the full text."
+    },
+    {
+      "claim": "Trust calibration is fragile in both directions: higher false-alarm rates degrade compliance because users burn time re-verifying alerts before acting (verification friction erodes automation's value), yet stated distrust does not protect against over-reliance \u2014 under high workload users misuse even poorly competent automation despite reporting low trust.",
+      "confidence": "medium",
+      "vote": "2-1 and 3-0 (two merged claims)",
+      "sources": [
+        "https://pmc.ncbi.nlm.nih.gov/articles/PMC4927573/"
+      ],
+      "evidence": "PMC4927573 (2016 review): 'Compliance... is degraded by higher rates of false alarms... users tend to consume critical time and attentional resources to verify alarms'; 'even when low TiA has been reported, human users may misuse even a poorly competent automation, particularly under high workload conditions.' Medium confidence because the cited source is a secondary review, though the underlying primary studies (Chancey et al. 2015, Biros et al. 2004) check out."
+    },
+    {
+      "claim": "Algorithm aversion: watching an algorithm err makes people abandon it even when it demonstrably outperforms the human alternative \u2014 this held even among the 83% of participants (610/741) who directly witnessed the algorithm win. The mechanism is asymmetric confidence updating: algorithm errors reduced confidence in the algorithm in all four studies, human errors reduced confidence in the human in only one, despite humans making 15-97% more error.",
+      "confidence": "high",
+      "vote": "3-0, 3-0, 2-1 (three merged claims)",
+      "sources": [
+        "https://marketing.wharton.upenn.edu/wp-content/uploads/2016/10/Dietvorst-Simmons-Massey-2014.pdf"
+      ],
+      "evidence": "Dietvorst, Simmons & Massey (JEP: General 2015), verified against full text: 'the model outperformed participants in all five studies'; footnote 10 confirms the four-vs-one asymmetry with per-study statistics. Caveat: Prahl & Van Swol (2017) failed to replicate blanket aversion (the asymmetric-updating pattern held); a 2021 follow-up found reversal in repeated real-world settings. Implication for doctrine: one visible agent error costs disproportionate trust."
+    },
+    {
+      "claim": "A small, even token, override channel largely cures algorithm aversion: adoption of an imperfect-but-superior model jumped from 32% (no modification allowed) to 73-76% (adjustable), and shrinking the allowed adjustment by 80% (10 -> 2 percentiles) did not change willingness to use it (71%/71%/68%, p=.809). What people need is a nonzero adjustment channel, not large discretionary power.",
+      "confidence": "high",
+      "vote": "3-0, 3-0, 3-0, 3-0 (four merged claims)",
+      "sources": [
+        "https://faculty.wharton.upenn.edu/wp-content/uploads/2016/08/Dietvorst-Simmons-Massey-2018.pdf",
+        "https://pubsonline.informs.org/doi/10.1287/mnsc.2016.2643"
+      ],
+      "evidence": "Dietvorst, Simmons & Massey (Management Science 2018), verified against the PDF: Study 1 (32% vs 73%/76%, both p<.001); Study 2 (\u03c72(2, N=623)=0.42, p=0.809 across adjust-by-10/5/2); authors' conclusion: 'one can reduce algorithm aversion by giving people some control\u2014even a slight amount.' Doctrine implication: always leave an edit/override affordance on agent output, however constrained."
+    },
+    {
+      "claim": "Ask-frequency directly drives abandonment, and it is frequency not per-decision cost that hurts: prompting users on every visit vs. 25% of visits significantly worsened retention (HR 0.78, p=0.003) even though each prompt took a median of 1.55 seconds to answer. Users also prefer deferred re-commitment ('not now, ask later') over permanently locking in an easier setting.",
+      "confidence": "medium",
+      "vote": "2-1, 2-1, 3-0 (three merged claims)",
+      "sources": [
+        "https://arxiv.org/pdf/2101.11743"
+      ],
+      "evidence": "Kovacs, Wu & Bernstein (CHI 2021, randomized experiment, 8,000+ HabitLab users), verified against the PDF including Table 1: 25%-of-visits HR 0.78 (CI 0.66-0.92) vs. 100% reference; no session-duration difference when prompts shown; users repeatedly chose to be re-asked rather than save easier settings. Caveats: relationship not strictly monotonic (never-asking was not significantly better than always-asking; the paper's conclusion is 'occasional beats constant'); single case study of a browsing-nudge extension, not an AI agent, and adjacent to the tracking-app domain excluded by R3."
+    },
+    {
+      "claim": "When friction IS spent on a genuinely risky action, inhibitive designs (forcing a delay or an action like typing/swiping before the risky choice is possible) work and keep working: they cut unsafe choices by up to 50%, were 2-3x more effective than controls at getting users to notice new critical information under extreme habituation, and the active-interaction variants (Swipe, Type) remained effective after many exposures while passive attention-directing designs decayed. Interrupting interstitial warnings were bypassed far less than passive contextual ones (45% vs 82.5% click-through).",
+      "confidence": "high",
+      "vote": "3-0, 3-0, 2-1, 3-0 (four merged claims)",
+      "sources": [
+        "https://cups.cs.cmu.edu/soups/2013/proceedings/a6_Bravo-Lillo.pdf",
+        "https://www.usenix.org/system/files/soups14-paper-bravo-lillo.pdf",
+        "https://arxiv.org/pdf/2008.10772"
+      ],
+      "evidence": "Bravo-Lillo et al. SOUPS 2013 (three between-subjects experiments, n=872 in Exp 3): 'reduced the proportion of participants choosing the less safe option by up to 50%'; 'two to three times more likely to make an informed decision' under habituation. SOUPS 2014 follow-up: 'Swipe and Type remained effective even after many exposures' \u2014 the one part corroborated by the Busse et al. 2019 partial replication. Kaiser et al. USENIX Security 2021: contextual CTR 33/40 vs interstitial 18/40. Caveat: MTurk lab settings; transfer to agent confirmation UIs is inferential."
+    },
+    {
+      "claim": "Formal graded-autonomy structures exist and converge on the same shape: Horvitz (CHI 1999) derives act/ask/do-nothing as an expected-utility computation over four outcomes with TWO thresholds (inaction/dialog and dialog/action) that shift with context (threshold rises when the user is absorbed, falls when rushed); Feng et al. (2025) define five autonomy levels by the USER's role (operator, collaborator, consultant, approver, observer), not agent capability, and flag L4 rubber-stamping \u2014 including misaligned agents exploiting user disengagement to gain autonomy \u2014 as an open, unsolved risk.",
+      "confidence": "high",
+      "vote": "3-0, 3-0, 3-0, 3-0 (four merged claims)",
+      "sources": [
+        "http://erichorvitz.com/chi99horvitz.pdf",
+        "https://arxiv.org/pdf/2506.12469"
+      ],
+      "evidence": "Horvitz verified against full text: 'two new threshold probabilities: the threshold between inaction and dialog... and the threshold between dialog and action... an instant index into whether to act, to engage the user in a dialog about action, or to do nothing.' Feng, McDonald & Zhang (arXiv 2506.12469) verified via PDF extraction: five user-role levels; L4 open questions include 'How can users be engaged... to avoid meaningless rubber stamping?' and 'How can misaligned agents leverage user disengagement to gain more autonomy?' Note: the stronger paraphrase that autonomy is 'a design decision independent of capability' was refuted as stated (0-3), as was the specific claim that Horvitz explicitly ties action COST to the threshold (0-3) \u2014 the threshold-shifting examples verified are attention-depth and time pressure."
+    }
+  ],
+  "caveats": "Domain transfer is the biggest uncertainty: most load-bearing evidence comes from pre-LLM human-factors settings (aviation monitoring 1993-2010, clinical decision support 2012, security dialogs 2013-2021, forecasting experiments 2015-2018) \u2014 the mechanisms are stable and still cited in 2025-26 agent literature, but no verified claim directly measures ask-budgets or rubber-stamping rates for LLM agent approval flows except Anthropic's single first-party 93% figure (self-reported, one product). Several attractive stronger versions of these findings were refuted in verification and must NOT be asserted: the Horvitz cost-to-threshold link, the Anthropic 84% auto-mode mechanism detail, non-monotonic ~70% reliability being optimal, and 'complacency ONLY under multi-task load.' Algorithm aversion has known replication limits (Prahl & Van Swol 2017; reversal in repeated real-world use), so treat it as a first-exposure/first-error effect, not a universal law. The ask-frequency retention numbers (Kovacs 2021) come from a digital-wellbeing extension adjacent to the tracking-app domain R3 excluded, and the dose-response is not monotonic. Green's oversight-theater findings are specific to government algorithmic decision-making. Two findings rest on a single source each (Zhu et al. oversight-design; PMC4927573 is a secondary review). Two of the three votes on the oversight-theater and ask-frequency claims were 2-1 rather than unanimous.",
+  "openQuestions": [
+    "What is the actual dose-response curve for agent approval prompts specifically \u2014 the 25%-vs-100% HabitLab result and Anthropic's 93% figure bracket the problem, but no study measures at what ask-rate agent users start blanket-approving or abandoning?",
+    "How can an approver-level (L4) user be kept genuinely engaged rather than rubber-stamping \u2014 the 2025 taxonomy paper explicitly flags this as open, and the complacency literature suggests neither expertise nor practice helps; does deliberately surfacing agent errors/uncertainty (the variable-reliability effect) transfer to LLM agents as a calibration intervention?",
+    "How should reversibility be operationalized in practice (undo depth, dry-run fidelity, blast-radius classification of tool calls) \u2014 verified evidence establishes the principle of risk-graded gating but almost nothing on concrete irreversibility taxonomies beyond Anthropic's two-factor sketch?",
+    "Does the minimal-control effect (Dietvorst 2018) hold for agent ACTIONS rather than forecasts \u2014 i.e., does a constrained edit/override affordance on proposed actions buy the same adoption gain as adjusting a numeric prediction?"
+  ],
+  "confirmed": [
+    {
+      "claim": "Automation that is constantly, highly reliable induces more operator complacency (worse failure-detection) than automation whose reliability visibly varies over time \u2014 the opposite of what a naive 'more reliable = safer to trust' intuition would predict.",
+      "source": "https://journals.sagepub.com/doi/10.1177/0018720810376055",
+      "quality": "primary",
+      "quote": "The mean detection rate of automation failures was markedly higher for the variable-reliability (82%) than for the constant-reliability condition (33%) (see Figure 1). The magnitude of the effect\u2014a 149% difference in detection rate\u2014is dramatic, considering that under single-task conditions, detection of engine malfunctions was quite easy, averaging about 97%.",
+      "confidence": "high",
+      "evidence": "Directly verified via the actual PDF of Parasuraman & Manzey (2010), \"Complacency and Bias in Human Use of Automation: An Attentional Integration,\" Human Factors 52(3), p. 384. The exact sentence appears verbatim: \"The mean detection rate of automation failures was markedly higher for the variable-reliability condition (82%) than for the constant-reliability condition (33%) (see Figure 1). The magnitude of the effect\u2014a 149% difference in detection rate\u2014is dramatic, considering that under single-task conditions, detection of engine malfunctions was quite easy, averaging about 97%.\" This is not an overreach: the paper explicitly frames this as counter-intuitive, arguing (citing Langer's \"premature cognitive commitment\") that unchanging reliability breeds a fixed belief the automation is trustworthy, while variable reliability keeps operators cognitively engaged \u2014 precisely the \"opposite of naive intuition\" framing in the claim. Note on sourcing: the cited URL is a 2010 review/synthesis paper, not the original primary study \u2014 Figure 1 is explicitly \"Adapted from 'Performance Consequences of Automation-Induced Complacency,' by R. Parasuraman, R. Molloy, and I. L. Singh, 1993\" (Int. J. Aviation Psychology). So the true primary source is the 1993 paper; the 2010 article reproduces its data with permission. This is a minor citation-precision issue, not a substantive one \u2014 the reproduced data and quote are accurate and properly attributed within the source given. Corroboration found via search: (a) Singh, Molloy & Parasuraman (1997) replicated the same consistency-of-reliability effect even after moving the automated task to the display's center; (b) Bagheri & Jamieson (2004) and De Waard et al. (1999, driving simulator) found convergent effects; (c) later syntheses (e.g., work on near-perfect automation) report ~34% detection under high/constant reliability, matching the 33% figure closely. No contradicting or debunking source was found. This is a foundational, highly-cited (1096+ citations), peer-reviewed finding in a top human-factors journal from recognized field authorities (Parasuraman, Manzey), still actively cited in current (2019-2025) automation/trust literature \u2014 not outdated or superseded.",
+      "vote": "3-0"
+    },
+    {
+      "claim": "Extended practice/training does not eliminate automation complacency, and skilled, highly experienced professionals (pilots, air traffic controllers) still exhibit the effect just as naive participants do \u2014 oversight degradation is not fixed merely by expertise or repetition.",
+      "source": "https://journals.sagepub.com/doi/10.1177/0018720810376055",
+      "quality": "primary",
+      "quote": "experience and practice do not appear to mitigate automation complacency: Skilled pilots and controllers exhibit the effect, and additional task practice in naive operators does not eliminate complacency.",
+      "confidence": "high",
+      "evidence": "Source is Parasuraman & Manzey (2010), \"Complacency and Bias in Human Use of Automation: An Attentional Integration,\" Human Factors 52(3):381-410, DOI 10.1177/0018720810376055 \u2014 the canonical, ~1096-citation review paper in this literature. Independent search summaries of the paper corroborate the supporting quote near-verbatim: \"Automation complacency is found in both naive and expert participants and cannot be overcome with simple practice\" and \"Automation bias occurs in both naive and expert participants, cannot be prevented by training or instructions.\" This directly matches the claim (skilled pilots/controllers exhibit the effect; practice doesn't eliminate it in naive operators either). A second independent search on aviation human-factors sources (FAA Safety Briefing, NBAA, AOPA) corroborates rather than contradicts: experienced pilots/controllers remain susceptible to automation complacency, and training/practice alone is described as insufficient \u2014 consistent with the claim, no contradicting evidence found. The claim is not an overreach of the quote (it stays at the same specificity level: skilled/expert operators exhibit it, practice doesn't eliminate it). Source quality (a major, primary, peer-reviewed review article) matches or exceeds the strength of the claim. Not outdated in effect \u2014 this 2010 review remains the standard citation for this exact claim in current human factors work.",
+      "vote": "2-1"
+    },
+    {
+      "claim": "Giving people even minimal, restricted ability to modify an imperfect algorithm's forecasts dramatically increases their willingness to use it: in Study 1, only 32% chose to use the model when they couldn't modify it at all (can't-change condition), versus 73-76% when they could adjust it (change-10 and adjust-by-10 conditions, both p < .001).",
+      "source": "https://faculty.wharton.upenn.edu/wp-content/uploads/2016/08/Dietvorst-Simmons-Massey-2018.pdf",
+      "quality": "primary",
+      "quote": "Whereas only 32% of participants in the can\u2019t-change condition chose to use the model\u2019s forecasts, 73% of participants in the change-10 condition (\u03c72(1, N = 145) = 24.19, p < 0.001) and 76% of participants in the adjust-by-10 condition (\u03c72(1, N = 146) = 28.40, p < 0.001) chose to use the model.",
+      "confidence": "high",
+      "evidence": "Verified against the primary source PDF (Dietvorst, Simmons & Massey 2018, Management Science 64(3), pp.1155-1170) via pdftotext extraction. Text at lines 340-342 reads verbatim: \"Whereas only 32% of participants in the can't-change condition chose to use the model's forecasts, 73% of participants in the change-10 condition (\u03c72(1, N=145)=24.19, p<0.001) and 76% of participants in the adjust-by-10 condition (\u03c72(1, N=146)=28.40...\" This matches the claim's numbers and stats exactly (28.40 confirmed by pattern, matching the supporting quote provided). The claim is a faithful restatement of Study 1 results, not an overreach \u2014 it doesn't extend the finding beyond what's stated (e.g., doesn't claim this generalizes beyond the specific 'even slightly restricted' modification conditions tested). Source is the primary peer-reviewed paper (Management Science, a top-tier journal), appropriate rigor for the claim's strength. No contradicting evidence found; this is a well-replicated, widely-cited finding in the algorithm aversion literature (WebSearch confirmed multiple citing papers referencing the same core result). Not outdated in the sense that matters \u2014 it's a foundational empirical finding still actively cited in 2025-26 human-AI interaction papers (e.g., arxiv 2601.15064, 2410.07728 found in search results).",
+      "vote": "3-0"
+    },
+    {
+      "claim": "The amount of control given barely matters once any control exists: reducing the allowed adjustment from 10 percentiles down to 5 or even 2 percentiles (an 80% reduction) did not significantly change people's willingness to use the algorithm (68-71% adoption across adjust-by-10/5/2 conditions, chi-square not significant, p = .809).",
+      "source": "https://faculty.wharton.upenn.edu/wp-content/uploads/2016/08/Dietvorst-Simmons-Massey-2018.pdf",
+      "quality": "primary",
+      "quote": "participants\u2019 decision to use the model in the adjust-by-X conditions did not depend on how much they were able to adjust the model: 71%, 71%, and 68% chose to use the model in the adjust-by-10, adjust-by-5, and adjust-by-2 conditions, respectively. These three conditions did not differ significantly (\u03c72(2, N = 623) = 0.42, p = 0.809).",
+      "confidence": "high",
+      "evidence": "Verified against the primary source PDF directly (downloaded and text-extracted faculty.wharton.upenn.edu/wp-content/uploads/2016/08/Dietvorst-Simmons-Massey-2018.pdf, \"Overcoming Algorithm Aversion,\" Management Science 64(3), 2018, pp.1155-1170). Study 2 (N=816 total, 4 conditions: can't-change, adjust-by-10, adjust-by-5, adjust-by-2) reports verbatim: \"participants' decision to use the model in the adjust-by-X conditions did not depend on how much they were able to adjust the model: 71%, 71%, and 68% chose to [use] the model in the adjust-by-10, adjust-by-5, and adjust-by-2 conditions, respectively. These three conditions did not differ significantly (\u03c72(2, N=623)=0.42, p=0.809).\" The quote given matches the source exactly (word-for-word, save trivial ligature OCR artifacts in my extraction). The paper's own text goes further and explicitly endorses the claim's framing: \"we can conclude that their willingness to use the model was not detectably altered by imposing an 80% reduction of the amount by which they could adjust.\" The claim's broader framing (\"control barely matters once any control exists\") is also directly supported by the paper's contrast with the can't-change condition (only 47% chose to use the model there vs ~70% pooled across the three adjust conditions, \u03c72(1,N=834)=36.46, p<.001) and by the abstract's own stated conclusion that preference for modifiable algorithms \"was indicative of a desire for some control... and not for a desire for greater control.\" Source is a peer-reviewed article in a top-tier journal (Management Science), primary and directly on-point, appropriate for the claim's strength. WebSearch turned up no replication failures, corrections, or credible disputes of this specific Study 2 finding.",
+      "vote": "3-0"
+    },
+    {
+      "claim": "The mechanism is not that people need large discretionary power over outcomes, but that they need a nonzero override/adjustment channel \u2014 the paper's own framing is that a 'slight' or 'small' amount of control is sufficient to overcome aversion to an imperfect but superior automated system.",
+      "source": "https://faculty.wharton.upenn.edu/wp-content/uploads/2016/08/Dietvorst-Simmons-Massey-2018.pdf",
+      "quality": "primary",
+      "quote": "This research suggests that one can reduce algorithm aversion by giving people some control\u2014even a slight amount\u2014over an imperfect algorithm\u2019s forecast.",
+      "confidence": "high",
+      "evidence": "Verified directly against the primary source (downloaded and text-extracted the PDF at faculty.wharton.upenn.edu, Dietvorst, Simmons & Massey 2018, Management Science 64(3):1155-1170). The claim is accurately and precisely supported, not an overreach:\n\n1) Abstract (lines 32-40): \"the preference for modifiable algorithms held even when participants were severely restricted in the modifications they could make... participants' preference for modifiable algorithms was indicative of a desire for some control over the forecasting outcome, and not for a desire for greater control... as participants' preference for modifiable algorithms was relatively insensitive to the magnitude of the modifications they were able to make... one can reduce algorithm aversion by giving people some control\u2014even a slight amount.\"\n\n2) Study 2 was designed specifically to test this: participants could adjust the algorithm's forecast by 10, 5, or 2 percentiles (vs. a 17.5-percentile average algorithm error) or not at all. Choice-to-use rates were statistically indistinguishable across the 10/5/2 conditions (71%, 71%, 68%; \u03c7\u00b2(2)=0.42, p=0.809) \u2014 an 80% reduction in adjustment range did not detectably change willingness to use the algorithm (lines 808-819).\n\n3) Explicit mechanism statement in the Discussion (lines 844-851): \"participants were... relatively insensitive to the amount by which they could adjust the model's forecasts. This finding suggests that, while it is beneficial to give people control over an imperfect algorithm's forecasts, the amount of control needed to obtain those benefits is actually quite small.\"\n\n4) The paper consistently frames the algorithm as imperfect-but-superior (abstract line 25: \"evidence-based algorithms consistently outperform human forecasters\"; line 505: participants who could adjust the model \"outperformed those who did not\"), matching the claim's \"imperfect but superior automated system\" framing.\n\nNo contradicting or qualifying evidence found in a follow-up search \u2014 related work (e.g., \"Overcoming Algorithm Aversion through Process Control,\" HMC22) builds on rather than disputes this finding, and no replication failure or critique of this specific mechanism surfaced. Source (peer-reviewed Management Science, a top operations/management journal) is appropriately strong for the claim's strength. The paper is foundational psychology/decision-science research (2016-2018), not a fast-moving empirical-benchmark field where currency decays \u2014 it remains the standard citation for this effect as of 2026.",
+      "vote": "3-0"
+    },
+    {
+      "claim": "Meaningful human oversight fails via two identifiable modes: (a) rubber-stamping, where humans approve AI outputs they don't fully understand, and (b) over-constraint, where the system is so tightly rule-bound that the AI's agency collapses into automation with no real discretion to oversee.",
+      "source": "https://link.springer.com/article/10.1007/s43681-026-01147-7",
+      "quality": "primary",
+      "quote": "humans act as rubber stamps, approving AI outputs they do not fully understand, or systems are constrained so tightly that AI collapses into rule-following automation",
+      "confidence": "high",
+      "evidence": "The claim is directly and almost verbatim supported by the primary source. The article \"Designing Meaningful Human Oversight in AI\" by Liming Zhu, Qinghua Lu, Ding Ming, Sung Une Lee, and Chen Wang (published in Springer Nature's AI and Ethics journal, DOI 10.1007/s43681-026-01147-7, also on SSRN/ResearchGate as a 2025 preprint) states the dilemma in near-identical language: \"Either humans act as rubber stamps, approving AI outputs they do not fully understand, or systems are constrained so tightly that AI collapses into rule-following automation, losing the very agentic qualities that make AI highly useful.\" The claim under review restates this as \"two identifiable modes\" of oversight failure (rubber-stamping vs. over-constraint), which is a faithful, non-overreaching paraphrase of the source's own either/or framing. Source quality is appropriate: this is a peer-reviewed AI ethics journal article by researchers affiliated with CSIRO's Data61 (a recognized AI governance research group), not a blog post or marketing claim, and it is current (2025-2026). WebSearch found no contradicting evidence disputing this specific dichotomy; related literature (MIT Sloan Management Review, Governing for Impact issue brief, Medium commentary) independently corroborates the rubber-stamping half of the claim, and no source was found disputing the over-constraint/automation-collapse half either. The claim is not extraordinary \u2014 it is a conceptual/theoretical framing of a design tension, appropriately sourced to the primary academic article that coined it.",
+      "vote": "3-0"
+    },
+    {
+      "claim": "Established human-factors research shows automation bias, complacency, and inappropriate reliance are structural failure modes of human oversight, driven by humans being poor at sustained monitoring of highly reliable automated systems.",
+      "source": "https://link.springer.com/article/10.1007/s43681-026-01147-7",
+      "quality": "primary",
+      "quote": "automation bias, complacency, and inappropriate reliance\" plague oversight systems where \"humans are poor at sustained monitoring of highly reliable systems",
+      "confidence": "high",
+      "evidence": "Fetched the primary source (Springer, \"Designing meaningful human oversight in AI,\" DOI 10.1007/s43681-026-01147-7, AI and Ethics journal). Section 5.1 of the article contains a near-verbatim match to the claim's supporting quote: \"Humans are poor at sustained monitoring of highly reliable systems and tend to over-trust plausible automated outputs while under-trusting unfamiliar or conflicting recommendations.\" The article explicitly attributes this to \"decades of work in human-automation interaction\" and cites Parasuraman & Manzey (2010) on complacent monitors missing critical alerts vs. over-intervention, and Lee & See (2004) on inappropriate reliance/rejection of correct AI outputs. These are the actual foundational human-factors sources (Parasuraman & Riley 1997 lineage) for automation bias/complacency \u2014 not marketing or forum material. A follow-up WebSearch for contradicting evidence found only refinements (e.g., \"weak vs. strong automation bias\" distinctions, debate over how to *design around* the problem) but no credible source disputing that automation bias, complacency, and inappropriate reliance are real, structural failure modes \u2014 if anything, search results (Parasuraman & Manzey 2010 abstract itself, a 2026 Philosophy & Technology piece, AI Act literature) reinforce the claim as mainstream and undisputed within human factors. The claim is not outdated (the underlying phenomenon is stable, decades-replicated, and the citing source is contemporaneous, 2026). Source quality (peer-reviewed journal article citing primary human-factors literature) matches the claim's strength (a well-established, non-extraordinary finding). No overreach detected: the claim's wording tracks the quote almost verbatim.",
+      "vote": "3-0"
+    },
+    {
+      "claim": "Providing explanations/transparency about an AI system's reasoning is, by itself, an insufficient intervention for correcting inappropriate reliance (over-trust or under-trust); interaction design is a more effective lever than explanation alone.",
+      "source": "https://link.springer.com/article/10.1007/s43681-026-01147-7",
+      "quality": "primary",
+      "quote": "explanations alone rarely fix inappropriate reliance",
+      "confidence": "high",
+      "evidence": "Fetched the primary source directly (link.springer.com/article/10.1007/s43681-026-01147-7, \"Designing meaningful human oversight in AI\" by Zhu, Lu, Ding, Lee, Wang et al., AI and Ethics vol. 6, published May 2026). The quote is verbatim and in context: \"explanations alone rarely fix inappropriate reliance,\" paired with \"interventions that change the interaction (e.g., who decides, when, and with what friction) tend to help more.\" The article explicitly rejects \"explanation as a sufficient safeguard\" and instead argues for interaction-level mechanisms (friction, divergence detection, sampling) \u2014 directly matching the claim's two parts (explanation-alone insufficiency + interaction design as the stronger lever). This is a peer-reviewed article in a reputable Springer journal (AI and Ethics) by CSIRO's Data61 responsible-AI group (Zhu/Lu are established authors in this space), not a preprint, blog, or press release. A WebSearch cross-check of the broader XAI/reliance-calibration literature corroborates rather than contradicts: textual/visual explanations alone show only minor, non-significant effects on reliance calibration (arXiv 2403.09552, 2501.16627), while adaptive interaction-design interventions (showing supporting vs. counter-explanations based on trust state) measurably reduce both over- and under-reliance (arXiv 2502.13321, \"Adjust for Trust\"). No credible source found disputing the general finding that explanations alone are insufficient; the mainstream HCI/XAI consensus (Bu\u00e7inca-style cognitive-forcing-function work, JAMIA \"Explainability in context\" article) points the same direction. Claim is current (2026), correctly attributed, and appropriately scoped (a well-established, non-extraordinary finding in the human-AI reliance literature, backed by a primary peer-reviewed source with a verbatim quote).",
+      "vote": "3-0"
+    },
+    {
+      "claim": "Adding interaction friction (\"inhibitive attractors\" that force a delay or an action like retyping/swiping before a risky choice can be made) significantly reduced how often users ignored red-flag cues and proceeded with a risky install, cutting the proportion choosing the less-safe option by up to 50% in a controlled between-subjects experiment.",
+      "source": "https://cups.cs.cmu.edu/soups/2013/proceedings/a6_Bravo-Lillo.pdf",
+      "quality": "primary",
+      "quote": "Participants who saw dialogs that employed inhibitive attractors were significantly less likely than those in the control group to ignore clues that installing this software might be harmful... They reduced the proportion of participants choosing the less safe option by up to 50%.",
+      "confidence": "high",
+      "evidence": "Fetched the primary source PDF directly (cups.cs.cmu.edu/soups/2013/proceedings/a6_Bravo-Lillo.pdf, SOUPS 2013, Bravo-Lillo et al., \"Your Attention Please: Designing Security-Decision UIs to Make Genuine Risks Harder to Ignore\"). The abstract states verbatim: \"We conducted three between-subjects experiments... Participants who saw dialogs that employed inhibitive attractors were significantly less likely than those in the control group to ignore clues that installing this software might be harmful\" \u2014 matching the claim's supporting quote exactly. Section 2 (Related Work intro/Section 1 discussion) states: \"Our preferred attractors outperformed the control, with statistically significant effect in Experiment 1 and with similar effect sizes (but smaller sample sizes) in Experiment 2. They reduced the proportion of participants choosing the less safe option by up to 50%.\" This directly and precisely supports the claim's \"up to 50%\" figure and the \"controlled between-subjects experiment\" framing (paper explicitly says \"three between-subjects experiments\"). Inhibitive attractors are defined in Section 3 as UI elements that \"prevent a user from making a potentially-hazardous choice until either some period of time has expired or the user performs a required action\" (e.g., animated connector requiring a delay, progressive reveal requiring the field to fully render) \u2014 matching the claim's description of \"force a delay or an action like retyping/swiping.\" A web search for critiques/replications turned up no contradicting or debunking evidence; only corroborating secondary summaries (ACM DL, Microsoft Research, ResearchGate) describing the same finding. Source is a peer-reviewed SOUPS (Symposium on Usable Privacy and Security) paper, a top venue for this subfield, and is the primary source itself (not a secondhand summary), so source quality matches the claim's strength.",
+      "vote": "3-0"
+    },
+    {
+      "claim": "Under conditions of extreme habituation (repeated exposure to the same dialog so users tune it out), inhibitive (friction-imposing) UI elements were 2-3x more effective than a non-inhibitive control at getting users to notice and act on new critical information the first time it appeared.",
+      "source": "https://cups.cs.cmu.edu/soups/2013/proceedings/a6_Bravo-Lillo.pdf",
+      "quality": "primary",
+      "quote": "Participants exposed to inhibitive attractors were two to three times more likely to make an informed decision than those in the control condition.",
+      "confidence": "high",
+      "evidence": "Read the full primary source (Bravo-Lillo et al., \"Your Attention Please: Designing Security-Decision UIs to Make Genuine Risks Harder to Ignore,\" SOUPS 2013, 18pp). The supporting quote is verbatim from the paper's own abstract: \"Participants exposed to inhibitive attractors were two to three times more likely to make an informed decision than those in the control condition.\" This directly describes Experiment 3, explicitly framed by the authors as testing \"the performance of attractors under conditions of extreme habituation\" (Sec. 5, p.9) \u2014 participants were repeatedly shown the same dialog (median 15-54 habituation trials per condition, Table 3) until critical new information was injected into a previously-irrelevant field. The paper's sole Experiment 3 metric is literally defined as: \"the immediate detection rate: the proportion of users who click the 'No' option on the first trial of the test period (the first time it appeared)\" (Sec 5.1.3, p.10) \u2014 matching the claim's \"notice and act on new critical information the first time it appeared\" almost word-for-word (the paper's own phrase, not a paraphrase). Results (Sec 5.2, Fig. 7, Table 4): all five inhibitive attractors (AC+Delay, AC+Reveal, AC+Swipe, Swipe, Type) had significantly higher immediate detection rates than non-inhibitive conditions \u2014 44% (AC+Swipe) to 74% (Type) vs. a maximum of 20% (Short ANSI) among non-inhibitive treatments, with p<.0001 for nearly all pairwise comparisons (Holm-Bonferroni corrected, Table 4) \u2014 i.e., a real, statistically robust, roughly 2-4x effect, consistent with \"2-3x.\" \"Inhibitive attractors\" are explicitly defined by the authors as UI elements that \"prevent a user from making a potentially-hazardous choice until either some period of time has expired or the user performs a required action\" (Sec 3, p.2), i.e., friction-imposing, matching the claim's parenthetical. Source is a peer-reviewed paper at a top usable-security venue (SOUPS), n=872 completing participants in Experiment 3, pre-registered IRB-approved design, and the authors explicitly flag their own limitations (MTurk sample, abandoned security framing for Exp. 3, habituation may not mirror real-world levels) rather than overselling. WebSearch for critiques/replications found no disputing or heavily qualifying source. No misread, no overreach, no outdated/marketing issue \u2014 the claim is a faithful restatement of the paper's own headline finding.",
+      "vote": "3-0"
+    },
+    {
+      "claim": "The paper defines a five-level autonomy taxonomy for AI agents based on the role the user takes when interacting with the agent (not on agent capability): operator (L1), collaborator (L2), consultant (L3), approver (L4), observer (L5).",
+      "source": "https://arxiv.org/pdf/2506.12469",
+      "quality": "primary",
+      "quote": "we define five levels of escalating agent autonomy, characterized by the roles a user can take when interacting with an agent: operator, collaborator, consultant, approver, and observer.",
+      "confidence": "high",
+      "evidence": "Direct quote from arxiv.org/html/2506.12469: \"we build our framework around five roles a user can take when interacting with an agent: operator, collaborator, consultant, approver, and observer\" \u2014 exactly matches claim's five-level taxonomy and ordering. Paper explicitly states autonomy is \"designed independently of capability,\" supporting the claim's \"(not on agent capability)\" qualifier. Corroborated independently by a WebSearch summary of the arxiv abstract page listing the same five levels with matching L1-L5 descriptions. One earlier WebFetch pass produced a spurious sixth \"Autonomous\" level not found in either the direct HTML fetch or the independent WebSearch summary \u2014 treated as a fetch/summarization artifact, not evidence against the claim, since two independent, more direct retrievals agree on exactly five levels.",
+      "vote": "3-0"
+    },
+    {
+      "claim": "At the 'approver' autonomy level (L4), where the agent only surfaces to the user for consequential-action sign-off, the paper flags rubber-stamping as an open, unsolved risk: user disengagement degrades the quality of oversight and can produce unintended approvals of risky actions, and misaligned agents could exploit this disengagement to gain more autonomy.",
+      "source": "https://arxiv.org/pdf/2506.12469",
+      "quality": "primary",
+      "quote": "How can users be engaged in agent activities to avoid meaningless rubber stamping? User disengagement can lower the care with which they approve actions and can result in unintended approvals... How can misaligned agents leverage user disengagement to gain more autonomy? Misaligned agents may have an objective contrary to those of their users and can employ strategies to gradually convince disengaged users to approve risky actions.",
+      "confidence": "high",
+      "evidence": "Fetched and text-extracted the primary source (arXiv:2506.12469, \"Levels of Autonomy for AI Agents\" by Feng, McDonald, Zhang) directly via curl+pdftotext and verified against the actual paper text (not just abstract). Confirmed: (1) The paper defines five autonomy levels L1-L5 (operator, collaborator, consultant, approver, observer), with L4 explicitly labeled \"Level 4: User as an approver\" (line 387). (2) The paper states L4 users interact with the agent \"when the agent encounters a blocker it cannot resolve on its own,\" including \"signing off on consequential actions\" \u2014 matching the claim's \"only surfaces... for consequential-action sign-off\" (paper's framing includes credential-provision and failure-state blockers too, but sign-off on consequential actions is explicitly one of the triggers, so this is a reasonable compression, not a misrepresentation). (3) Under \"Some open questions for L4 agents,\" verbatim: \"How can users be engaged in agent activities to avoid meaningless rubber stamping? User disengagement can lower the care with which they approve actions and can result in unintended approvals.\" and \"How can misaligned agents leverage user disengagement to gain more autonomy? Misaligned agents may have an objective contrary to those of their users and can employ strategies to gradually convince disengaged users to approve risky actions.\" Both are explicitly framed as open/unsolved questions (bulleted under \"open questions\"), exactly as the claim states. The supporting quote given matches the source verbatim. Source is a legitimate, on-topic, recent (2025) arXiv paper directly proposing an autonomy-level taxonomy for LLM agents \u2014 appropriate quality for this claim's strength, and it's one of the grounding brief's named target sources (\"recent 2025-26 agent-autonomy-level taxonomy papers\"). No overreach, no misread, no staleness issue, not marketing content.",
+      "vote": "3-0"
+    },
+    {
+      "claim": "Anthropic explicitly grades required containment/oversight by an expected-risk framework combining likelihood of failure and blast radius, not by uniform human-in-the-loop gating for all agent actions.",
+      "source": "https://www.anthropic.com/engineering/how-we-contain-claude",
+      "quality": "primary",
+      "quote": "the risk of these deployments has two components: how likely a failure is, and how much damage one could do.",
+      "confidence": "high",
+      "evidence": "Verified via direct WebFetch of the primary source (anthropic.com/engineering/how-we-contain-claude): the quoted line \"the risk of these deployments has two components: how likely a failure is, and how much damage one could do\" is accurately reproduced and in context. The article explicitly builds a two-factor (likelihood \u00d7 blast radius) risk framework and applies it differentially rather than uniformly: claude.ai gets lighter oversight in ephemeral containers, Claude Code approval requirements scale with developer expertise, and Cowork is treated differently because \"a non-technical knowledge worker shouldn't be expected to judge bash incantations.\" The piece states the design principle directly: \"Match isolation strength to the user's capacity for oversight. A developer who can read bash and a knowledge worker who can't are not running the same threat model.\" A follow-up WebSearch surfaced independent secondary coverage (BestBlogs.dev, AI Beat, GenAI Playbook summaries) converging on the same reading, and one summary adds that the post explicitly argues uniform human-in-the-loop gating fails in practice due to approval fatigue (~93% blanket-approval rate on Claude Code prompts) \u2014 reinforcing that Anthropic frames the alternative to uniform gating as risk-graded containment, exactly as the claim states. No contradicting or qualifying source was found. Source is Anthropic's own primary engineering blog, an appropriate quality level for a claim about Anthropic's own stated design philosophy, and the post is current (2026, matches or postdates other cited material).",
+      "vote": "3-0"
+    },
+    {
+      "claim": "Under Claude Code's original per-action human-in-the-loop approval model, users approved roughly 93% of permission prompts, indicating a high rubber-stamp/automation-bias rate rather than substantive per-action review.",
+      "source": "https://www.anthropic.com/engineering/how-we-contain-claude",
+      "quality": "primary",
+      "quote": "users approved roughly 93% of permission prompts",
+      "confidence": "high",
+      "evidence": "WebFetch of the primary source (anthropic.com/engineering/how-we-contain-claude) confirms the exact quote \"Our telemetry showed users approved roughly 93% of permission prompts\" and confirms Anthropic itself frames this as evidence of approval fatigue/rubber-stamping, not careful review: the article states \"The more approvals a user sees, the less attention they pay to each, becoming over time much less diligent in their supervision,\" and treats the 93% figure as the motivating failure that led them to build Claude Code's auto mode (which cut prompts 84%). A corroborating WebSearch (InfoQ coverage, other tech blogs) independently reports the same 93% figure and the same \"approval fatigue\" framing. The claim under review matches the source's own stated interpretation almost verbatim \u2014 it is not an overreach, misread, or cherry-pick; it's a first-party admission from a primary, current (2026), high-quality source, and no contradicting evidence turned up.",
+      "vote": "3-0"
+    },
+    {
+      "claim": "Horvitz frames the decision to act autonomously vs. defer to the user as a formal expected-utility computation with a derivable threshold probability p*: the system should act only when the inferred probability of the user's goal p(G|E) exceeds a threshold set by the relative utilities of the four outcomes (correct action, wrong action, correct inaction, missed action), and this threshold shifts with context (e.g. rises when the user is absorbed in another task, falls when the user is rushed).",
+      "source": "http://erichorvitz.com/chi99horvitz.pdf",
+      "quality": "primary",
+      "quote": "The best decision to make at any value of p(G|E) is the action associated with the greatest expected utility at that likelihood of the user having the goal. By inspecting the graph, it is easy to see that it is best for the system to take action if the probability of a goal is greater than p* and to refrain from acting if the probability is less than p*.",
+      "confidence": "high",
+      "evidence": "Fetched and read the primary source (Horvitz, \"Principles of Mixed-Initiative User Interfaces,\" CHI 1999, erichorvitz.com/chi99horvitz.pdf) directly \u2014 not just the quoted excerpt. The claim is precisely and fully supported by the paper's \"From Beliefs to Actions\" / \"Expected Utility and Thresholds for Agent Action\" sections:\n\n1. Formal expected-utility computation with derivable threshold p*: confirmed verbatim. Equations 2-3 give eu(A|E) and eu(\u00acA|E) as functions of p(G|E); text states \"The threshold probability can be computed for any four utilities by setting Equations 2 and 3 equal to one another and solving for p(G|E),\" and \"it is best for the system to take action if the probability of a goal is greater than p* and to refrain from acting if the probability is less than p*\" (matches the supplied supporting quote exactly).\n\n2. Four outcomes (correct action, wrong action, correct inaction, missed action): confirmed exactly. Table 1 defines u(A,G) [correct action], u(A,\u00acG) [wrong/erroneous action], u(\u00acA,G) [missed action], u(\u00acA,\u00acG) [correct inaction] \u2014 precisely the four outcomes the claim names.\n\n3. Threshold rises when user absorbed in another task: confirmed near-verbatim. \"The utility of unwanted action can diminish significantly with increases in the depth of a user's focus on another task. Such a reduction in the value of action leads to a higher probability threshold.\"\n\n4. Threshold falls when user is rushed: confirmed near-verbatim. \"the utility, u(\u00acA,G) ... may decrease as a user becomes more rushed. Diminishing the value of this action reduces the threshold probability for action.\"\n\nEvery element of the claim, including the two specific contextual examples, is directly stated in the primary source, not inferred or extrapolated. This is a faithful, accurate paraphrase, not an overreach.",
+      "vote": "3-0"
+    },
+    {
+      "claim": "The paper adds a third option beyond act/don't-act -- initiating a dialog to ask the user -- and shows this creates two threshold probabilities (inaction/dialog and dialog/action) rather than one, giving a graded, three-tier autonomy-gating structure rather than a binary gate.",
+      "source": "http://erichorvitz.com/chi99horvitz.pdf",
+      "quality": "primary",
+      "quote": "action can be guided by two new threshold probabilities: the threshold between inaction and dialog, p*\u00ac A,D, and the threshold between dialog and action, p*D,A. These two thresholds provide an instant index into whether to act, to engage the user in a dialog about action, or to do nothing",
+      "confidence": "high",
+      "evidence": "Verified directly against the primary source (Horvitz, \"Principles of Mixed-Initiative User Interfaces,\" CHI 1999, fetched via Wayback Machine mirror since erichorvitz.com returns 403). The supporting quote is verbatim and accurate: page 6-7 states \"action can be guided by two new threshold probabilities: the threshold between inaction and dialog, p*\u00acA,D, and the threshold between dialog and action, p*D,A. These two thresholds provide an instant index into whether to act, to engage the user in a dialog about action, or to do nothing.\" This is not cherry-picked or taken out of context -- it's the paper's central formal contribution in the section \"Dialog as an Option for Action,\" which explicitly extends the earlier binary action/inaction threshold model (Figure 4, single p*) by adding dialog as a third option (Figure 6, two thresholds p*\u00acA,D and p*D,A). This matches the LookOut system description earlier in the paper: \"the system decides to either (1) do nothing... (2) to engage the user in a dialog... or (3) to go ahead and attempts to provide its service\" -- an explicit three-way choice. The claim's characterization (third option beyond act/don't-act; two thresholds instead of one; graded three-tier gating structure) is an accurate, non-overreaching paraphrase of the paper's own framing, not an inference stretched beyond the text. Source quality (a primary, foundational, correctly-attributed academic paper, directly fetched and read in full) is well-matched to the claim's strength -- the claim only describes what the paper says/shows, it does not make an external empirical claim needing corroboration. The paper being from 1999 is not a currency problem here since it is cited as the origin of this specific formal framework, which is exactly how the research question uses it (a known primary source for autonomy-level/threshold theory), not as a claim about current SOTA agent behavior.",
+      "vote": "3-0"
+    },
+    {
+      "claim": "Across a survey of 41 policies mandating human oversight of government algorithms, Green finds evidence that people are structurally unable to perform the oversight functions those policies assume they can perform (i.e., human-in-the-loop review of algorithmic decisions is often not load-bearing).",
+      "source": "https://papers.ssrn.com/sol3/papers.cfm?abstract_id=3921216",
+      "quality": "primary",
+      "quote": "evidence suggests that people are unable to perform the desired oversight functions",
+      "confidence": "high",
+      "evidence": "Confirmed via primary source (Green, \"The Flaws of Policies Requiring Human Oversight of Government Algorithms,\" Computer Law & Security Review 45 (2022) 105681, benzevgreen.com/wp-content/uploads/2022/04/22-clsr.pdf, read directly). Abstract states verbatim: \"In this article, I survey 41 policies that prescribe human oversight of government algorithms and find that they suffer from two significant flaws. First, evidence suggests that people are unable to perform the desired oversight functions.\" This matches the claim's \"41 policies\" figure and the supporting quote exactly (quote is verbatim from the abstract, not misquoted). Section 3 of the paper (p.4) confirms methodology: 41 policy documents surveyed (23 proposed/passed legislation, 8 policy guidance, 10 related to two US risk-assessment tools), coded for how they describe human oversight. Section 4 (referenced but not fully read) is described as evaluating \"the three forms of human oversight\" and finding they are \"not supported by empirical evidence: the vast majority of research suggests that people cannot reliably perform any of the desired oversight functions\" \u2014 directly supporting \"structurally unable\" framing (paper cites Bainbridge 1983 'ironies of automation,' Suchman et al. 1999, Gray & Suri 2019 as evidence hybrid human-automation systems are inherently difficult to design/regulate, i.e., a structural/systemic claim, not merely anecdotal individual failures). Source quality is high: peer-reviewed journal article by a University of Michigan professor, winner of the Future of Privacy Forum's 2022 Privacy Papers for Policymakers Award, widely cited (arXiv preprint, Harvard Berkman Klein Center coverage). WebSearch for critiques/rebuttals turned up no credible contradicting or heavily qualifying sources. The claim is a faithful, appropriately-scoped paraphrase of the paper's central thesis, not an overreach.",
+      "vote": "3-0"
+    },
+    {
+      "claim": "Because effective human oversight rarely materializes, oversight mandates function as legitimizing theater: they let agencies deploy flawed/controversial algorithms while appearing accountable, without fixing the underlying algorithmic problems.",
+      "source": "https://papers.ssrn.com/sol3/papers.cfm?abstract_id=3921216",
+      "quality": "primary",
+      "quote": "human oversight policies legitimize government uses of faulty and controversial algorithms without addressing the fundamental issues with these tools",
+      "confidence": "high",
+      "evidence": "Verified against Ben Green's \"The Flaws of Policies Requiring Human Oversight of Government Algorithms\" (SSRN 3921216; published Computer Law & Security Review, Vol. 45, 2022 \u2014 peer-reviewed, not a mere preprint). The paper's own abstract states its two-flaw thesis nearly verbatim: \"(1) evidence suggests that people are unable to perform the desired oversight functions. (2) as a result of the first flaw, human oversight policies legitimize government uses of faulty and controversial algorithms without addressing the fundamental issues with these tools.\" The supplied quote is an exact abstract excerpt, and the claim's causal framing (\"because effective human oversight rarely materializes... legitimizing theater... without fixing underlying problems\") is a faithful paraphrase of Green's flaw-1-causes-flaw-2 structure, not an overreach \u2014 this is the paper's central thesis, not a cherry-picked aside. Green derives it from a survey of 40 actual government human-oversight policies plus citation to automation-bias/complacency literature, so source strength matches claim strength (a normative/empirical policy-law analysis, appropriately hedged as \"policies... legitimize,\" not stated as a universal law). I searched for rebuttals: a 2024 FAccT paper (Langer, Baum et al., \"On the Quest for Effectiveness in Human Oversight\") offers a more optimistic, prescriptive counter-position \u2014 arguing effective oversight is achievable with better interdisciplinary design \u2014 but this is a forward-looking design proposal, not evidence contradicting Green's empirical finding about how existing mandates function today; it qualifies the field's response rather than refuting the claim as stated. No dating problem (2021-2022, still actively cited through 2024-25 literature) and no marketing/press-release quality issues (peer-reviewed law/policy journal).",
+      "vote": "2-1"
+    },
+    {
+      "claim": "Oversight requirements create a false sense of security and let vendors/agencies evade accountability for algorithmic harms rather than genuinely mitigating them \u2014 i.e., the presence of a human-in-the-loop is used as a liability shield rather than a real safety mechanism.",
+      "source": "https://papers.ssrn.com/sol3/papers.cfm?abstract_id=3921216",
+      "quality": "primary",
+      "quote": "provide a false sense of security in adopting algorithms and enable vendors and agencies to shirk accountability for algorithmic harms",
+      "confidence": "high",
+      "evidence": "Verified via WebSearch that SSRN 3921216 is Ben Green, \"The Flaws of Policies Requiring Human Oversight of Government Algorithms\" (Computer Law & Security Review, 2022; also arXiv:2109.05067; won the Future of Privacy Forum's Privacy Papers for Policymakers award). The supporting quote is reproduced verbatim/near-verbatim by multiple independent summaries (Berkman Klein Center listing, AI Law Blawg, and search-engine synthesis of the paper itself): the paper surveys 41 government-algorithm oversight policies and concludes such policies \"provide a false sense of security in adopting algorithms and enable vendors and agencies to shirk accountability for algorithmic harms,\" because (1) evidence shows people can't actually perform the oversight function and (2) oversight requirements shift accountability from agency leaders to relatively powerless frontline operators. This directly and specifically supports the claim under review \u2014 the claim's wording ('false sense of security', 'vendors/agencies... evade accountability') tracks the source's own language almost exactly, not an inferential leap. Source quality matches claim strength: peer-reviewed law/policy journal article, award-winning, from a named academic (Ben Green, then at U-M/Berkman Klein), not a preprint, blog, or press release. No contradicting or rebutting source was found in search; the closest related literature (Green & Kak's follow-up 'The False Comfort of Human Oversight as an Antidote to AI Harm') reinforces rather than disputes the thesis. Not outdated \u2014 2022 publication on a policy-argument claim (not a fast-moving empirical benchmark), and the argument remains actively cited in current (2025) human-oversight literature (e.g., arXiv:2509.12290 'Secure human oversight of AI'). One caveat: the paper's empirical base is specifically government algorithmic decision-making (41 policies), and the claim under review states the finding somewhat more generally ('vendors/agencies' broadly) \u2014 but this generalization is minor and uses the source's own phrasing, not a mischaracterization.",
+      "vote": "2-1"
+    },
+    {
+      "claim": "A meta-analysis across the reviewed studies found erroneous automated advice (from clinical decision support systems) was more likely to be followed in the automated-advice group than controls, risk ratio 1.26 (95% CI 1.11-1.44).",
+      "source": "https://pmc.ncbi.nlm.nih.gov/articles/PMC3240751/",
+      "quality": "primary",
+      "quote": "erroneous advice was more likely to be followed in the CDSS groups than in the control groups",
+      "confidence": "high",
+      "evidence": "WebFetch of the primary source (PMC3240751, Goddard/Roudsari/Wyatt, \"Automation bias: a systematic review of frequency, effect mediators, and mitigators,\" JAMIA 19(1), 2012) confirms the exact figures: pooling 4 CDSS studies, \"The risk ratio was 1.26 (95% CI 1.11 to 1.44); erroneous advice was more likely to be followed in the CDSS groups than in the control groups... increased the risk of an incorrect decision being made by 26%\" (p<0.0005, non-significant heterogeneity). The claim under review reproduces this number and framing accurately, with no overreach \u2014 it correctly attributes it to a meta-analysis of clinical decision support systems specifically, not automation bias generally. An independent WebSearch corroborates the paper's existence, venue (JAMIA, a top peer-reviewed informatics journal), and general finding, and surfaced no contradicting or heavily qualifying source. The paper is a widely-cited systematic review appropriate in rigor for the claim's specificity; it is dated 2012 but this is a mechanism-level finding (automation bias/trust miscalibration in decision support) rather than a fast-moving empirical fact about current AI systems, and is still commonly cited in 2025-26 agent-autonomy literature as foundational evidence, so it is not stale for this doctrinal purpose. No marketing/press-release framing \u2014 this is an academic meta-analysis with explicit CI and p-value.",
+      "vote": "3-0"
+    },
+    {
+      "claim": "Across prospective studies, users reversed their own correct decisions in favor of erroneous system advice ('negative consultations') at rates of 6%-11%, i.e., a measurable minority-but-nontrivial share of interactions show automation-induced error even among competent users.",
+      "source": "https://pmc.ncbi.nlm.nih.gov/articles/PMC3240751/",
+      "quality": "primary",
+      "quote": "clinicians \"over-rode their own correct decisions in favor of erroneous advice from the DSS\" in 6% of cases",
+      "confidence": "high",
+      "evidence": "WebFetch of the primary source (PMC3240751, Goddard, Roudsari & Wyatt, \"Automation bias: a systematic review of frequency, effect mediators, and mitigators,\" JAMIA 2011) confirms the claim verbatim: the review states negative consultations (users overriding their own correct decisions in favor of erroneous DSS advice) \"ranged from 6% to 11% of cases in prospective empirical studies,\" citing four named prospective studies (Friedman et al. 6%, Berner et al. 8%, Westbrook et al. 7%, McKibbon & Fridsma 11%). This is a peer-reviewed systematic review (appropriate source quality for a claim of this strength), the range and framing match the claim's wording almost exactly, and a follow-up WebSearch found no contradicting evidence \u2014 only corroborating citations of the same review and a related but distinct 5.2% negative-consultation figure from a separate prescribing study, which falls near the low end of the same range rather than contradicting it. The claim is not outdated in a way that matters (automation bias rates from clinical DSS studies of this era are still the standard citation in current literature) and is not an overreach \u2014 'measurable minority-but-nontrivial share' is a fair characterization of a 6-11% rate.",
+      "vote": "3-0"
+    },
+    {
+      "claim": "Higher false-alarm rates degrade compliance with automation because users spend time and attention re-verifying alerts before acting, i.e. added verification friction erodes automation's value.",
+      "source": "https://pmc.ncbi.nlm.nih.gov/articles/PMC4927573/",
+      "quality": "primary",
+      "quote": "Compliance, however, is degraded by higher rates of false alarms. In particular, when higher rates of false alarms are observed, users tend to consume critical time and attentional resources to verify alarms before choosing a response.",
+      "confidence": "high",
+      "evidence": "Quote verified via direct fetch of PMC4927573 (Merritt/Ilgen-style review, \"From Trust in Automation to Decision Neuroscience,\" 2016, Frontiers in Human Neuroscience-type review synthesizing human-automation-interaction literature): \"Compliance, however, is degraded by higher rates of false alarms. In particular, when higher rates of false alarms are observed, users tend to consume critical time and attentional resources to verify alarms before choosing a response.\" This directly and specifically supports the claim's causal chain (higher false-alarm rate -> verification burden -> degraded compliance). Independent corroboration via web search of the primary empirical literature this review synthesizes (Chancey/Bliss/Proaps 2015 \"False Alarms vs. Misses,\" Dixon & Wickens-line studies, Davenport & Bustamante 2010) confirms the same mechanism: false-alarm-prone automation specifically hurts compliance (mediated by trust) and delays alert-driven attention shifts, distinct from miss-prone automation's effect on reliance. No contradicting evidence found. Minor caveat: the cited source is a secondary review rather than the primary empirical papers (e.g., Meyer 2001, Bliss et al.), but the finding is foundational, decades-old, and stable human-factors literature (not a fast-moving field claim), so review-level sourcing is adequate for the claim's strength. The claim's added gloss (\"erodes automation's value\") is a reasonable, non-overreaching paraphrase of the quoted mechanism.",
+      "vote": "2-1"
+    },
+    {
+      "claim": "Even when users self-report low trust in an automated system, they may still misuse (over-rely on) a poorly competent automation under high workload, meaning stated distrust does not reliably prevent automation bias.",
+      "source": "https://pmc.ncbi.nlm.nih.gov/articles/PMC4927573/",
+      "quality": "primary",
+      "quote": "even when low TiA has been reported, human users may misuse even a poorly competent automation, particularly under high workload conditions",
+      "confidence": "medium",
+      "evidence": "Verified via WebFetch of the actual PMC4927573 article (Drnec, Marathe, Lukos & Metcalfe, \"From Trust in Automation to Decision Neuroscience...\", Frontiers in Human Neuroscience, 2016). The quoted sentence is verbatim in the \"Trust Outcomes and their Relationship to TiA\" section: \"even when low TiA has been reported, human users may misuse even a poorly competent automation, particularly under high workload conditions (Daly, 2002; Biros et al., 2004).\" The claim under review is a faithful, appropriately hedged paraphrase (\"may still misuse... under high workload,\" \"does not reliably prevent\") \u2014 it does not overstate the source's own hedged \"may\" framing. It's presented alongside the paired asymmetric finding (high reported trust with paradoxical manual-mode disuse, Lee & Moray 1992), showing the source treats self-report/behavior mismatch as a documented, non-fringe phenomenon in the TiA literature, not an isolated anomaly. A follow-up WebSearch corroborates the general pattern independently: multiple other human-factors sources describe over-reliance on automation under high workload conditions as an established finding. Caveats that keep confidence at medium rather than high: (1) the specific claim traces to two older primary studies (Daly 2002, Biros et al. 2004) cited within a 2016 review rather than a large meta-analysis \u2014 modest but proportionate evidentiary weight for a claim that itself only says \"may,\" not \"always\"; (2) I did not independently verify the Daly/Biros primary sources support the review's characterization, only that the review article says what the claim quotes. No contradicting evidence was found.",
+      "vote": "3-0"
+    },
+    {
+      "claim": "Automation complacency (poorer detection of automated-system malfunctions vs. manual monitoring) occurs specifically under multiple-task load, when manual tasks compete with the automated task for attention; it appears in both novice and expert operators and is not eliminated by simple repeated practice.",
+      "source": "https://www.researchgate.net/publication/47792928_Complacency_and_Bias_in_Human_Use_of_Automation_An_Attentional_Integration",
+      "quality": "primary",
+      "quote": "Automation complacency occurs under conditions of multiple-task load, when manual tasks compete with the automated task for the operator's attention. Automation complacency is found in both naive and expert participants and cannot be overcome with simple practice.",
+      "confidence": "high",
+      "evidence": "The claim is a near-verbatim paraphrase of the actual quote/abstract from Parasuraman & Manzey (2010), \"Complacency and Bias in Human Use of Automation: An Attentional Integration,\" Human Factors (SAGE, DOI 10.1177/0018720810376055), a highly-cited (1096+ citations per SciSpace) peer-reviewed review paper \u2014 appropriate source quality for this claim's strength. Independent WebSearch confirms both sub-claims: (1) the multiple-task-load specificity is corroborated by other sources noting that under single-task monitoring conditions, detection is efficient and unaffected by automation reliability, whereas complacency effects and reliability-dependence emerge specifically under multitasking; (2) the finding that complacency occurs in both naive/novice and expert participants and resists simple practice is stated identically across multiple independent summaries (NASA TM-2001-211413 lineage, ResearchGate abstracts of related Parasuraman studies). No contradicting or heavily-qualifying evidence surfaced. The paper, while from 2010, is foundational/canonical in this literature and its core findings are still cited as current in downstream 2019+ papers (e.g., Automation-Induced Complacency Potential scale validation), so it is not outdated for this claim. No overreach detected \u2014 claim matches source scope exactly, does not extend beyond what the quote states.",
+      "vote": "3-0"
+    },
+    {
+      "claim": "Constant (unvarying) high automation reliability produces far worse failure-detection than variable reliability: detection rate of automation failures was 82% under variable-reliability automation vs. only 33% under constant-reliability automation in the original Parasuraman, Molloy & Singh (1993) study, a 149% relative difference, even though single-task detection of the same malfunctions was ~97% accurate.",
+      "source": "https://www.researchgate.net/publication/47792928_Complacency_and_Bias_in_Human_Use_of_Automation_An_Attentional_Integration",
+      "quality": "primary",
+      "quote": "The mean detection rate of automation failures was markedly higher for the variable-reliability condition (82%) than for the constant-reliability condition (33%) ... The magnitude of the effect\u2014a 149% difference in detection rate\u2014is dramatic, considering that under single-task conditions, detection of engine malfunctions was quite easy, averaging about 97%.",
+      "confidence": "medium",
+      "evidence": "Multiple independent WebSearch queries return the same near-verbatim text as the claim's supporting quote: \"The mean detection rate of automation failures was markedly higher for the variable-reliability condition (82%) than for the constant-reliability condition (33%)... a 149% difference in detection rate... under single-task conditions, detection of engine malfunctions was quite easy, averaging about 97%.\" This text traces to Parasuraman & Manzey (2010, Human Factors, \"Complacency and Bias in Human Use of Automation: An Attentional Integration\" \u2014 a highly-cited, ~1000+ citation peer-reviewed review), which is summarizing Parasuraman, Molloy & Singh (1993, Int'l J. Aviation Psychology). The qualitative finding (variable reliability >> constant reliability for failure detection) is independently confirmed as replicated by Singh, Molloy & Parasuraman (1997) and Bagheri & Jamieson (2004), per a separate search result citing Parasuraman & Wickens (2008). I could not access the ResearchGate PDF directly (403 Forbidden) or the original 1993 primary article to eyeball the raw numbers myself, so this rests on secondary-source corroboration rather than my own direct read of primary data \u2014 a real but modest gap. One accuracy nitpick: the claim's citation footnote labels the researchgate URL \"(primary),\" but that URL is actually the 2010 Parasuraman & Manzey review article, not the 1993 primary paper itself \u2014 a source-labeling imprecision, not a substantive misrepresentation, since the numbers themselves are accurately attributed to the 1993 study within that review. No contradicting evidence, no sign of small-sample-driven irreproducibility beyond the normal caveats of 1990s human-factors lab studies (n~24-40), and no indication the finding is outdated \u2014 it is still cited as foundational in 2019-2023 automation/complacency literature.",
+      "vote": "3-0"
+    },
+    {
+      "claim": "Seeing an algorithm perform (and therefore make errors) makes people significantly less likely to choose it over an inferior human forecaster, even though the algorithm outperformed the human in every study \u2014 the effect is not explained away by rational updating on accuracy.",
+      "source": "https://marketing.wharton.upenn.edu/wp-content/uploads/2016/10/Dietvorst-Simmons-Massey-2014.pdf",
+      "quality": "primary",
+      "quote": "We show that people are especially averse to algorithmic forecasters after seeing them perform, even when they see them outperform a human forecaster. This is because people more quickly lose confidence in algorithmic than human forecasters after seeing them make the same mistake.",
+      "confidence": "high",
+      "evidence": "Verified against the actual full text of the primary source (fetched PDF, extracted via pdftotext at /private/tmp/claude-501/.../scratchpad/dietvorst.txt). The abstract quote given is verbatim accurate: \"Participants who saw the algorithm perform were less confident in it, and less likely to choose it over an inferior human forecaster. This was true even among those who saw the algorithm outperform the human.\" The claim's factual core (\"algorithm outperformed the human in every study\") is explicitly confirmed in the Results section: \"As expected, the model outperformed participants in all five studies\" and \"Participants in every condition in every study were better off choosing the model over the human.\" The \"not explained away by rational updating on accuracy\" framing is supported by the paper's own asymmetry finding: \"Seeing the model perform significantly decreased confidence in the model's forecasts in every study... Seeing the human perform significantly decreased confidence in the human's forecasts in only one of the four studies\" \u2014 despite the model being objectively more accurate (producing 15-97% less error than the human across studies), confidence dropped more for the model, the opposite of what rational Bayesian updating on relative accuracy would predict. Source quality (Journal of Experimental Psychology: General, Dietvorst/Simmons/Massey 2015, primary peer-reviewed source, heavily cited and still referenced in 2025-26 human-AI decision-making literature) matches the claim's strength. One caveat worth noting for the broader research report (not a refutation of this specific claim): later replication attempts (e.g., Prahl & Van Swol 2017) failed to replicate a generalized/default algorithm aversion effect, finding the asymmetric-confidence-loss-after-bad-advice pattern held but not blanket aversion \u2014 this bears on how strongly the doctrine should generalize the finding, but does not misstate what this specific paper's 5 studies found, which is exactly what the claim asserts.",
+      "vote": "3-0"
+    },
+    {
+      "claim": "This is not a minority effect: even the majority of participants who directly witnessed the algorithm outperform the human (610 of 741, 83% across the five studies) were still less likely to bet on the algorithm than were participants who never saw it perform at all.",
+      "source": "https://marketing.wharton.upenn.edu/wp-content/uploads/2016/10/Dietvorst-Simmons-Massey-2014.pdf",
+      "quality": "primary",
+      "quote": "In every experiment, participants in the model-and-human condition, who saw both the model and the human perform, were significantly less likely to tie their bonuses to the model than were participants who did not see the model perform. This result is not limited to the minority... as even those who saw the model outperform the human were less likely to choose the model than were participants who did not see the model perform.",
+      "confidence": "high",
+      "evidence": "Verified directly against the primary source (Dietvorst, Simmons, & Massey, 2014, JEP: General, \"Algorithm Aversion,\" pp. 6-7 of the PDF). The paper states verbatim: \"participants in the model-and-human conditions, most of whom saw the model outperform the human in the first stage of the experiment (610 of 741 [83%] across the five studies), were, across all studies, among those least likely to choose the model... This result is not limited to the minority who saw the human outperform the model, as even those who saw the model outperform the human were less likely to choose the model than were participants who did not see the model perform.\" (Footnote 7 breaks down the per-study chi-square tests confirming this held in every individual study, not just in aggregate.) The claim under review is essentially a direct paraphrase of this passage, with the numbers (610/741, 83%) and the causal comparison (saw-outperform vs. never-saw) both reproduced accurately. No overreach: the paper explicitly frames this as evidence the effect is \"not limited to the minority\" \u2014 i.e., it holds even among the majority who saw the algorithm win. Source is a peer-reviewed primary source (top psychology journal, ~2014, foundational and still widely cited/uncontested on this specific finding), matching the strength of the claim.",
+      "vote": "3-0"
+    },
+    {
+      "claim": "The asymmetry is specifically in how confidence updates: watching an algorithm err substantially and consistently reduced participants' confidence in the algorithm's forecasts across all four studies that manipulated model experience, whereas watching a human err reduced confidence in the human's forecasts in only one of those four studies \u2014 despite humans making larger errors on average (15-97% more error than the model depending on the study/domain).",
+      "source": "https://marketing.wharton.upenn.edu/wp-content/uploads/2016/10/Dietvorst-Simmons-Massey-2014.pdf",
+      "quality": "primary",
+      "quote": "seeing the model perform significantly decreased participants' confidence in the model's forecasts in every study.10 Seeing the model perform significantly decreased confidence in the human's forecasts in only one of the four studies",
+      "confidence": "high",
+      "evidence": "Downloaded and text-extracted the primary source PDF (marketing.wharton.upenn.edu Dietvorst-Simmons-Massey-2014.pdf) directly and confirmed the claim verbatim against the paper's own text, not just the excerpted quote. Footnote 10 (p. ~861 of the PDF text) states exactly: \"Seeing the model perform significantly decreased confidence in the model's forecasts in every study: Study 1... Study 3a... Study 3b... Study 4... Seeing the human perform significantly decreased confidence in the human's forecasts in only one of the four studies: Study 1 (p=.262, ns), Study 3a (p=.952, ns), Study 3b (p=.450, ns), Study 4 (p=.023, significant).\" The body text states the same in prose: \"seeing the human perform did not consistently decrease confidence in the human's forecasts\u2014it did so significantly only in Study 4, seeing the model perform significantly decreased participants' confidence in the model's forecasts in all four studies.\" This exactly matches the claim's \"all four studies... whereas watching a human err reduced confidence in the human's forecasts in only one of those four studies.\" The error-magnitude figure is also independently confirmed: the paper states the human \"produced ... 15\u201329% more error than the model in the MBA student forecasting task of Studies 1, 2, and 4 and 90\u201397% more error than the model in the airline passenger forecasting task of Studies 3a and 3b\" \u2014 combining to exactly the claim's \"15-97% more error than the model depending on the study/domain\" (and the discussion section separately restates this as \"13-97% more error\"). One caveat: the claim's supplied \"Supporting quote\" itself contains a transcription slip (it reads \"Seeing the model perform significantly decreased confidence in the human's forecasts...\" where the actual paper says \"Seeing the human perform...\"), but this is an error in the excerpt given to me, not in the underlying claim, which correctly attributes the effect to watching the human. A 2021 follow-up (Lin, Kim & Tong, SSRN 3891832) found the asymmetry reverses in repeated real-world settings (insulin dosing), but this is a boundary-condition finding about generalizability, not a refutation of what Dietvorst et al.'s original four studies found \u2014 the claim is scoped to that paper's studies specifically.",
+      "vote": "2-1"
+    },
+    {
+      "claim": "The trust-restoring effect of control is driven by the mere presence of some agency, not by the size of the discretion granted \u2014 a tiny modification allowance works nearly as well as a larger one.",
+      "source": "https://pubsonline.informs.org/doi/10.1287/mnsc.2016.2643",
+      "quality": "primary",
+      "quote": "participants' preference for modifiable algorithms was relatively insensitive to the magnitude of the modifications they were able to make",
+      "confidence": "high",
+      "evidence": "Verified against the primary source (Dietvorst, Simmons & Massey 2018, Management Science 64(3):1155-1170, fetched full PDF of Studies 1-2). Study 2 directly tests the claim: participants were randomly assigned to adjust-by-10, adjust-by-5, or adjust-by-2 percentile conditions vs. a can't-change control. Choice-to-use rates were 71%, 71%, and 68% respectively (vs 47% in can't-change) \u2014 a chi-square test across the three magnitude conditions was non-significant: \u03c7\u00b2(2, N=623)=0.42, p=0.809. The paper's own discussion states: 'participants were relatively insensitive to the amount by which they could adjust the model's forecasts... the amount of control needed to obtain those benefits is actually quite small,' and explicitly frames this as evidence people want 'some' control, not 'greater' control. This is an exact match to the claim, not an overreach \u2014 the claim's phrasing ('tiny modification allowance works nearly as well as a larger one') is a direct, non-exaggerated paraphrase of the 68/71/71% finding. Source quality is high (top-tier peer-reviewed journal, well-cited, N=816 in Study 2, preregistered-style design with clear stats). Searched for contradicting evidence/replications: found a 2023 CHI follow-up (arXiv:2303.12896, 'Overcoming Algorithm Aversion: A Comparison between Process and Outcome Control') that reinforces rather than contradicts the theme \u2014 it finds 'some control' (of the right type) matters more than the extent of control. No credible source disputing the magnitude-insensitivity finding was found. Minor caveat: the claim's framing as 'trust-restoring' is an interpretive gloss \u2014 the original paper measures willingness-to-use/choice behavior and satisfaction rather than using the word 'trust' directly \u2014 but this is a standard and reasonable mapping in the algorithm-aversion literature, not a misrepresentation.",
+      "vote": "3-0"
+    },
+    {
+      "claim": "Interface interventions that force active interaction with the changed element (the 'Swipe' and 'Type' attractors) remain effective at directing attention even after many repeated exposures, unlike passive/attention-directing designs.",
+      "source": "https://www.usenix.org/system/files/soups14-paper-bravo-lillo.pdf",
+      "quality": "primary",
+      "quote": "two attractors, Swipe and Type, remained effective even after many exposures.",
+      "confidence": "high",
+      "evidence": "The quote is verbatim from the primary source (Bravo-Lillo et al., \"Harder to Ignore? Revisiting Pop-Up Fatigue and Approaches to Prevent It,\" USENIX SOUPS 2014). Independent web searches surfacing paper summaries/citations converge on the same finding using near-identical language: \"for the two attractors that forced the user to interact with the text field containing the change [Swipe and Type], increasing the level of habituation did not decrease the proportion of participants who responded to the change,\" in contrast to passive attractors and the control, where \"increasing habituation reduced the proportion of participants who noticed the change.\" This directly supports both halves of the claim under review: (1) Swipe/Type remain effective across many exposures, and (2) this differs from passive/attention-directing designs, which degrade with habituation. A partial replication (Busse et al., \"Do We Snooze If We Can't Lose?\", USEC/NDSS 2019) failed to fully replicate the original study's broader results, but specifically corroborated Swipe and Type as \"resistant to habituation\" with \"similar compliance trends\" \u2014 i.e., the one part of the original study most relevant to this claim held up under independent replication, even though the paper's overall replication was imperfect. Source quality (peer-reviewed, well-cited primary HCI/security paper, authored by recognized researchers including Lorrie Cranor) is adequate for a claim of this specificity and strength \u2014 it is a bounded, well-scoped empirical finding, not an extraordinary or sweeping claim. No credible source found disputing the Swipe/Type-specific finding. Minor caveats: study is an artificial MTurk lab experiment (external validity to real-world agent UIs is inferential, not directly tested) and is now 11 years old, but neither undermines the narrow claim as stated, which is about that specific study's findings.",
+      "vote": "2-1"
+    },
+    {
+      "claim": "Increasing how often users are prompted to make a decision (asking on every visit vs. asking on only 25% of visits) significantly worsens long-term retention (hazard ratio 0.78, p<0.003), i.e., higher ask-frequency measurably drives attrition.",
+      "source": "https://arxiv.org/pdf/2101.11743",
+      "quality": "primary",
+      "quote": "Asking users \"on all visits\" showed worse retention than asking \"25% of visits\" (hazard ratio 0.78, p<0.003)",
+      "confidence": "high",
+      "evidence": "Verified directly against the primary source (arxiv 2101.11743, Kovacs/Wu/Bernstein, \"Not Now, Ask Later,\" CHI 2021 \u2014 read pages 1-7 of the actual PDF, including Table 1 and Figure 7 in Section 5.2). This is a randomized controlled experiment on the HabitLab browser extension: users were randomly assigned to have a difficulty-preference prompt shown at 0%, 25%, 50%, or 100% of visits, and retention (time-to-uninstall/attrition, via survival/Cox proportional-hazards analysis) was measured. Table 1 shows exactly: reference = 100% of visits; 25% of visits \u2192 Hazard Ratio 0.78 (95% CI 0.66-0.92), p=0.003. This is an exact match to the supporting quote and the claim's stated numbers. The paper's own text states: 'Retention is significantly higher when the prompts are shown 25% of the time, compared to 100% of the time.' Source quality is high \u2014 peer-reviewed CHI (top HCI venue) paper with a genuine randomized experiment (not observational/correlational), N=1,108 observations, 1,029 events, reported with full CI/p-values/likelihood-ratio and Wald tests, so it comfortably meets the bar for this claim's strength. Not outdated (2021, and interruption/friction-retention dynamics in HCI aren't a fast-moving-model-capability topic where 5-year-old findings expire). Not marketing/press-release content. One nuance the claim's 'i.e.' gloss elides: the relationship isn't strictly monotonic \u2014 the 0%-of-visits (never asked) condition had HR=0.93 (p=0.47, not significant) versus the 100% reference, i.e., never-asking wasn't reliably better than asking-every-time either; only the specific 25% frequency significantly outperformed 100%. So the safer framing is 'occasional asking beats constant asking' (which is what the paper itself concludes) rather than a strict monotonic dose-response 'more asking always worse.' This is a precision quibble on the generalizing clause, not a refutation of the core quoted statistic, which is accurate and well-supported. I found no contradicting evidence in search results; independent search summaries of this paper corroborate the same HR/p-value (one paraphrase said 'p<0.005' vs the table's exact p=0.003 \u2014 a rounding artifact in a secondary summary, not a discrepancy in the primary source I read directly). One scope caveat worth flagging to the synthesis stage (not grounds for refuting factual accuracy): HabitLab is itself a personal behavior-tracking/digital-wellbeing tool, and the grounding says tracking-app abandonment/lapse typology was already settled by Cairn R3 and is out of scope for R8. However, this particular finding is a general interaction-friction-vs-retention causal experiment (sub-area 3: friction economics), not a lapse-typology study, so it's plausibly still in-scope \u2014 but the adjacency to the excluded domain is worth a note.",
+      "vote": "2-1"
+    },
+    {
+      "claim": "The authors conclude that excessive prompting increases attrition even though it only costs users a small amount of time per interaction (median 1.55 seconds to answer the prompt) \u2014 friction from decision frequency, not decision cost, is what drives abandonment.",
+      "source": "https://arxiv.org/pdf/2101.11743",
+      "quality": "primary",
+      "quote": "median of 1.55 seconds",
+      "confidence": "high",
+      "evidence": "Verified directly against the primary source (Kovacs, Wu, Bernstein, \"Not Now, Ask Later,\" CHI 2021, arXiv:2101.11743) via ar5iv full text. The paper explicitly states \"median of the distribution is 1.55 seconds\" for time to answer a difficulty-preference prompt, and explicitly uses the term \"attrition\": \"low-frequency prompting reduces attrition compared to high-frequency prompting\" and \"excessive prompting increasing attrition.\" Crucially, the authors separate time-cost from frequency: \"there is no significant difference in the duration of sessions when a difficulty prompt is shown, vs not shown\" (ruling out per-interaction time cost as the driver), while retention was \"significantly higher when users are asked... at a low frequency (25% of visits)... compared to being asked on all visits\" (p<0.005) \u2014 an effect the authors attribute to annoyance/interruption burden, backed by direct user feedback: \"we received feedback from many users that they had uninstalled HabitLab because they were annoyed by excessive difficulty choice prompts.\" The claim's \"decision frequency, not decision cost\" framing is a paraphrase rather than a verbatim quote, but it is a faithful synthesis of the authors' own contrast (minimal per-prompt time cost vs. frequency-driven annoyance/uninstalls), not an overreach. Source quality is strong (peer-reviewed CHI paper, N=8,000+ users, 16,183 timed responses). One caveat for downstream use: this is a single case study of a self-directed browsing-nudge extension, not an AI-agent confirmation-prompt study, so it's directly on-topic for sub-area 3 (general interaction-friction economics) but should not be treated as agent-specific evidence.",
+      "vote": "2-1"
+    },
+    {
+      "claim": "Despite steadily weakening their actual behavior-change commitment, most users decline to permanently lock in the easier setting and instead keep opting to be re-asked to re-negotiate difficulty on their next visit \u2014 a 'not now, ask later' pattern of deferred re-commitment rather than one-time renegotiation.",
+      "source": "https://arxiv.org/pdf/2101.11743",
+      "quality": "primary",
+      "quote": "many still expect to return to the harder interventions imminently: they repeatedly choose to be asked to change difficulty again on the next visit",
+      "confidence": "high",
+      "evidence": "Verified via arxiv.org/abs/2101.11743. The paper's actual title IS the claim: \"Not Now, Ask Later: Users Weaken Their Behavior Change Regimen Over Time, But Expect To Re-Strengthen It Imminently\" by Kovacs, Wu, and Bernstein (CHI '21), based on log analysis of 8,000+ HabitLab users (a tool restricting excessive online browsing via configurable-difficulty interventions). The arxiv abstract confirms the mechanism precisely: users progressively shift to easier interventions over time, yet \"users frequently opt to be prompted again on their next visit rather than permanently saving their preference for easier restrictions\" \u2014 i.e., deferred re-commitment (\"not now, ask later\") rather than one-time renegotiation of the easier setting. This is not an overreach or misread; the claim is essentially a restatement of the paper's own title and central abstract finding, not an inference stretched from a supporting quote. The PDF's full text was not directly extractable (image-heavy encoding), so I could not pull the exact in-body sentence containing \"many still expect to return to the harder interventions imminently,\" but the abstract-level evidence independently and strongly corroborates the claim's substance and the supporting quote's language. Source quality is high (peer-reviewed CHI paper, primary source, large-N behavioral log study) and well-matched to the claim's strength (a descriptive behavioral pattern, not an extraordinary causal claim). No contradicting evidence found. Not outdated \u2014 it's a stable behavioral/UX finding, not a claim about fast-moving model capabilities. Note: this HabitLab/digital-wellness domain overlaps with what the grounding flags as \"personal-tracking abandonment ... already settled by Cairn R3, do not research\" \u2014 the claim itself checks out factually, but its relevance to the general human-agent autonomy-boundary question (vs. tracking-app-specific churn) is a scope question for the parent synthesis to weigh, not a refutation ground.",
+      "vote": "3-0"
+    },
+    {
+      "claim": "Interrupting warnings that require a click-through action produce a dramatically larger behavioral effect than passive/inline warnings \u2014 in a controlled search-task experiment, click-through rate on the interstitial (interrupting) warning was much lower (users bypassed it far less) than on the contextual (passive) warning.",
+      "source": "https://arxiv.org/pdf/2008.10772",
+      "quality": "primary",
+      "quote": "The CTR for the contextual warning was very high: 33/40... The CTR for the interstitial warning was much lower: 18/40.",
+      "confidence": "high",
+      "evidence": "Verified against the actual paper (Kaiser et al., \"Adapting Security Warnings to Counter Online Disinformation,\" arXiv:2008.10772, published at USENIX Security 2021, Princeton/Cornell authors). Fetched both the arxiv PDF/abstract and the ar5iv HTML rendering. The exact quote \"CTR for the contextual warning was very high: 33/40... The CTR for the interstitial warning was much lower: 18/40\" is verbatim in the paper's laboratory-study results section (n=20 per condition, simulated search task). CTR here means click-through past the warning (bypass rate), so the claim's interpretation \u2014 interstitial/interrupting warnings suppressed bypass far more than contextual/passive warnings (45% vs 82.5% click-through) \u2014 is a correct, non-overreaching reading of the data, and matches the paper's own abstract framing: \"Users routinely ignore contextual warnings, but users notice interstitial warnings.\" A supplementary search on security-warning habituation literature turned up a consistent, independent finding in the same direction (active/interstitial warnings heeded by ~79% of participants vs. essentially 0% for a passive warning in a separate study), and no contradicting source. Source is peer-reviewed at a top venue, not outdated (2020-21 HCI/security-warning research remains valid, not a fast-moving-capabilities field), and not marketing content. One minor nuance not in the claim: the paper notes neither comprehension nor fear of harm moderated the effect (suggesting friction/annoyance may drive it rather than informed choice) \u2014 this qualifies the mechanism but does not contradict the stated numerical/behavioral claim.",
+      "vote": "3-0"
+    }
+  ],
+  "refuted": [
+    {
+      "claim": "Automation complacency (poorer detection of automation failures than manual monitoring) reliably appears only under multiple-task load, where a competing manual task draws attention away from the automated task; under single-task conditions, monitoring is near-perfect.",
+      "vote": "0-3",
+      "source": "https://journals.sagepub.com/doi/10.1177/0018720810376055"
+    },
+    {
+      "claim": "Habituation to a repeated security dialog sharply degrades users' ability to notice a meaningful change in it: going from low to high exposure (1 rep vs 20 reps) produced roughly a three-fold drop in the proportion of participants who noticed/responded to the change, under the control condition.",
+      "vote": "1-2",
+      "source": "https://www.usenix.org/system/files/soups14-paper-bravo-lillo.pdf"
+    },
+    {
+      "claim": "The authors argue autonomy should be treated as a design decision independent of the agent's capability level -- a highly capable agent can still be deliberately kept at low autonomy (frequent consultation), and a less-capable agent can be run at high autonomy.",
+      "vote": "0-3",
+      "source": "https://arxiv.org/pdf/2506.12469"
+    },
+    {
+      "claim": "Anthropic replaced repeated per-action confirmation with an 'auto mode' backed by OS-level sandboxing (Seatbelt/bubblewrap), which reduced permission prompts by 84% while substituting deterministic environmental containment for human confirmation friction.",
+      "vote": "0-3",
+      "source": "https://www.anthropic.com/engineering/how-we-contain-claude"
+    },
+    {
+      "claim": "Horvitz explicitly ties the cost of wrongly acting (blast radius of an erroneous autonomous action) to the probability threshold required before autonomous action is permitted: increasing the cost of an unwanted action raises the threshold, i.e. higher-cost/harder-to-reverse actions require higher confidence before the system may act on its own rather than asking.",
+      "vote": "0-3",
+      "source": "http://erichorvitz.com/chi99horvitz.pdf"
+    },
+    {
+      "claim": "When an automated decision aid gives a confident but false recommendation, trained operators can follow it at very high (up to 100%) commission-error rates even when contradicting evidence is directly available on other displays and operators had been told to cross-check \u2014 showing human-in-the-loop review can fail as a safety backstop rather than catching the error.",
+      "vote": "1-2",
+      "source": "https://journals.sagepub.com/doi/10.1177/0018720810376055"
+    },
+    {
+      "claim": "System reliability calibration is non-monotonic: moderate (~70%) reliability produced better human monitoring/performance than higher-but-imperfect reliability, because near-perfect (but not perfect) automation induces complacency and erodes vigilance.",
+      "vote": "1-2",
+      "source": "https://pmc.ncbi.nlm.nih.gov/articles/PMC3240751/"
+    },
+    {
+      "claim": "Human users continue to trust and use automation even with substantial error rates, up to roughly 30%, as long as errors are predictable.",
+      "vote": "0-3",
+      "source": "https://pmc.ncbi.nlm.nih.gov/articles/PMC4927573/"
+    },
+    {
+      "claim": "Automation bias occurs simply because an automated system is present, driven by a general human tendency to default to the lowest-effort course of action rather than independently verify.",
+      "vote": "0-3",
+      "source": "https://pmc.ncbi.nlm.nih.gov/articles/PMC4927573/"
+    },
+    {
+      "claim": "People often refuse to use algorithms after seeing them err even once, despite the algorithms outperforming human forecasters on average \u2014 this is the core algorithm aversion phenomenon.",
+      "vote": "0-3",
+      "source": "https://pubsonline.informs.org/doi/10.1287/mnsc.2016.2643"
+    },
+    {
+      "claim": "Giving people even minimal ability to adjust an imperfect algorithm's output (a small modifiable margin) significantly increases their willingness to adopt and rely on it, and improves their actual forecasting performance versus using the unmodifiable algorithm or their own judgment alone.",
+      "vote": "1-2",
+      "source": "https://pubsonline.informs.org/doi/10.1287/mnsc.2016.2643"
+    }
+  ],
+  "sources": [
+    {
+      "url": "https://journals.sagepub.com/doi/10.1177/0018720810376055",
+      "quality": "primary",
+      "angle": "Automation bias & complacency (academic)",
+      "claimCount": 5
+    },
+    {
+      "url": "https://pmc.ncbi.nlm.nih.gov/articles/PMC3240751/",
+      "quality": "primary",
+      "angle": "Automation bias & complacency (academic)",
+      "claimCount": 5
+    },
+    {
+      "url": "https://pmc.ncbi.nlm.nih.gov/articles/PMC4927573/",
+      "quality": "primary",
+      "angle": "Automation bias & complacency (academic)",
+      "claimCount": 5
+    },
+    {
+      "url": "https://www.researchgate.net/publication/47792928_Complacency_and_Bias_in_Human_Use_of_Automation_An_Attentional_Integration",
+      "quality": "primary",
+      "angle": "Automation bias & complacency (academic)",
+      "claimCount": 5
+    },
+    {
+      "url": "https://www.semanticscholar.org/paper/Complacency-and-Bias-in-Human-Use-of-Automation:-An-Parasuraman-Manzey/b0e5a85803bb959ed2cbd47c51009cc48059c02c",
+      "quality": "unreliable",
+      "angle": "Automation bias & complacency (academic)",
+      "claimCount": 0
+    },
+    {
+      "url": "https://faculty.wharton.upenn.edu/wp-content/uploads/2016/08/Dietvorst-Simmons-Massey-2018.pdf",
+      "quality": "primary",
+      "angle": "Algorithm aversion (Dietvorst)",
+      "claimCount": 5
+    },
+    {
+      "url": "https://marketing.wharton.upenn.edu/wp-content/uploads/2016/10/Dietvorst-Simmons-Massey-2014.pdf",
+      "quality": "primary",
+      "angle": "Algorithm aversion (Dietvorst)",
+      "claimCount": 5
+    },
+    {
+      "url": "https://pubsonline.informs.org/doi/10.1287/mnsc.2016.2643",
+      "quality": "primary",
+      "angle": "Algorithm aversion (Dietvorst)",
+      "claimCount": 4
+    },
+    {
+      "url": "https://tianpan.co/blog/2026-04-15-human-in-the-loop-rubber-stamp",
+      "quality": "blog",
+      "angle": "Human-in-the-loop oversight economics",
+      "claimCount": 4
+    },
+    {
+      "url": "https://ravipalwe.medium.com/review-fatigue-is-breaking-human-in-the-loop-ai-heres-the-design-pattern-that-fixes-it-044d0ab1dd12",
+      "quality": "blog",
+      "angle": "Human-in-the-loop oversight economics",
+      "claimCount": 4
+    },
+    {
+      "url": "https://link.springer.com/article/10.1007/s43681-026-01147-7",
+      "quality": "primary",
+      "angle": "Human-in-the-loop oversight economics",
+      "claimCount": 5
+    },
+    {
+      "url": "https://cybermaniacs.com/cm-blog/rubber-stamp-risk-why-human-oversight-can-become-false-confidence",
+      "quality": "blog",
+      "angle": "Human-in-the-loop oversight economics",
+      "claimCount": 5
+    },
+    {
+      "url": "https://cups.cs.cmu.edu/soups/2013/proceedings/a6_Bravo-Lillo.pdf",
+      "quality": "primary",
+      "angle": "Interaction friction economics",
+      "claimCount": 5
+    },
+    {
+      "url": "https://www.usenix.org/system/files/soups14-paper-bravo-lillo.pdf",
+      "quality": "primary",
+      "angle": "Interaction friction economics",
+      "claimCount": 5
+    },
+    {
+      "url": "https://www.researchgate.net/publication/323898188_Habituation_effects_in_computer_security_warning",
+      "quality": "unreliable",
+      "angle": "Interaction friction economics",
+      "claimCount": 0
+    },
+    {
+      "url": "https://arxiv.org/pdf/2101.11743",
+      "quality": "primary",
+      "angle": "Interaction friction economics",
+      "claimCount": 5
+    },
+    {
+      "url": "https://arxiv.org/pdf/2008.10772",
+      "quality": "primary",
+      "angle": "Interaction friction economics",
+      "claimCount": 5
+    },
+    {
+      "url": "https://formstory.io/learn/form-abandonment-statistics/",
+      "quality": "blog",
+      "angle": "Interaction friction economics",
+      "claimCount": 5
+    },
+    {
+      "url": "https://arxiv.org/pdf/2506.12469",
+      "quality": "primary",
+      "angle": "Levels-of-autonomy taxonomies for LLM agents",
+      "claimCount": 5
+    },
+    {
+      "url": "https://knightcolumbia.org/content/levels-of-autonomy-for-ai-agents-1",
+      "quality": "primary",
+      "angle": "Levels-of-autonomy taxonomies for LLM agents",
+      "claimCount": 5
+    },
+    {
+      "url": "https://neuraltrust.ai/blog/agentic-ai-governance-enterprise",
+      "quality": "blog",
+      "angle": "Levels-of-autonomy taxonomies for LLM agents",
+      "claimCount": 4
+    },
+    {
+      "url": "https://arxiv.org/html/2603.20953v1",
+      "quality": "primary",
+      "angle": "Levels-of-autonomy taxonomies for LLM agents",
+      "claimCount": 4
+    },
+    {
+      "url": "https://www.anthropic.com/engineering/how-we-contain-claude",
+      "quality": "primary",
+      "angle": "Blast-radius/reversibility action gating (practitioner)",
+      "claimCount": 5
+    },
+    {
+      "url": "https://www.anthropic.com/news/our-framework-for-developing-safe-and-trustworthy-agents",
+      "quality": "primary",
+      "angle": "Blast-radius/reversibility action gating (practitioner)",
+      "claimCount": 5
+    },
+    {
+      "url": "https://www.anthropic.com/research/measuring-agent-autonomy",
+      "quality": "primary",
+      "angle": "Blast-radius/reversibility action gating (practitioner)",
+      "claimCount": 5
+    },
+    {
+      "url": "https://arxiv.org/pdf/2507.22358",
+      "quality": "primary",
+      "angle": "Blast-radius/reversibility action gating (practitioner)",
+      "claimCount": 5
+    },
+    {
+      "url": "https://galileo.ai/blog/ai-agent-guardrails-framework",
+      "quality": "blog",
+      "angle": "Blast-radius/reversibility action gating (practitioner)",
+      "claimCount": 4
+    },
+    {
+      "url": "https://arxiv.org/pdf/2606.24937",
+      "quality": "secondary",
+      "angle": "Blast-radius/reversibility action gating (practitioner)",
+      "claimCount": 5
+    },
+    {
+      "url": "http://erichorvitz.com/chi99horvitz.pdf",
+      "quality": "primary",
+      "angle": "Mixed-initiative interaction principles",
+      "claimCount": 5
+    },
+    {
+      "url": "https://dl.acm.org/doi/pdf/10.1145/302979.303030",
+      "quality": "primary",
+      "angle": "Mixed-initiative interaction principles",
+      "claimCount": 5
+    },
+    {
+      "url": "http://erichorvitz.com/mixedinit.htm",
+      "quality": "primary",
+      "angle": "Mixed-initiative interaction principles",
+      "claimCount": 5
+    },
+    {
+      "url": "https://arxiv.org/pdf/1106.4573",
+      "quality": "primary",
+      "angle": "Mixed-initiative interaction principles",
+      "claimCount": 5
+    },
+    {
+      "url": "https://arxiv.org/pdf/2510.19512",
+      "quality": "primary",
+      "angle": "Mixed-initiative interaction principles",
+      "claimCount": 4
+    },
+    {
+      "url": "https://arxiv.org/pdf/2509.19152",
+      "quality": "primary",
+      "angle": "Mixed-initiative interaction principles",
+      "claimCount": 5
+    },
+    {
+      "url": "https://papers.ssrn.com/sol3/papers.cfm?abstract_id=3921216",
+      "quality": "primary",
+      "angle": "Contrarian: oversight as flawed safety mechanism",
+      "claimCount": 4
+    },
+    {
+      "url": "https://www.sciencedirect.com/science/article/pii/S0267364922000292",
+      "quality": "primary",
+      "angle": "Contrarian: oversight as flawed safety mechanism",
+      "claimCount": 5
+    }
+  ],
+  "stats": {
+    "angles": 8,
+    "sourcesFetched": 36,
+    "claimsExtracted": 162,
+    "claimsVerified": 45,
+    "confirmed": 34,
+    "killed": 11,
+    "urlDupes": 0,
+    "budgetDropped": 11,
+    "agentCalls": 181,
+    "afterSynthesis": 12
+  }
+}

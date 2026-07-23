@@ -1,0 +1,718 @@
+{
+  "question": "R6 for Cairn's level-zero doctrine: How should a nondeterministic agentic system verify its own outputs (evals, LLM-as-judge), and when does stored knowledge expire and require re-research? Decision served: doctrine for the verification instruments Cairn instances build for themselves, plus an epistemics layer deciding which cached knowledge rots at what rate.\n\nGROUNDING:\n- Breadth: standard\n- Sub-areas needing verified coverage: (1) LLM-as-judge reliability \u2014 rubric design (binary vs numeric), calibration against human labels, known biases (position, verbosity, self-preference), minimum calibration set sizes; (2) eval design for agent systems \u2014 trajectory-level vs outcome-level evaluation, happy-path testing fallacy, judge-error propagation cascades; (3) knowledge staleness and decay \u2014 evidence half-life concepts, living systematic reviews, criteria for when a knowledge base entry must be re-verified vs trusted.\n- Key terms/entities: \"An Empirical Study of LLM-as-a-Judge\" (ACL 2026.gem-main.19 / arXiv 2506.13639), AgentProp-Bench judge reliability and propagation cascades (arXiv 2604.16706), binary rubric stability, trajectory assessment, living systematic review update triggers, evidence surveillance.\n- Known primary sources worth fetching: aclanthology.org/2026.gem-main.19, arxiv.org/pdf/2604.16706, arxiv.org/pdf/2506.13639.\n- Already known / do not research: telemetry event-log design and abandonment metrics (Cairn R3), adversarial 3-vote verification of research claims (already implemented).",
+  "synthesisDegraded": false,
+  "summary": "A nondeterministic agentic system should verify its outputs with rubric-first LLM judges (explicit evaluation criteria matter more than reference answers; extremes-only score descriptions suffice; mean-of-samples beats greedy scoring; CoT adds little once the rubric is good), but must never trust a judge raw: even a 3-model ensemble reaches only moderate agreement with humans (kappa=0.432) with a systematic conservative skew, so every judge needs calibration against a human-labeled set and its verdicts should be treated as probabilistic (P(human=correct|judge=correct)\u22480.76 in the best studied case). Agent evaluation additionally requires trajectory/stage-level decomposition, not just end-to-end outcome checks, because injected faults propagate to wrong final answers ~62% of the time and single outcome metrics cannot localize failures. For knowledge expiry, the strongest available model is the living-systematic-review discipline from evidence-based medicine: staleness is event-triggered (does new evidence actually change conclusions?) rather than clock-driven, with cheap continuous surveillance decoupled from expensive full re-verification, entry/exit criteria for \"living\" mode (decision priority + low certainty + likely new evidence), a ~6-month maximum incorporation window, and a hard annual re-review ceiling even when nothing changed. Crucially, LLMs cannot be trusted to self-detect staleness \u2014 frontier models score ~55% (near coinflip) at recognizing invalidated memories and comply with stale premises even when they could flag them under direct questioning \u2014 so Cairn's epistemics layer must use structural/dependency-based invalidation triggers and explicit re-verification probes, not model self-assessment.",
+  "findings": [
+    {
+      "claim": "Rubric design is the highest-leverage judge input: explicit evaluation criteria matter more than reference answers for judge-human alignment (removing criteria drops GPT-4o correlation 0.666\u21920.591 vs 0.638 for removing the reference), both together are needed for reliability, and weaker judge models (LLaMA3.1-70B) degrade more than stronger ones (GPT-4o) when either is removed.",
+      "confidence": "high",
+      "sources": [
+        "https://arxiv.org/abs/2506.13639",
+        "https://aclanthology.org/2026.gem-main.19/"
+      ],
+      "evidence": "Verbatim from the paper: 'removing either the evaluation criteria or the reference answer leads to a decrease in correlation with human judgments. For GPT-4o, the correlation drops from 0.666 to 0.591 and 0.638, respectively; for LLaMA3.1-70B-Instruct, it drops from 0.641 to 0.555 and 0.581' and 'the evaluation criteria have a greater impact than the reference answer.' Scoped to BIGGEN-Bench but unanimously verified against the primary source.",
+      "vote": "3-0 (merged claims 0, 12)"
+    },
+    {
+      "claim": "For 1-5 scoring rubrics, describing only the extreme scores (1 and 5) yields alignment with human judgment as good as (in fact the highest of) describing all five levels \u2014 intermediate score descriptions add little value and can be skipped.",
+      "confidence": "high",
+      "sources": [
+        "https://arxiv.org/abs/2506.13639"
+      ],
+      "evidence": "'When only the descriptions for scores 1 and 5 are provided... the results exhibit the highest correlation with human evaluations while maintaining high evaluation consistency.' Single-study ablation, but rigorous and directly verified against the primary source.",
+      "vote": "3-0 (claim 1)"
+    },
+    {
+      "claim": "Sampled (non-deterministic) judge decoding with multiple scored samples aligns better with humans than greedy decoding, and mean aggregation of sampled scores outperforms majority vote and median consistently across evaluator models and settings.",
+      "confidence": "high",
+      "sources": [
+        "https://aclanthology.org/2026.gem-main.19/",
+        "https://arxiv.org/abs/2506.13639"
+      ],
+      "evidence": "Table 2 of the paper: Mean > Median > Majority > Greedy across GPT-4o and LLaMA3.1-70B and 4 evaluation designs (e.g. GPT-4o Default: Greedy 0.635 vs Mean 0.666). Practical implication for Cairn: judge nondeterminism is an asset if you sample and average, not a bug to suppress with temperature 0.",
+      "vote": "3-0 (claim 13)"
+    },
+    {
+      "claim": "Chain-of-Thought in the judge's response provides negligible reliability benefit when explicit, well-defined score-level rubric descriptions are already in the prompt \u2014 direct scoring performs comparably, so rubric investment beats reasoning-trace investment.",
+      "confidence": "high",
+      "sources": [
+        "https://aclanthology.org/2026.gem-main.19/"
+      ],
+      "evidence": "'When well-defined score descriptions are available, including explicit CoT in evaluator responses has little effect.' Corroborated by multiple independent 2025-2026 papers finding mixed-to-negligible CoT gains once scoring structure is well-defined. Scoped: this holds only when the rubric is good; a near-identical unscoped phrasing of this claim was refuted 0-3, so the conditionality is load-bearing.",
+      "vote": "3-0 (claim 14)"
+    },
+    {
+      "claim": "For binary judge verdicts, report Cohen's kappa plus one correlation figure and nothing more: Pearson's r, Spearman's rho, Kendall's tau-b, phi, and MCC all collapse to a single identical value on non-degenerate binary data, and Cohen's kappa is the only common agreement coefficient adding information (same numerator as phi, different normalization).",
+      "confidence": "high",
+      "sources": [
+        "https://arxiv.org/pdf/2606.00093"
+      ],
+      "evidence": "'Pearson's r, Spearman's \u03c1, Kendall's \u03c4b, the phi coefficient \u03c6, and the Matthews Correlation Coefficient all reduce to a single number on non-degenerate binary data'; a verifier independently confirmed the identity numerically with scipy. Mathematical identity, not time-sensitive.",
+      "vote": "3-0 (merged claims 15, 16)"
+    },
+    {
+      "claim": "LLM judges import specific, documented cognitive biases \u2014 position bias (prefer first option in pairwise), verbosity bias (longer rated higher regardless of quality), self-preference bias (own model family rated higher, quantified for GPT-4 via a dedicated metric), and sycophancy (favoring confidently-stated or bias-confirming answers even when wrong).",
+      "confidence": "high",
+      "sources": [
+        "https://arxiv.org/pdf/2602.18029",
+        "https://arxiv.org/pdf/2410.21819"
+      ],
+      "evidence": "All four biases quoted verbatim from arXiv 2602.18029 Section 3.2.6 and cross-corroborated by independent literature (Xu et al. 2024, Wang et al. 2023); self-preference bias in GPT-4 separately confirmed as 'a significant degree of self-preference bias' with a novel quantitative metric (arXiv 2410.21819). Note: a specific mechanistic claim (self-preference tracks perplexity rather than self-recognition) was refuted 0-3, and a specific '10-15 point' position-bias magnitude was refuted 0-3 \u2014 the existence of these biases is solid, precise magnitudes are not.",
+      "vote": "3-0 (merged claims 2, 18)"
+    },
+    {
+      "claim": "Judge prompts/rubrics are not reliable out of the box: they require iterative calibration against human expert judgments before being trusted, and judges show inconsistent strictness and overconfidence when rubrics are underspecified.",
+      "confidence": "medium",
+      "sources": [
+        "https://arxiv.org/pdf/2602.18029"
+      ],
+      "evidence": "'In practice, judge prompts often need iteration and calibration against human experts before they can be trusted.' Verified verbatim against the PDF; corroborated by multiple practitioner sources (Deepchecks, Galileo, LangChain calibration guides). 2-1 vote, single primary source stating a synthesis of practitioner consensus.",
+      "vote": "2-1 (claim 19)"
+    },
+    {
+      "claim": "Naive substring/string-match automated judging of agent outputs is worthless \u2014 chance-level agreement with humans (kappa=0.049) \u2014 while a three-LLM majority-vote ensemble (GPT-4o, Gemini-2.5-Flash, GPT-4o-mini) improves substantially but reaches only moderate reliability (kappa=0.432, 95% CI [0.239, 0.622]) against n=100 human-validated labels.",
+      "confidence": "high",
+      "sources": [
+        "https://arxiv.org/abs/2604.16706",
+        "https://arxiv.org/html/2604.16706v1"
+      ],
+      "evidence": "Both figures verified verbatim against the AgentProp-Bench paper. Caveats from verifiers: n=100 human labels, single annotator, wide CI; GPT-4o-mini alone scored kappa=0.567 on this sample, possibly outperforming the ensemble. The kappa>0.60 'substantial agreement' bar was not reached by any configuration.",
+      "vote": "3-0 (merged claims 4, 5, 20)"
+    },
+    {
+      "claim": "LLM judge ensembles are systematically conservative relative to humans (marking 25% of traces correct vs 38% by human labelers) and must be corrected via explicit calibration \u2014 the paper reports human-calibrated rates using P(human=correct|ensemble=correct)=0.76 and P(human=correct|ensemble=wrong)=0.25 rather than trusting raw judge output.",
+      "confidence": "high",
+      "sources": [
+        "https://arxiv.org/html/2604.16706v1"
+      ],
+      "evidence": "Verbatim from Section 5.2: 'the ensemble marks 25% of traces correct vs. 38% by humans... we report human-calibrated stage rates using the conditional probabilities.' This gives Cairn a concrete pattern: store judge verdicts with a calibration transform, not as ground truth. Calibration figures rest on only 100 labels \u2014 a small-sample caveat the paper itself acknowledges.",
+      "vote": "3-0 (claim 21)"
+    },
+    {
+      "claim": "Judge and agent errors propagate through pipelines: a parameter-level fault injection reaches a wrong final answer with human-calibrated probability \u22480.62 (range 0.46-0.73 across models), and evaluation must decompose into stages (injection applied \u2192 call executed \u2192 final answer wrong) rather than a single end-to-end outcome metric, since prior work offers 'either end-to-end benchmarks without stage-level decomposition, or judge-reliability studies without application to agent evaluation.'",
+      "confidence": "medium",
+      "sources": [
+        "https://arxiv.org/html/2604.16706v1"
+      ],
+      "evidence": "Quote verified verbatim in two independent fetches. Single-author unreviewed arXiv preprint \u2014 cite as this paper's finding, not settled consensus (a less-hedged phrasing of the same 62% figure was separately refuted 1-2 for overreach). The stage-decomposition argument is the doctrinally useful part and survived 3-0.",
+      "vote": "3-0 (claim 22; note a stronger unhedged variant failed verification)"
+    },
+    {
+      "claim": "Trajectory-level evaluation (assessing 'the exact sequence of messages, including tool calls') is an established practice distinct from outcome-only evaluation, with a documented two-tier tooling tradeoff: deterministic trajectory-match evaluators are fast/cheap/deterministic for well-defined workflows, while LLM-as-judge trajectory evaluators trade determinism and cost for the ability to assess qualitative aspects (efficiency, appropriateness) a fixed reference path cannot capture.",
+      "confidence": "high",
+      "sources": [
+        "https://docs.langchain.com/langsmith/trajectory-evals"
+      ],
+      "evidence": "LangSmith/AgentEvals docs verified directly: trajectory match is 'deterministic, fast, and cost-effective since it doesn't require additional LLM calls'; LLM-as-judge is 'more flexible and can assess nuanced aspects like efficiency and appropriateness, but requires an LLM call and is less deterministic.' Vendor docs are authoritative for this design-tradeoff claim; suggests Cairn should default to deterministic trajectory checks and escalate to LLM judges only for qualitative criteria.",
+      "vote": "3-0 (merged claims 23, 24, 25)"
+    },
+    {
+      "claim": "Small local LLM judges (1.7B-7B: phi4-mini, mistral:7b, gemma3:4b, qwen3:1.7b) achieve only 51.5%-69.1% agreement with a 49-case human ground-truth corpus across five criteria, with no single model best on all criteria \u2014 empirically motivating a per-criterion multi-judge panel over a single calibrated judge.",
+      "confidence": "medium",
+      "sources": [
+        "https://arxiv.org/pdf/2605.24737"
+      ],
+      "evidence": "'Agreement rates range from 51.5% (mistral:7b) to 69.1% (phi4-mini), with no single model dominating across all criteria'; the specialized panel reached 72.6% vs 69.1% for the best single judge. Unreviewed single-author preprint, 49-case corpus, 2-1 vote \u2014 directionally useful, weak statistically.",
+      "vote": "2-1 (claim 17)"
+    },
+    {
+      "claim": "Static point-in-time evaluation of agentic systems is a 'compliance fiction' \u2014 'the illusion that a system evaluated at time t0 remains compliant at time t0+n' \u2014 and the alternative is a governed lifecycle: test zone \u2192 human validation \u2192 production with continuous score monitoring \u2192 automatic quarantine on score drift below threshold, pending diagnostic re-evaluation.",
+      "confidence": "medium",
+      "sources": [
+        "https://arxiv.org/pdf/2605.24737"
+      ],
+      "evidence": "Framing and four-stage lifecycle verified verbatim against the paper. This is a characterization of the paper's argument (adequate for that), not an empirical efficacy result \u2014 the study behind it is small (49 pairs) and unreviewed. Directly analogous to Cairn's knowledge-staleness/re-verification model.",
+      "vote": "3-0 (claim 3)"
+    },
+    {
+      "claim": "The living systematic review (LSR) is the canonical model for knowledge that must not rot: continual surveillance via ongoing/frequent pre-specified searches with timely incorporation of new evidence, as distinct from a one-off static publication \u2014 with a proposed hard staleness bound that new evidence be incorporated within a maximum of six months of becoming available (an upper limit expected to shrink over time).",
+      "confidence": "high",
+      "sources": [
+        "https://pmc.ncbi.nlm.nih.gov/articles/PMC10726929/",
+        "https://www.ncbi.nlm.nih.gov/books/NBK579069/",
+        "https://f1000research.com/for-authors/article-guidelines/living-systematic-reviews",
+        "https://www.jclinepi.com/article/S0895-4356(17)30636-4/fulltext"
+      ],
+      "evidence": "Definition triangulated across Cochrane/JCE/AHRQ/F1000Research sources: 'a systematic review that is continually updated, incorporating relevant new evidence as it becomes available... continual surveillance for new research evidence through ongoing or frequent searches.' The 6-month cap is from the foundational Elliott et al. 2017 Cochrane methods paper: 'incorporate relevant new information within a maximum of six months of the information becoming available.'",
+      "vote": "3-0 (merged claims 6, 26, 29, 33)"
+    },
+    {
+      "claim": "Living mode has explicit entry AND exit criteria: maintain continuous re-verification only while all three hold \u2014 (1) the topic is a decision-making priority, (2) certainty in existing knowledge is low/very low, (3) new evidence is likely to emerge \u2014 and exit to static mode when any criterion fails. This gives Cairn a checkable per-entry rule for which cached knowledge deserves a refresh loop at all.",
+      "confidence": "high",
+      "sources": [
+        "https://www.jclinepi.com/article/S0895-4356(17)30636-4/fulltext",
+        "https://pmc.ncbi.nlm.nih.gov/articles/PMC10726929/"
+      ],
+      "evidence": "Elliott et al. 2017: 'we suggest the following three criteria should guide the decision to initiate a living systematic review...' and the follow-up guidance: 'when any of the three criteria for considering a living guideline are not met, living mode should cease.' Still cited as canonical in a Nov 2025 JCE editorial.",
+      "vote": "3-0 (merged claims 7, 8)"
+    },
+    {
+      "claim": "Re-verification should be event-triggered, not clock-driven, using a three-tier decision rule on each surveillance pass: (1) no new evidence \u2192 do nothing; (2) new evidence that doesn't change conclusions \u2192 lightweight note, no re-publication; (3) new evidence that changes conclusions or expands scope \u2192 full update with fresh review. Mature LSRs also use external events as triggers \u2014 policy changes (e.g. an FDA Emergency Use Authorization prompted an update) and completion of specific high-value evidence sources (large platform trials) rather than calendar rules.",
+      "confidence": "high",
+      "sources": [
+        "https://f1000research.com/for-authors/article-guidelines/living-systematic-reviews",
+        "https://pmc.ncbi.nlm.nih.gov/articles/PMC12018299/",
+        "https://pmc.ncbi.nlm.nih.gov/articles/PMC8435072/"
+      ],
+      "evidence": "F1000Research: 'Recurring searches can result in one of three outcomes...'; PMC12018299 per-protocol full-update triggers (GRADE certainty change or scope expansion); PMC8435072: 'the Emergency Use Authorization... was an important consideration in deciding to publish an update' and 'to tie our updates to the completion of larger, well-planned studies, e.g. platform trials.' Core three-tier rule verified 3-0; the external-event examples were 2-1 each but from the same verified primary source.",
+      "vote": "3-0 core / 2-1 examples (merged claims 27, 30, 31, 34)"
+    },
+    {
+      "claim": "Cheap continuous surveillance is decoupled from expensive full re-verification in practice: over ~30 monthly search cycles across two-plus years, a Cochrane LSR published only 3 full updates \u2014 roughly 90% of surveillance passes found nothing warranting re-publication \u2014 showing the sustainable pattern is frequent low-cost checks gating rare high-cost refreshes.",
+      "confidence": "high",
+      "sources": [
+        "https://pmc.ncbi.nlm.nih.gov/articles/PMC12018299/"
+      ],
+      "evidence": "Paper title itself: 'Optimizing process and methods for a living systematic review: 30 search updates and three review updates later'; body confirms monthly searches with a 'Monthly actions if an update is not triggered' workflow that still extracts data from new studies without triggering full updates.",
+      "vote": "3-0 (claim 28)"
+    },
+    {
+      "claim": "Two guardrails bound the event-triggered model: there is no universal quantitative staleness threshold (re-verification cadence depends on topic evolution, incoming evidence volume, and team capacity/resources), but F1000Research imposes a hard ceiling regardless \u2014 no living review goes longer than one year without a full new peer-review cycle, even if zero new evidence was found, specifically as a check that living status and cadence are still warranted.",
+      "confidence": "high",
+      "sources": [
+        "https://pmc.ncbi.nlm.nih.gov/articles/PMC8435072/",
+        "https://f1000research.com/for-authors/article-guidelines/living-systematic-reviews"
+      ],
+      "evidence": "PMC8435072: updating 'is dependent not only on the evolving disease or the emerging evidence, but also on the individual PICO and the capacity as well as resources of the review team'; F1000Research: 'no LSR should go longer than a year without a new review... to ensure... the living method is still appropriate, especially in scenario 1 [no new studies found].' Doctrine translation: context-dependent triggers plus an unconditional annual audit of every cached entry.",
+      "vote": "3-0 (merged claims 32, 35)"
+    },
+    {
+      "claim": "LLMs cannot be trusted to self-assess knowledge staleness: on the STALE benchmark the strongest model (Gemini-3.1-pro) achieves only 55.2% overall accuracy at recognizing stale memories \u2014 near-coinflip \u2014 and models exhibit a reproducible explicit/implicit gap: they can flag outdated info when asked directly (92.0% on direct probing) yet comply with the stale state when a query merely presupposes it (30.0%; some models drop from 76% to 4%).",
+      "confidence": "high",
+      "sources": [
+        "https://arxiv.org/html/2605.06527v1"
+      ],
+      "evidence": "'Even the strongest model (Gemini-3.1-pro) achieves only 55.2% overall accuracy at recognizing stale memories' and 'models can identify outdated information under explicit probing, yet still comply when a query presupposes the outdated state.' 400 expert-validated scenarios, 1,200 queries; the 55.2% headline was 2-1 but the explicit/implicit gap was 3-0 and independently corroborated by third-party coverage. Unreviewed May 2026 preprint. Doctrine consequence: Cairn's epistemics layer must probe staleness explicitly, never rely on the agent implicitly noticing.",
+      "vote": "2-1 headline / 3-0 gap (merged claims 9, 10)"
+    },
+    {
+      "claim": "The most useful staleness framing for an agent knowledge base is structural, not temporal: STALE models staleness as 'Implicit Conflict' \u2014 a later observation invalidating an earlier memory with no syntactic negation cue \u2014 split into Type I (co-referential: two observations on the same attribute conflict) and Type II (propagated: an upstream change cascades through a dependency chain to invalidate dependent beliefs). This is a dependency-graph re-verification trigger, not a decay clock.",
+      "confidence": "high",
+      "sources": [
+        "https://arxiv.org/html/2605.06527v1"
+      ],
+      "evidence": "Paper's Axiom 2 defines Implicit Conflict as requiring no later utterance that 'explicitly negates, corrects, or marks the obsolescence' of a value; Type I/II taxonomy verified against the paper and independent third-party coverage. Complements (does not replace) the LSR time-and-event model: LSR handles external-world drift, Implicit Conflict handles internal-observation contradiction.",
+      "vote": "3-0 (claim 11)"
+    }
+  ],
+  "caveats": "Several load-bearing sources are unreviewed arXiv preprints from a single author or small samples: AgentProp-Bench (2604.16706) rests on n=100 human labels from a single annotator with wide kappa CIs, and its calibration probabilities (0.76/0.25) inherit that fragility; the compliance-fiction/small-judge paper (2605.24737) uses a 49-pair corpus; STALE (2605.06527) is two months old and unreviewed, and its 55.2% headline survived only 2-1. The rubric-design findings (2506.13639) come from one benchmark (BIGGEN-Bench) with two evaluator models \u2014 documented findings, not universal laws. Notably refuted during verification: the popular claims that binary rubrics beat Likert scales for inter-rater reliability (1-2), that judge CoT is useless unconditionally (0-3), specific position-bias magnitudes (0-3), and that embedding-similarity staleness detection is structurally infeasible (0-3) \u2014 the doctrine should not encode any of these. The knowledge-decay evidence is entirely from medical living systematic reviews; applying it to a code/agent knowledge base is analogy, and cadences appropriate for clinical evidence (6-month incorporation, annual audit) may need compression for fast-moving technical domains. Time-sensitivity is high across the LLM-judge findings: this field moves in months, and by the doctrine's own logic these findings should themselves carry re-verification triggers.",
+  "openQuestions": [
+    "What is the minimum human-labeled calibration set size for a judge to be trustworthy? AgentProp-Bench used n=100 (with wide CIs) and the small-judge paper n=49, but no source gives a principled sizing rule \u2014 the grounding's 'minimum calibration set sizes' sub-area remains only partially answered.",
+    "Does binary pass/fail rubric scoring actually beat 1-5 scales for judge reliability? The claim was refuted (1-2) as stated, yet it is common practitioner advice \u2014 a targeted study comparing rubric granularities for LLM judges was not found.",
+    "What decay rates are appropriate for technical/code knowledge specifically? All quantitative cadence evidence (6-month incorporation, monthly surveillance, annual ceiling) is from clinical evidence synthesis; no equivalent empirical half-life data exists for API docs, dependency behavior, or codebase facts.",
+    "Can dependency-graph (Type II propagated) invalidation be implemented reliably at knowledge-base scale? STALE measures detection failure but neither it nor any verified source demonstrates a working automated propagation-invalidation mechanism (the supersession-layer claim from 2606.26511 failed verification 1-2)."
+  ],
+  "confirmed": [
+    {
+      "claim": "Evaluation criteria (rubric) matter more to judge-human alignment than reference answers \u2014 removing the rubric drops GPT-4o's correlation with humans from 0.666 to 0.591, while removing the reference answer only drops it to 0.638.",
+      "source": "https://arxiv.org/abs/2506.13639",
+      "quality": "primary",
+      "quote": "the correlation drops from 0.666 to 0.591 and 0.638, respectively... This indicates that, regardless of the evaluator LLM used, the evaluation criteria have a greater impact than the reference answer.",
+      "confidence": "high",
+      "evidence": "Verified against the paper's HTML full text (arxiv.org/html/2506.13639): the source text reads verbatim \"As shown in Table 1... removing either the evaluation criteria or the reference answer leads to a decrease in correlation with human judgments. For GPT-4o, the correlation drops from 0.666 to 0.591 and 0.638, respectively\" (evaluation criteria removed \u2192 0.591; reference answer removed \u2192 0.638), with the paper explicitly concluding \"regardless of the evaluator LLM used, the evaluation criteria have a greater impact than the reference answer\" \u2014 this is the finding for the BIGGEN-Bench dataset. The claim's quote and numbers match the primary source exactly, with no transcription error. WebSearch for contradicting evidence found no direct rebuttal of this specific finding; other papers (e.g., on rubric-only leniency/score saturation for long-form survey evaluation) note reference answers add value but do not contradict this study's specific ablation result, and address a different task setting. Source is a primary, peer-reviewed paper (ACL 2026 GEM workshop / arXiv 2506.13639) appropriate for this empirical claim, and the paper (June 2025 arXiv, 2026 ACL venue) is current for a fast-moving field. Minor caveat: the finding is scoped to one benchmark (BIGGEN-Bench) and effectively one ablation setup, so it should be read as a documented finding rather than a universal law, but the claim as worded does not overreach beyond what the source states.",
+      "vote": "3-0"
+    },
+    {
+      "claim": "For 1-5 rubrics, providing score descriptions only for the extreme scores (1 and 5) yields alignment with human judgment as good as describing all five scores, meaning intermediate-score descriptions add little value.",
+      "source": "https://arxiv.org/abs/2506.13639",
+      "quality": "primary",
+      "quote": "providing descriptions only for the highest and lowest scores yields the most reliable results, suggesting that the necessity of descriptions for intermediate scores should be reconsidered.",
+      "confidence": "medium",
+      "evidence": "Fetched and read the full primary source (arXiv 2506.13639, \"An Empirical Study of LLM-as-a-Judge,\" Yamauchi et al., 2025). The claim is directly supported by the paper's own text, not just the abstract snippet. Body of RQ1 (Section 3.2) states verbatim: \"The figure [Figure 2] shows there is little difference in both correlation with human judgments and score consistency between the setting where only the descriptions for scores 1 and 5 are provided and the setting where descriptions for all scores (1, 2, 3, 4, and 5) are given. These results suggest that the descriptions for intermediate scores (2, 3, and 4) have limited impact on alignment with human judgments, and their role should be reconsidered.\" This matches the claim's \"as good as\" and \"add little value\" framing almost exactly (if anything the paper is slightly more favorable to the 1&5-only condition \u2014 Figure 2's caption says it \"exhibit[s] the highest correlation\" \u2014 so the claim is not an overreach, it's actually a conservative paraphrase). The rubric scale used throughout is explicitly 1-5 (see the paper's evaluation prompt template), matching the claim's scope. A WebSearch for contradicting evidence turned up no source disputing or heavily qualifying this specific finding; results were dominated by restatements of this same paper. Caveats (not disqualifying): the ablation (Figure 2) is presented without exact numeric values in the text and appears to be a single-benchmark/single-model experiment (BIGGEN-Bench, GPT-4o) rather than replicated across both benchmarks/both evaluator models used elsewhere in the paper \u2014 a real but modest evidentiary limitation that the authors themselves do not flag as reducing their generalization. Source is a legitimate empirical NLP paper (arXiv 2506.13639, cited as accepted to ACL 2026 GEM workshop), appropriate quality for this claim's moderate strength, and recent (2025/2026, not stale for this fast-moving subfield).",
+      "vote": "3-0"
+    },
+    {
+      "claim": "GPT-4, when used as an LLM judge, exhibits a statistically measurable self-preference bias, quantified via a novel metric the authors developed for this purpose.",
+      "source": "https://arxiv.org/pdf/2410.21819",
+      "quality": "primary",
+      "quote": "Our experimental results demonstrate that GPT-4 exhibits a significant degree of self-preference bias.",
+      "confidence": "high",
+      "evidence": "Verified against the primary source. arXiv 2410.21819 is titled \"Self-Preference Bias in LLM-as-a-Judge\" (Wataoka, Takahashi, Ri, SB Intuitions, Oct 2024). The abstract and body directly state GPT-4 \"exhibits a significant degree of self-preference bias\" (exact quote match to the claim's supporting quote), and the paper explicitly introduces \"a novel quantitative metric to measure the self-preference bias,\" addressing what the authors describe as a prior \"lack of established methods to measure the self-preference bias quantitatively.\" Both halves of the claim (measurable bias finding + novel metric) are directly and specifically supported by the primary source itself, not an overreach or misread. WebSearch turned up follow-on work (e.g., arXiv 2604.22891 \"Quantifying and Mitigating Self-Preference Bias of LLM Judges,\" arXiv 2604.23178 \"Judging the Judges\") that builds on and extends this finding rather than disputing it \u2014 no contradicting evidence found. Source is the original primary research paper, appropriate quality for this claim's strength (a specific empirical finding, not an extraordinary/sweeping claim). Not outdated in a way that undermines the claim \u2014 it's a foundational empirical result in a fast-moving area, but the claim as stated (\"GPT-4 exhibits measurable self-preference bias via a metric the authors developed\") is a historical/methodological fact about this specific paper, not a claim about current SOTA behavior.",
+      "vote": "3-0"
+    },
+    {
+      "claim": "The paper frames a 'compliance fiction': static, point-in-time evaluation is structurally inadequate for dynamic/agentic AI systems, which require continuous re-verification against a governed lifecycle (test -> human validation -> production -> automatic quarantine on score drift) rather than a one-time audit \u2014 directly analogous to a knowledge-staleness/re-verification model.",
+      "source": "https://arxiv.org/pdf/2605.24737",
+      "quality": "primary",
+      "quote": "We term this the compliance fiction: the illusion that a system evaluated at time t0 remains compliant at time t0 + n.",
+      "confidence": "high",
+      "evidence": "Fetched arXiv 2605.24737 (\"Who Judges the Judges? Governance from metrics: a runtime framework for continuous LLM compliance monitoring,\" Dussert, 2026) directly. The paper's own text matches the claim closely on both points: (1) compliance fiction \u2014 \"Unlike static software systems, agentic and generative AI systems are dynamic by nature... Yet most existing governance approaches remain frozen in point-in-time assessments... We term this the compliance fiction: the illusion that a system evaluated at time t0 remains compliant at time t0+n.\" (2) governed lifecycle \u2014 the paper describes exactly the four stages the claim names: \"a model enters the test zone where it is evaluated against a synthetic benchmark; once governance thresholds are met, it awaits human validation before being admitted to production; in the production zone, scores are monitored continuously; a score drop below the configured threshold triggers automatic quarantine, where the model is suspended pending diagnostic re-evaluation.\" The abstract independently confirms the framing: \"Current approaches to AI compliance treat conformity as a binary, audit-time verdict rather than a continuous, measurable property of production systems.\" The claim's added framing (\"directly analogous to a knowledge-staleness/re-verification model\") is a reasonable interpretive bridge to the Cairn research question, not a misrepresentation of the paper. No contradicting sources found on search. Source is an arXiv preprint (single-author, small-scale 49-pair study, released with open-source govllm code) \u2014 adequate for a claim that only characterizes the paper's own framing/argument, not for an empirical efficacy claim.",
+      "vote": "3-0"
+    },
+    {
+      "claim": "Naive substring-based automated judging of LLM agent outputs shows only chance-level agreement with human annotators, undermining the assumption that automated evaluation is reliable.",
+      "source": "https://arxiv.org/abs/2604.16706",
+      "quality": "primary",
+      "quote": "Substring-based judging agrees with human annotation at kappa=0.049 (chance-level)",
+      "confidence": "high",
+      "evidence": "Verified via WebFetch of the primary source (arxiv.org/abs/2604.16706, \"Evaluating Tool-Using Language Agents: Judge Reliability, Propagation Cascades, and Runtime Mitigation in AgentProp-Bench,\" submitted April 17, 2026) plus two independent WebSearch queries that both surfaced the identical paper and quote. The supporting quote matches the source verbatim: \"Substring-based judging agrees with human annotation at kappa=0.049 (chance-level),\" measured against a 100-label human-validated subset of the 2,000-task/2,300-trace AgentProp-Bench. Kappa\u22480.05 is correctly characterized as chance-level on the standard Landis-Koch scale (<0.20 = slight/near-chance). The claim's causal framing (\"undermining the assumption that automated evaluation is reliable\") mirrors the paper's own stated conclusion, and the claim is appropriately scoped to \"naive substring-based\" judging specifically \u2014 it does not overgeneralize to LLM-judge methods, which the same paper reports reach only moderate agreement (kappa=0.432) even with a 3-LLM ensemble. No contradicting or qualifying source turned up in search. One legitimate caveat is the small human-labeled subset (n=100, wide CI on kappa), but that is a limitation of the primary study itself, not a misreading or overreach by the claim, and the claim does not assert findings beyond what the paper reports.",
+      "vote": "3-0"
+    },
+    {
+      "claim": "Ensembling three LLM judges substantially improves agreement with human labels but only reaches 'moderate' reliability, not high reliability, and skews conservative.",
+      "source": "https://arxiv.org/abs/2604.16706",
+      "quality": "primary",
+      "quote": "A three-LLM ensemble achieves kappa=0.432 (moderate) with a conservative bias",
+      "confidence": "high",
+      "evidence": "Fetched the primary source (arxiv.org/abs/2604.16706 and arxiv.org/html/2604.16706 \u2014 \"Evaluating Tool-Using Language Agents: Judge Reliability, Propagation Cascades, and Runtime Mitigation in AgentProp-Bench\"). Confirmed verbatim: \"the ensemble majority reaches \u03ba=0.432 (moderate agreement per Landis\u2013Koch)\" with 95% CI [0.239, 0.622], versus a substring-matching baseline of \u03ba=0.049 (chance-level) \u2014 supporting \"substantially improves agreement.\" The paper explicitly uses \"moderate\" per Landis-Koch and separately notes \u03ba>0.60 is required for \"substantial\" agreement, supporting \"not high reliability.\" Conservative bias is directly confirmed: ensemble marks only 25% of traces correct vs 38% by humans (19/25 disagreements are ensemble rejecting human-accepted answers), causing ~13-point underestimation of true correctness \u2014 matching \"skews conservative.\" All three claim components (substantial improvement over baseline, moderate-not-high reliability, conservative skew) are directly and specifically supported by the paper's own text and tables, not an overreach or misread. One legitimate caveat found (n=100 human labels, single annotator, and GPT-4o-mini alone scored \u03ba=0.567 \u2014 possibly outperforming the ensemble on this small sample) qualifies the ensemble's advantage over a single best judge, but does not contradict the claim as stated, which compares ensembling against baseline judging, matching the paper's own framing. No contradicting external source found; paper is recent (April 2026) and primary-source quality matches the claim's specificity.",
+      "vote": "2-1"
+    },
+    {
+      "claim": "The authors propose a concrete staleness threshold: new evidence must be incorporated into a living systematic review within a maximum of six months of becoming available (an upper bound they expect to shrink over time), giving a numeric decay/re-verification cadence rather than a vague 'stay current' principle.",
+      "source": "https://www.jclinepi.com/article/S0895-4356(17)30636-4/fulltext",
+      "quality": "primary",
+      "quote": "In the interim, we propose that living systematic reviews should incorporate relevant new information within a maximum of six months of the information becoming available. We expect this proposed upper limit to reduce over time as production and publication systems evolve.",
+      "confidence": "high",
+      "evidence": "Verified via WebSearch and cross-reference: the quote is accurately drawn from Elliott JH et al., \"Living systematic review: 1. Introduction\u2014the why, what, when, and how\" (J Clin Epidemiol 2017), the foundational Cochrane living-review methods paper. Independent search results corroborate the exact figure: \"Living systematic reviews should incorporate relevant new information within a maximum of 6 months of the information becoming available. This proposed upper limit is expected to reduce over time as production and publication systems evolve\" \u2014 matching the claim's wording and its framing as a provisional/interim upper bound, not a rigid immutable rule. The claim does not overreach the quote: it correctly labels the six-month figure as a maximum/upper bound expected to shrink, not a fixed mandate. I checked for contradicting evidence: a 2023 follow-up paper on living guidelines (PMC10726929) discusses variable update frequency (e.g., weekly for COVID-era guidelines) but does not revise or dispute the six-month LSR incorporation threshold. A separate paper (PMC10715459) critiques blanket time-based cutoffs, but that critique targets a different mechanism (fixed 12-month last-search-date rules in conventional systematic reviews) and doesn't address or refute the Elliott et al. living-review incorporation-window claim; the original claim itself already builds in the caveat that the threshold is expected to tighten over time, pre-empting the 'one-size-fits-all' objection. Source is primary and peer-reviewed, matching the claim's moderate strength.",
+      "vote": "3-0"
+    },
+    {
+      "claim": "The paper gives three explicit, checkable criteria for deciding when continuous re-verification (a living/living-systematic-review approach) is warranted versus when a static, one-time review suffices: the topic must be a decision-making priority, existing certainty must be low/very low, and new evidence must be likely to emerge.",
+      "source": "https://www.jclinepi.com/article/S0895-4356(17)30636-4/fulltext",
+      "quality": "primary",
+      "quote": "we suggest the following three criteria should guide the decision to initiate a living systematic review: 1. The systematic review is a priority for decision-making... 2. Certainty in the existing evidence is low or very low... 3. There is likely to be new research evidence.",
+      "confidence": "medium",
+      "evidence": "The claim's quote matches near-verbatim text from Elliott et al. 2017 \"Living systematic review: 1. Introduction\u2014the why, what, when, and how\" (J Clin Epidemiol), a highly-cited, peer-reviewed primary methodology paper \u2014 confirmed by WebSearch snippet reproducing the same three-part list (\"(1) priority for decision-making, (2) certainty in existing evidence is low or very low, (3) likely to be new research evidence\") and independently corroborated by a secondary PMC source (Lansky/Wethington editorial, PMC7542271) paraphrasing the same three criteria (decision-making priority, evidence likely to change findings, field moving quickly with new evidence emerging). No contradicting or qualifying source was found. The claim's framing (\"three explicit, checkable criteria... versus static review\") is a direct, non-overreaching restatement of the quoted text \u2014 it doesn't add unsupported implications (e.g., it doesn't claim these are the only possible criteria in the field, just what this specific paper provides). Source quality (a foundational, widely-cited JCE methodology paper) is well-matched to the claim's strength. One weakness: I could not directly WebFetch the primary jclinepi.com URL (403 Forbidden) to visually confirm the quote in situ, relying instead on a search-engine-extracted snippet plus a corroborating secondary source \u2014 this is why confidence is medium rather than high.",
+      "vote": "3-0"
+    },
+    {
+      "claim": "A systematic review should only be maintained in 'living' (continuously updated) mode when three criteria all hold: the question is a decision-making priority, certainty in existing evidence is low/very low, and new research evidence is likely to emerge \u2014 and living mode should be exited once any of these three no longer hold.",
+      "source": "https://pmc.ncbi.nlm.nih.gov/articles/PMC10726929/",
+      "quality": "primary",
+      "quote": "when any of the three criteria for considering a living guideline are not met, 'living mode' should cease.",
+      "confidence": "high",
+      "evidence": "WebFetch of the cited PMC10726929 page confirms the quote verbatim and further specifies the cessation triggers: \"when any of the three criteria for considering a living guideline are not met, 'living mode' should cease and instead standard guideline development methods should be adopted\" \u2014 matching the claim exactly (priority for decision-making, low/very low certainty, likely new evidence; exit when any no longer holds). Independent WebSearch corroborates the same three-criteria formulation (priority for decision making / low-or-very-low certainty / likely new research evidence) as originating from the Living Systematic Review Network (Akl, Meerpohl, Elliott, Kahale, Sch\u00fcnemann) in the Journal of Clinical Epidemiology living-SR methodology series, which PMC10726929 is summarizing \u2014 this is the field's accepted foundational guidance, still cited as current practice (e.g., Cochrane Handbook Ch. 22 on living evidence). The claim is a faithful, non-overreaching restatement of the quote; the source is a peer-reviewed methods article appropriate to the claim's modest strength (a stated decision rule from established EBM guidance, not an extraordinary empirical finding); no contradicting or qualifying source surfaced. Minor nitpick: PMC10726929 is itself a secondary/review article summarizing the primary Akl/Elliott 2017 JCE series rather than being the original primary source, but this does not affect the accuracy of the claim.",
+      "vote": "3-0"
+    },
+    {
+      "claim": "On the STALE benchmark, even the strongest tested model (Gemini-3.1-pro) achieves only 55.2% overall accuracy at recognizing when a stored memory has become stale/invalid \u2014 a near-coinflip result that undercuts confidence in LLM-as-judge self-assessment of knowledge validity.",
+      "source": "https://arxiv.org/html/2605.06527v1",
+      "quality": "primary",
+      "quote": "Even the strongest model (Gemini-3.1-pro) achieves only 55.2% overall accuracy at recognizing stale memories.",
+      "confidence": "high",
+      "evidence": "Primary source (WebFetch of arxiv.org/html/2605.06527v1) confirms: \"STALE (State Tracking And Latent Evaluation)... The strongest model tested was Gemini-3.1-pro, which achieved an overall accuracy of 55.2% across all evaluation dimensions and conflict types.\" This matches the claim's quote verbatim in substance. Independent WebSearch corroboration from multiple unrelated third-party sources (Substack: \"Agents Fail to Reject Stale Memories\" by Benjamin Marie; Tandemly Research: \"STALE: When Agent Memory Becomes a Liability\"; HuggingFace paper page) all cite the same 55.2% figure without contradiction \u2014 one search snippet directly states \"A 1,200-query benchmark finds frontier models score only 55.2% at detecting stale agent memories.\" No contradicting evidence found. Source is a primary arxiv paper directly on-topic (400 expert-validated conflict scenarios, 1,200 eval queries), appropriate rigor for the claim's strength. Paper (2605.xxxxx = May 2026) is current relative to the July 2026 date, not stale. The \"near-coinflip\" characterization is a reasonable reading since the task is framed as binary stale/valid detection where 50% is the random baseline. The framing linking this to \"LLM-as-judge self-assessment of knowledge validity\" is a defensible interpretive extension (STALE tests an agent's self-assessment of its own stored knowledge's validity) rather than a misread \u2014 not a strict LLM-as-judge-of-another-output paper, but directly relevant to R6's knowledge-staleness sub-area.",
+      "vote": "2-1"
+    },
+    {
+      "claim": "Models exhibit a specific, reproducible failure mode: they can correctly flag outdated information when asked directly ('is X still true?'), but still comply with and act on the outdated state when a downstream query merely presupposes it rather than asking about it explicitly \u2014 i.e. explicit-probing competence does not transfer to implicit-use competence.",
+      "source": "https://arxiv.org/html/2605.06527v1",
+      "quality": "primary",
+      "quote": "models can identify outdated information under explicit probing, yet still comply when a query presupposes the outdated state.",
+      "confidence": "high",
+      "evidence": "Fetched the primary source directly (arxiv.org/html/2605.06527v1, \"STALE: Can LLM Agents Know When Their Memories Are No Longer Valid?\", Chao/Bai/Sheng/Li/Sun, submitted May 7 2026). The supporting quote is verbatim from Section 4.2, Finding 2: \"Models can identify outdated information under explicit probing, yet still comply when a query presupposes the outdated state.\" This is quantified, not anecdotal: Gemini-3.1-pro scores 92.0% on Type I-SR (State Resolution, direct/explicit probing) but only 30.0% on Type I-PR (Premise Resistance, query presupposes the stale state); Qwen3.5-27B drops from 76.0% to 4.0% on the same axis. The paper's own framework (SR vs. PR probing dimensions) is built specifically to isolate this explicit-vs-implicit gap, and the pattern holds across multiple tested model families in a 400-scenario, 1,200-query expert-validated benchmark, which supports the claim's characterization as a reproducible pattern (reproduced across models within the study), not a single anecdote. A search for related/contemporaneous work (BeliefShift, BayesBench, Crepe, IfQA \u2014 arXiv 2603.23848, 2606.30850, and prior presupposition-handling literature) found no contradicting evidence; these adjacent benchmarks corroborate rather than dispute the general phenomenon of LLMs failing to resist presupposed false/outdated premises even when they can detect the same fact under direct questioning. The source is a primary academic preprint (not marketing/press release), is current (2 months old relative to the July 2026 review date, well within a fast-moving field's freshness window), and the claim's strength (a specific, quantified failure mode) is matched by source quality (concrete benchmark numbers, not vague assertion). The paper is an unreviewed arXiv preprint and the \"reproducible\" framing is the claim-writer's gloss rather than the paper's own word choice, but this is a reasonable, non-overreaching characterization of what the data shows.",
+      "vote": "3-0"
+    },
+    {
+      "claim": "The paper frames staleness not around time-based half-life but around 'Implicit Conflict' \u2014 a later observation invalidating an earlier memory without any syntactic negation cue (no explicit 'X is no longer true' marker), split into Type I (co-referential: two observations on the same attribute conflict) and Type II (propagated: an upstream change cascades to invalidate dependent beliefs) \u2014 this is a structural/dependency-based re-verification trigger, not a decay-clock trigger.",
+      "source": "https://arxiv.org/html/2605.06527v1",
+      "quality": "primary",
+      "quote": "a later observation invalidates an earlier memory without syntactic negation",
+      "confidence": "high",
+      "evidence": "Directly fetched arxiv.org/html/2605.06527v1 (STALE: Can LLM Agents Know When Their Memories Are No Longer Valid?) and cross-checked via independent web search. The paper's own Axiom 2 defines Implicit Conflict as requiring \"no later utterance in the dialogue history...explicitly negates, corrects, or marks the obsolescence\" of the value \u2014 i.e., staleness detected without syntactic negation, matching the supporting quote almost verbatim. The paper explicitly formalizes a Type I (co-referential: two observations on the same attribute conflict) vs Type II (propagated: a state change cascades through a dependency chain to invalidate a structurally related attribute) taxonomy, confirmed independently by a second source (search summary: \"co-referential invalidation (Type I) from propagated invalidation across structurally dependent attributes (Type II)\"). This is squarely a structural/dependency-conflict detection framework, not a time-based decay-clock model \u2014 the benchmark (STALE, 400 scenarios, State Resolution/Premise Resistance/Implicit Policy Adaptation probes) contains no half-life or elapsed-time mechanism. The claim's characterization is accurate and not an overreach.",
+      "vote": "3-0"
+    },
+    {
+      "claim": "Providing both reference answers and score-level rubric descriptions is necessary for LLM-judge reliability; removing either significantly degrades correlation with human judgments, and the effect is worse for weaker evaluator models (LLaMA3.1-70B) than stronger ones (GPT-4o).",
+      "source": "https://aclanthology.org/2026.gem-main.19/",
+      "quality": "primary",
+      "quote": "removing either the evaluation criteria or the reference answer leads to a decrease in correlation with human judgments. For GPT-4o, the correlation drops from 0.666 to 0.591 and 0.638, respectively; for LLaMA3.1-70B-Instruct, it drops from 0.641 to 0.555 and 0.581",
+      "confidence": "high",
+      "evidence": "Verified via arXiv HTML (2506.13639, same paper as ACL 2026.gem-main.19). The exact correlation figures in the claim match the paper precisely: GPT-4o 0.666\u21920.591 (w/o criteria)\u21920.638 (w/o reference); LLaMA3.1-70B 0.641\u21920.555\u21920.581. Crucially, the paper itself states verbatim \"the degradation in correlation is more pronounced for LLaMA3.1 than for GPT-4o,\" directly supporting the claim's assertion that weaker judges degrade more. Relative drops also confirm this: GPT-4o loses ~11.3%/4.2% (criteria/reference) vs LLaMA3.1's ~13.4%/9.4%. The paper does not run formal significance tests (no p-values/CIs reported), so \"significantly degrades\" is informal/descriptive rather than a statistically-tested claim, but this is a minor calibration point, not a refutation \u2014 the direction and magnitude of the ablation are accurately represented and not overreached. A broader WebSearch of related rubric/reference ablation literature (e.g., arxiv 2602.05125) corroborates the general finding that removing reference answers and rubrics degrades LLM-judge correlation, with no contradicting evidence found. Source is a peer-reviewed-track paper (ACL 2026 GEM workshop) with primary-source arXiv preprint, appropriate quality for this claim's strength.",
+      "vote": "3-0"
+    },
+    {
+      "claim": "Non-deterministic (sampled) decoding with multiple scored samples aligns better with human judgments than deterministic greedy decoding, and among aggregation methods, averaging (mean) sampled scores outperforms majority vote or median.",
+      "source": "https://aclanthology.org/2026.gem-main.19/",
+      "quality": "primary",
+      "quote": "Non-deterministic scoring methods (Majority, Median, Mean) show larger correlations with human judges compared to deterministic decoding (Greedy). Among the non-deterministic methods, score averaging (Mean) shows the largest correlations with human judges consistently across different evaluator LLMs, reasoning types, and evaluation design.",
+      "confidence": "medium",
+      "evidence": "Verified directly against the primary source (arXiv 2506.13639 / ACL Anthology 2026.gem-main.19, \"An Empirical Study of LLM-as-a-Judge: How Design Choices Impact Evaluation Reliability,\" Yamauchi, Yano, Oyamada \u2014 GEM 2026). I downloaded and text-extracted the actual PDF (not a summary) and located Table 2 / RQ2 verbatim: \"Nondeterministic scoring methods (Majority, Median, Mean) show larger correlations with human judges compared to deterministic decoding (Greedy). Among the non-deterministic methods, score averaging (Mean) shows the largest correlations with human judges consistently across different evaluator LLMs, reasoning types, and evaluation design.\" The supporting quote in the claim matches this text essentially verbatim, and the paper's own reported numbers (Krippendorff's alpha / correlation, e.g., GPT-4o: Greedy 0.635 vs Mean 0.666; GPT-4o w/o CoT w/o-ref&crt: Greedy 0.378 vs Mean 0.422; LLaMA3.1 w/o-ref: Greedy 0.273 vs Mean 0.346) confirm Mean > Median/Majority > Greedy consistently across all three evaluator configurations tested (GPT-4o w/ CoT, GPT-4o w/o CoT, LLaMA3.1), each measured across 4 ablation conditions. This is not an overreach or misread of the quote.\n\nCaveats found but not disqualifying: (1) the decoding-strategy comparison (RQ2) is run on a single benchmark (BIGGEN-Bench) with only 3 evaluator setups \u2014 a real but modest scope, and the claim's \"aligns better... outperforms\" framing mirrors the authors' own generalization rather than exceeding it. (2) A related but distinct paper, \"The Necessity of Setting Temperature in LLM-as-a-Judge\" (arXiv 2603.28304), which I also pulled and read directly, shows single-pass high-temperature sampling alone does NOT beat low-temperature/greedy (SP-Low AGR 0.51 vs SP-Mid 0.50), and single-pass Agreement generally decreases with temperature (r \u2248 -0.82 to -0.93) \u2014 but this paper is not actually contradicting the claim under review: it's testing raw temperature effects on unaggregated single samples, whereas Yamauchi et al.'s claim specifically concerns aggregated multi-sample scoring (5 samples via majority/median/mean) vs single-shot greedy. When this second paper does test ensembling+majority voting over multiple high-temp samples, it also finds modest but consistent improvements over single-pass low-temp (0.52-0.53 vs 0.51 AGR on ambiguous cases) \u2014 broadly compatible with, not contradictory to, the aggregation-beats-single-shot direction of the claim. No credible source found that directly refutes \"aggregated non-deterministic sampling beats greedy\" or that \"mean aggregation beats majority/median.\" Venue is a workshop (GEM, co-located with ACL 2026) rather than a top-tier main track, and evidence base is modest in scale, which tempers confidence but does not refute the claim.",
+      "vote": "3-0"
+    },
+    {
+      "claim": "Chain-of-Thought reasoning in the judge's response provides negligible reliability benefit when explicit, well-defined score-level rubric descriptions are already present in the prompt \u2014 direct scoring performs comparably.",
+      "source": "https://aclanthology.org/2026.gem-main.19/",
+      "quality": "primary",
+      "quote": "In the Default setting, where evaluation criteria and reference answers are provided, both methods show similar correlation and consistency. Thus, when well-defined score descriptions are available, including explicit CoT in evaluator responses has little effect.",
+      "confidence": "medium",
+      "evidence": "Quote match: verified via WebFetch of arxiv.org/html/2506.13639v1 (same paper as aclanthology.org/2026.gem-main.19) that the paper's Table 3 \"Default\" condition (with criteria & reference provided) shows Direct vs CoT scoring nearly identical for GPT-4o: correlation 0.641 vs 0.638, Krippendorff's alpha 0.912 vs 0.908 \u2014 and the paper states verbatim: \"when well-defined score descriptions are available, including explicit CoT in evaluator responses has little effect.\" This is an exact match to the claim's scoping (CoT negligible benefit specifically when rubric is already well-defined). The claim also correctly notes the inverse: the same paper found CoT helps more when criteria are removed (\"w/o crt\" setting: Direct 0.570 vs CoT 0.591), i.e., the claim isn't cherry-picking a result the paper itself contradicts elsewhere \u2014 it's citing the paper's own load-bearing distinction. Source is a peer-reviewed primary source (accepted paper). Caveat lowering confidence: WebSearch surfaced contrary practitioner claims (G-Eval, Liu et al. \u2014 CoT improved Spearman correlation 0.51\u21920.66; several 2026 SEO/guide blogs claiming \"CoT raises agreement by 10-20%, skipping it leaves accuracy on the table\"). However G-Eval's CoT is auto-generated evaluation *steps* that themselves constitute the rubric (i.e., no well-defined rubric exists independently of the CoT), so it's not a true apples-to-apples contradiction of this paper's narrower, correctly-scoped claim; the blog sources are low-quality/SEO content, not comparable in rigor to the primary ACL source, and don't isolate the \"rubric already well-defined\" condition. Given the claim is narrowly and accurately scoped to match exactly what the primary source tested, and the counter-evidence doesn't test the same condition, the claim survives.",
+      "vote": "3-0"
+    },
+    {
+      "claim": "For binary evaluation criteria (the common case for judge rubrics), five commonly-reported agreement/correlation statistics are mathematically redundant \u2014 they collapse to the same single value on non-degenerate binary data, so reporting multiple of them adds no information.",
+      "source": "https://arxiv.org/pdf/2606.00093",
+      "quality": "primary",
+      "quote": "Pearson's r, Spearman's \u03c1, Kendall's \u03c4b, the phi coefficient \u03c6, and the Matthews Correlation Coefficient all reduce to a single number on non-degenerate binary data.",
+      "confidence": "high",
+      "evidence": "Claim is directly and exactly supported by the primary source. WebFetch of arxiv.org/abs/2606.00093 (\"Agreement Metrics for LLM-as-Judge Evaluation: What to Report and Why\", Rao & Callison-Burch) returned the identical quote given in the claim. I independently verified the mathematical identity numerically: computed Pearson r, Spearman \u03c1, Kendall \u03c4_b, phi coefficient, and MCC on the same random non-degenerate binary vector pair (n=50, seed=0) using scipy.stats \u2014 all five returned exactly 0.11440107883060731/...35 (identical to float precision). Independent corroboration via web search: Wikipedia/multiple stats references confirm MCC is mathematically identical to the phi coefficient, and phi coefficient is Pearson's r applied to two binary variables \u2014 this is textbook-established, not a novel or contestable claim. The Spearman/Kendall-tau_b equivalence on binary 2x2 data is a known consequence of tie-corrected rank formulas reducing to the same contingency-table statistic, which the numeric check confirms holds exactly. Found no contradicting sources. This is a mathematical identity (not an empirical/time-sensitive claim), so staleness is not a concern, and the \"non-degenerate\" qualifier in the claim correctly matches the source's own hedge (the identity breaks down in degenerate cases like all-same labels, which is a standard caveat, not an overreach).",
+      "vote": "3-0"
+    },
+    {
+      "claim": "Among common agreement coefficients, Cohen's kappa is the only one that provides information beyond the redundant set, because it normalizes differently than the phi-coefficient-equivalent metrics despite sharing the same numerator.",
+      "source": "https://arxiv.org/pdf/2606.00093",
+      "quality": "primary",
+      "quote": "Cohen's \u03ba is the one agreement coefficient that adds information: it shares \u03c6's numerator but normalizes differently.",
+      "confidence": "high",
+      "evidence": "The claim is essentially a direct paraphrase of the paper's own text. WebSearch on arxiv.org/abs/2606.00093 (Rao & Callison-Burch, \"Agreement Metrics for LLM-as-Judge Evaluation\") returned the paper's stated context and near-verbatim quote: \"Cohen's \u03ba is the one agreement coefficient that adds information: it shares \u03d5's numerator but normalizes differently\" \u2014 stated specifically in the context that for binary (MET/UNMET) rubric criteria, Pearson's r, Spearman's \u03c1, Kendall's \u03c4_b, the phi coefficient, and MCC all reduce to the same number on non-degenerate binary data (a \"redundant set\"), leaving Cohen's kappa as the one metric carrying additional information. The claim under review's phrasing (\"the only one that provides information beyond the redundant set... normalizes differently than the phi-coefficient-equivalent metrics despite sharing the same numerator\") accurately reflects this scoped context rather than overreaching to all agreement coefficients generally.\nIndependent corroboration: a second WebSearch on the general statistics/psychometrics literature (independent of this paper) confirmed the same mathematical relationship \u2014 Cohen's kappa and the phi coefficient for 2x2 tables share the \"ad-bc\" numerator but differ in their denominators/normalization, with kappa correcting for chance agreement while phi measures raw association (see e.g. Feingold 1992, \"The Equivalence of Cohen's Kappa and Pearson's Chi-Square Statistics,\" and Warrens-era psychometrika work on 2x2 association coefficients). This is well-established, non-controversial statistical fact, not a fringe or paper-specific assertion, so the source quality (an arXiv preprint) is adequate given the claim is independently verifiable mathematics rather than an empirical/contestable result.\nNo contradicting sources were found in either search.",
+      "vote": "3-0"
+    },
+    {
+      "claim": "Small LLM judges (1.7B-7B parameters: phi4-mini, mistral:7b, gemma3:4b, qwen3:1.7b) achieve only moderate agreement with a 49-case human-annotated ground-truth corpus across five regulatory criteria, and no single model is the best judge across all criteria \u2014 motivating a multi-judge panel design rather than a single calibrated judge.",
+      "source": "https://arxiv.org/pdf/2605.24737",
+      "quality": "primary",
+      "quote": "Agreement rates range from 51.5% (mistral:7b) to 69.1% (phi4-mini), with no single model dominating across all criteria \u2014 empirically motivating the Profile-as-jury design.",
+      "confidence": "high",
+      "evidence": "Verified against the primary source (arxiv.org/html/2605.24737, \"Who judges the judges? Governance from metrics,\" Dussert, preprint 23 May 2026). The paper directly reports agreement rates for four small local judge models (phi4-mini 3.8B, gemma3:4b, mistral:7b, qwen3:1.7b) on a 49-case human-annotated corpus, averaged across three question orderings: phi4-mini 69.1% (highest), mistral:7b 51.5% (lowest) \u2014 matching the claim's cited range exactly. The paper explicitly states \"no single model dominates across all criteria simultaneously\" (near-verbatim to the claim), and confirms evaluation spans five named regulatory criteria (Transparency, Data Privacy, Non-Manipulation, Prompt Injection, Human Oversight), matching \"five regulatory criteria.\" The paper's own finding motivating criterion-level specialization/panel design (\"Profile-as-jury,\" 72.6% for specialized panel vs 69.1% best single judge) directly supports the claim's framing that this empirically motivates a multi-judge panel over a single calibrated judge. Caveats: this is an unreviewed arXiv preprint (not peer-reviewed/published at a venue) and a single study with a small 49-case corpus, so it is modest-strength evidence \u2014 but the claim's wording is appropriately scoped (not overstated) and the source is used correctly as a primary source with accurate quotation, not misread or exaggerated. No contradicting evidence found in a broader search; findings are consistent with general knowledge that small local LLM judges have markedly lower agreement than frontier-model judges.",
+      "vote": "2-1"
+    },
+    {
+      "claim": "LLM-as-judge evaluation imports specific, documented cognitive biases: position bias (preference for the first option in pairwise comparisons), verbosity bias (longer answers rated higher regardless of quality), self-preference bias (models rate their own model family's outputs higher), and sycophancy (judges favor confidently-stated or bias-confirming answers even when factually wrong).",
+      "source": "https://arxiv.org/pdf/2602.18029",
+      "quality": "primary",
+      "quote": "Position bias: Models overwhelmingly prefer the first option presented in a pairwise comparison... Verbosity bias: Judges tend to rate longer answers higher, regardless of quality... Self-Preference bias: Models tend to rate outputs from their own model family higher... Sycophancy: Models (and human judges) often prefer answers that confirm their existing biases or are stated assertively, even if factually wrong.",
+      "confidence": "high",
+      "evidence": "Fetched the primary source directly (arxiv.org/html/2602.18029v1, \"Towards More Standardized AI Evaluation: From Models to Agents\" by El Filali & Bedar, Feb 2026) and confirmed the supporting quote is verbatim from Section 3.2.6 of the paper, covering all four biases exactly as claimed: position bias (\"Models overwhelmingly prefer the first option presented in a pairwise comparison\"), verbosity bias (\"Judges tend to rate longer answers higher, regardless of quality\"), self-preference bias (\"Models tend to rate outputs from their own model family higher\"), and sycophancy (\"Models... often prefer answers that confirm their existing biases or are stated assertively, even if factually wrong\"). Cross-checked against independent literature via WebSearch (Xu et al. 2024 on self-preference bias at 10-25%, Wang et al. 2023 on verbosity bias at 15-30 points inflation, plus multiple 2025-2026 papers like arxiv 2410.21819, 2604.22891, 2602.02219 specifically on position bias) \u2014 these four biases are well-established, broadly corroborated findings in the LLM-as-judge field, not contested, fringe, or overreach. The source is a legitimate arXiv research paper (not marketing/press release), and current (Feb 2026, not stale). Minor note: this source was not in the research grounding's pre-identified \"known primary sources\" list, but it is an additional relevant primary source directly on-topic and independently verifiable.",
+      "vote": "3-0"
+    },
+    {
+      "claim": "LLM-judge prompts/rubrics are not reliable out of the box and require an iterative calibration process against human expert judgments before they can be trusted; judges also show inconsistent strictness and overconfidence when rubrics are underspecified.",
+      "source": "https://arxiv.org/pdf/2602.18029",
+      "quality": "primary",
+      "quote": "In practice, judge prompts often need iteration and calibration against human experts before they can be trusted [2, 4].",
+      "confidence": "medium",
+      "evidence": "Verified via WebFetch of arxiv.org/html/2602.18029 (paper \"Towards More Standardized AI Evaluation: From Models to Agents\", El Filali & Bedar, Feb 2026, Section 3.2.6 \"The Biases of LLM-as-a-Judge\"). The exact quote appears verbatim: \"agent-grade judges often show inconsistent strictness and overconfidence when evaluation rubrics are underspecified. In practice, judge prompts often need iteration and calibration against human experts before they can be trusted.\" The claim under review is a faithful paraphrase, not an overreach \u2014 it captures both the calibration requirement and the underspecified-rubric/inconsistent-strictness point from the same sentence. Independent WebSearch corroboration (Appen's \"LLM-as-a-Judge Rubric Design\", GoDaddy's \"Calibrating Scores of LLM-as-a-Judge\", the \"Judge Reliability Harness\" arXiv paper 2603.05399, VERA-MH arXiv 2605.13318) all converge on the same conclusions: judges are unreliable without calibration against human/expert labels, and vague/underspecified rubrics produce inconsistent scoring. This is a well-established, non-extraordinary claim in the current LLM-eval literature, so a single arXiv preprint (recent, Feb 2026, named authors with relevant backgrounds \u2014 one an AI evaluation practitioner at G42) is adequate sourcing given the broad corroboration. One minor discrepancy: the claim's cited bracket numbers \"[2, 4]\" don't match what I found in the source text (\"[2] [20]\") \u2014 likely a transcription slip in the claim summary, not a misrepresentation of substance, and not sufficient to refute the claim itself. Not outdated, not marketing content.",
+      "vote": "2-1"
+    },
+    {
+      "claim": "A three-LLM majority-vote judge ensemble (GPT-4o, Gemini-2.5-Flash, GPT-4o-mini) achieves only moderate agreement with human labels (kappa=0.432, 95% CI [0.239, 0.622]) on n=100 validated traces, while naive substring matching is chance-level (kappa=0.049) -- directly bearing on how much to trust LLM-as-judge without calibration.",
+      "source": "https://arxiv.org/html/2604.16706v1",
+      "quality": "primary",
+      "quote": "Substring matching: \"\u03ba=0.049\" (chance-level agreement); Three-LLM ensemble: \"\u03ba=0.432\" (moderate agreement, 95% CI [0.239, 0.622])",
+      "confidence": "medium",
+      "evidence": "Verified directly against the primary source (arxiv.org/html/2604.16706v1, \"Evaluating Tool-Using Language Agents: Judge Reliability, Propagation Cascades, and Runtime Mitigation in AgentProp-Bench,\" Gurram, April 2026) via WebFetch and cross-confirmed via WebSearch snippet. Both independently return the exact same figures cited in the claim: substring matching \u03ba=0.049 (paper states \"statistically indistinguishable from chance,\" 95% CI [-0.122, 0.221]); three-LLM ensemble (GPT-4o, Gemini-2.5-Flash, GPT-4o-mini) majority vote \u03ba=0.432, 95% CI [0.239, 0.622], described by the paper itself as \"moderate agreement,\" on n=100 human-validated stratified labels. No numerical discrepancy, no rounding games, no cherry-picking \u2014 the claim's numbers match the source verbatim, and the claim's own hedge (\"n=100 validated traces\") discloses the modest sample size rather than hiding it. The quote provided in the claim is a faithful, non-overreaching paraphrase of the source. No contradicting evidence surfaced in search. Caveats that keep confidence at medium rather than higher: this is a single-author arxiv preprint (Bhaskar Gurram, Zasti Inc.) that appears not yet peer-reviewed/published in a venue, and n=100 is a modest calibration set \u2014 but the claim does not overstate certainty beyond what the source reports, and the interpretive framing (\"directly bearing on how much to trust LLM-as-judge without calibration\") is a reasonable, non-distorting inference from the finding rather than a misrepresentation.",
+      "vote": "3-0"
+    },
+    {
+      "claim": "The judge ensemble is systematically conservative/biased relative to human raters: it marks only 25% of traces correct versus 38% by human labelers, requiring explicit calibration via conditional probabilities (P(human=correct|ensemble=correct)=0.76, P(human=correct|ensemble=wrong)=0.25) rather than trusting raw judge output.",
+      "source": "https://arxiv.org/html/2604.16706v1",
+      "quality": "primary",
+      "quote": "the ensemble marks 25% of traces correct vs. 38% by humans",
+      "confidence": "high",
+      "evidence": "Verified against arxiv.org/html/2604.16706v1 (Gurram, \"Evaluating Tool-Using Language Agents: Judge Reliability, Propagation Cascades, and Runtime Mitigation in AgentProp-Bench,\" submitted April 2026). Two independent targeted fetches of the HTML source both returned the identical verbatim passage from Section 5.2 (\"Human calibration\"): \"Because the ensemble judge has a conservative bias (marks only 25% of traces correct vs. 38% by humans), we report human-calibrated stage rates using the conditional probabilities P(human=correct|ensemble=correct)=0.76 and P(human=correct|ensemble=wrong)=0.25, estimated from the 100 human labels.\" This exactly matches all four numbers in the claim (25%, 38%, 0.76, 0.25) and the claim's characterization (\"systematically conservative/biased,\" \"requiring explicit calibration via conditional probabilities rather than trusting raw judge output\") tracks the paper's own framing precisely \u2014 no overreach. The paper's abstract (fetched separately) independently corroborates the \"conservative bias\" characterization and the three-LLM ensemble (GPT-4o, Gemini-2.5-Flash, GPT-4o-mini) majority-voting setup with kappa=0.432 moderate agreement against 100 human-validated labels. WebSearch confirms the paper is a real, indexed arXiv preprint (also mirrored on ResearchGate), current (April 2026, well within relevance window for a July 2026 report), with no contradicting sources found. Caveats worth flagging to the requester (not sufficient to refute a source-accuracy claim): single-author preprint, not yet peer-reviewed, and the 0.76/0.25 calibration figures rest on only 100 human labels \u2014 small-sample calibration-set-size concern that the doctrine's grounding notes already flag as a sub-area needing coverage, but the claim under review is an accurate restatement of what the source says, not an independent validation of the finding's generalizability.",
+      "vote": "3-0"
+    },
+    {
+      "claim": "Judge errors propagate through agentic pipelines: a parameter-level fault injection propagates all the way to a wrong final answer with human-calibrated probability approximately 0.62 (range 0.46-0.73 across models), and the paper argues stage-level decomposition (injection applied -> call executed -> final answer wrong) is needed rather than a single end-to-end outcome metric, since existing work offers 'either end-to-end benchmarks without stage-level decomposition, or judge-reliability studies without application to agent evaluation.'",
+      "source": "https://arxiv.org/html/2604.16706v1",
+      "quality": "primary",
+      "quote": "Under validated evaluation, a parameter-level injection propagates to a wrong final answer with human-calibrated probability \u22480.62 (range 0.46\u20130.73 across models).",
+      "confidence": "medium",
+      "evidence": "Verified directly against arxiv.org/html/2604.16706v1 (fetched twice) and cross-checked via WebSearch. The paper \"Evaluating Tool-Using Language Agents: Judge Reliability, Propagation Cascades, and Runtime Mitigation in AgentProp-Bench\" (Bhaskar Gurram, Zasti Inc., arXiv 2604.16706, posted April 2026) contains the exact supporting quote verbatim: \"Under validated evaluation, a parameter-level injection propagates to a wrong final answer with human-calibrated probability \u22480.62 (range 0.46\u20130.73 across models).\" The paper also contains, verbatim, the second quoted sentence in the claim: \"Existing work provides either end-to-end benchmarks without stage-level decomposition, or judge-reliability studies without application to agent evaluation.\" The paper's actual stage decomposition is S1 (injection applied) -> S2 (visible execution effect / observable tool response change) -> S3 (wrong final answer under ensemble judging), which the claim paraphrases as \"injection applied -> call executed -> final answer wrong\" \u2014 a reasonably faithful paraphrase, not a misread. No contradicting or qualifying evidence turned up in search (no rebuttals, no disputing follow-up papers found; a later related paper, AgentCheck arXiv 2607.11098, appears to build on rather than contest this work). One legitimate weakness: this is a single-author, non-peer-reviewed arXiv preprint from a small company (Zasti Inc.), not a top-lab or peer-reviewed venue, so the precise point estimate (0.62) should be treated as one study's finding rather than an established constant \u2014 but the claim itself already hedges appropriately with the 0.46-0.73 range and attributes the argument to \"the paper,\" not to a broader consensus. Given for a doctrine/grounding document (not a claim of scientific consensus), quote fidelity and lack of contradiction outweigh the single-source/non-peer-review caveat.",
+      "vote": "3-0"
+    },
+    {
+      "claim": "LangSmith/AgentEvals defines agent trajectory evaluation as evaluating 'the exact sequence of messages, including tool calls' produced by a live agent run, distinct from single-output/outcome evaluation.",
+      "source": "https://docs.langchain.com/langsmith/trajectory-evals",
+      "quality": "primary",
+      "quote": "the exact sequence of messages, including tool calls",
+      "confidence": "high",
+      "evidence": "Directly fetched the primary source (docs.langchain.com/langsmith/trajectory-evals) and confirmed the exact quote \"the exact sequence of messages, including tool calls\" appears verbatim, describing what trajectory evaluation examines. The page attributes this to LangChain's `agentevals` package: \"LangChain's agentevals package provides evaluators specifically designed for testing agent trajectories with live models.\" While the page does not use the literal phrase \"single-output/outcome evaluation,\" it substantively supports that framing \u2014 trajectory eval is contrasted with evaluating only the final result (\"Many agent behaviors only emerge when using a real LLM, such as which tool the agent decides to call... or whether a prompt modification affects the entire execution trajectory\"). A follow-up web search corroborates this same distinction from independent LangChain sources: LangChain's own X/Twitter post (\"Evaluating only an agent's final response isn't enough... it necessary to evaluate the entire trajectory taken\") and LangChain's \"LLM Evaluation Framework: Trajectories vs. Outputs\" resource page, both explicitly opposing trajectory evaluation to outcome/final-output evaluation. Source is primary and appropriate for the claim's modest strength; no contradicting evidence found; not outdated (matches current docs, doc appears actively maintained, no version-mismatch signals); not marketing/press-release framing (technical product documentation).",
+      "vote": "3-0"
+    },
+    {
+      "claim": "Deterministic trajectory-match evaluators (rule-based comparison against a reference trajectory) are explicitly positioned as faster and more cost-effective than LLM-as-judge trajectory evaluators, precisely because they avoid an additional LLM call.",
+      "source": "https://docs.langchain.com/langsmith/trajectory-evals",
+      "quality": "primary",
+      "quote": "deterministic, fast, and cost-effective since it doesn't require additional LLM calls",
+      "confidence": "high",
+      "evidence": "Fetched the primary source directly (docs.langchain.com/langsmith/trajectory-evals). The page explicitly contrasts the two evaluator types in its opening section: trajectory match is described as \"Ideal for testing well-defined workflows where you know the expected behavior... This approach is deterministic, fast, and cost-effective since it doesn't require additional LLM calls,\" while LLM-as-judge trajectory evaluation is described as \"More flexible... but requires an LLM call and is less deterministic.\" This is a direct, verbatim match to the claim and its supporting quote \u2014 not a paraphrase or overreach. The claim is narrow (a documentation-stated design tradeoff, not an empirical benchmark claim), so a primary-source official doc is sufficient evidentiary weight; it doesn't require independent corroboration since it's an assertion about how the vendor positions/implements the feature, which the vendor's own docs are the authoritative source for. Nothing about the claim is extraordinary or time-sensitive in a way that would make it likely to be outdated or reversed \u2014 \"no LLM call = faster/cheaper\" is close to a definitional/logical relationship, not a contestable empirical finding. No contradicting framing found in the fetched content; the LLM-as-judge section corroborates rather than disputes the tradeoff (it independently states the reverse: LLM-as-judge \"requires an LLM call and is less deterministic\").",
+      "vote": "3-0"
+    },
+    {
+      "claim": "LLM-as-judge trajectory evaluators trade determinism for flexibility: they can assess qualitative aspects like efficiency and appropriateness that a fixed reference path cannot capture, but at the cost of requiring an LLM call and being less deterministic.",
+      "source": "https://docs.langchain.com/langsmith/trajectory-evals",
+      "quality": "primary",
+      "quote": "More flexible and can assess nuanced aspects like efficiency and appropriateness, but requires an LLM call and is less deterministic",
+      "confidence": "high",
+      "evidence": "WebFetch of the primary source (docs.langchain.com/langsmith/trajectory-evals) confirms the quote is accurate and the claim is a faithful paraphrase, not an overreach. The page explicitly frames this as a two-way comparison: \"Trajectory Match\" (hard-coded reference-path comparison) is described as \"deterministic, fast, and cost-effective since it doesn't require additional LLM calls,\" while \"LLM-as-Judge\" is described as \"More flexible and can assess nuanced aspects like efficiency and appropriateness, but requires an LLM call and is less deterministic.\" This directly supports every clause of the claim: (1) the determinism-for-flexibility tradeoff, (2) LLM-judge's ability to assess efficiency/appropriateness that a fixed reference path cannot (the fixed-path approach only does step-by-step tool/order matching, not qualitative assessment), (3) the cost of requiring an LLM call, (4) reduced determinism. WebSearch cross-check found no contradicting sources; other practitioner sources (Evidently AI, Comet, W&B) describe the same general tradeoff between deterministic trajectory matching and flexible LLM-judge evaluation, corroborating rather than disputing it. This is a practitioner/design-tradeoff claim (not an extraordinary empirical claim), so a reputable vendor engineering-docs source is adequate quality, and the docs are current (fetched live, no signs of staleness).",
+      "vote": "3-0"
+    },
+    {
+      "claim": "A living systematic review is formally defined as one under continual surveillance (via ongoing or frequent, pre-specified-frequency searches) with new evidence incorporated in a timely manner, as distinct from a one-off static review.",
+      "source": "https://pmc.ncbi.nlm.nih.gov/articles/PMC10726929/",
+      "quality": "primary",
+      "quote": "A systematic review that is continually updated, incorporating relevant new evidence as it becomes available\u2026this means continual surveillance for new research evidence through ongoing or frequent searches",
+      "confidence": "high",
+      "evidence": "WebFetch of the primary source (PMC10726929) confirms the quote verbatim: \"a systematic review that is continually updated, incorporating relevant new evidence as it becomes available...this means continual surveillance for new research evidence through ongoing or frequent searches and the inclusion of relevant new information into the review in a timely manner so that the findings of the systematic review remain current.\" The claim's paraphrase (continual surveillance, ongoing/frequent searches, timely incorporation, distinct from a one-off static review) tracks the quote closely with no overreach \u2014 \"distinct from a one-off static review\" is a direct, licensed inference from \"continually updated\" vs. traditional review practice. This is not an extraordinary claim; it is the standard, foundational methodological definition of \"living systematic review\" originating from Elliott et al. 2014 (PLoS Medicine) and reaffirmed consistently across independent sources: the Journal of Clinical Epidemiology living-SR guidance series, the Cochrane Handbook Chapter 22 (\"Prospective approaches to accumulating evidence\"), and a 2023 Systematic Reviews scoping review on living-SR methods/guidance. No contradicting or qualifying source was found in search \u2014 the definition is uncontested in the methodology literature. Source quality (primary methods paper, cross-corroborated by Cochrane and JCE) matches the claim's modest definitional strength.",
+      "vote": "3-0"
+    },
+    {
+      "claim": "The review does not escalate to a full published update on a fixed time schedule; it only triggers a full update when new evidence changes the GRADE certainty/interpretation of an outcome or expands the review's scope (new populations, interventions, comparisons, or outcomes) \u2014 an event-triggered rather than time-decay staleness model.",
+      "source": "https://pmc.ncbi.nlm.nih.gov/articles/PMC12018299/",
+      "quality": "primary",
+      "quote": "Per-protocol, a full update of our review is carried out when new evidence changes one or more of the following review components: the interpretation or certainty (i.e., Grading of Recommendations Assessment, Development and Evaluation rating) of one or more outcomes, or the range of settings, populations, interventions, comparisons, or outcomes investigated.",
+      "confidence": "high",
+      "evidence": "WebFetch of the primary source (PMC12018299) confirms the quote verbatim and shows it accurately characterizes the review's methodology: the article states three full-update triggers, matching the claim \u2014 updates occur only when new evidence changes GRADE interpretation/certainty of an outcome, OR expands scope (settings, populations, interventions, comparisons, outcomes). Critically, the source also confirms the \"not fixed time schedule\" half of the claim: monthly searches are described as continuous surveillance/dissemination activity (briefing documents, spreadsheets, podcasts) that do NOT by themselves trigger a full published update \u2014 only substantive evidence changes do. This directly substantiates the event-triggered vs. time-decay distinction the claim draws. The claim is scoped narrowly to \"the review\" (this specific living systematic review), not overgeneralized to all living systematic reviews or to LLM-judge/agent-eval systems generally, so there's no overreach beyond what the source supports. Source is a primary peer-reviewed/PMC article, appropriate quality for this factual (non-extraordinary) methodological claim.",
+      "vote": "3-0"
+    },
+    {
+      "claim": "Over two years, monthly search surveillance (24 search cycles by the two-year mark, described elsewhere as 30 over the full study period) produced only 3 full review updates \u2014 most search cycles found nothing significant enough to warrant re-publishing the review, showing continuous cheap surveillance decoupled from expensive full re-verification.",
+      "source": "https://pmc.ncbi.nlm.nih.gov/articles/PMC12018299/",
+      "quality": "primary",
+      "quote": "A Cochrane LSR with an international author team that has been 'living' for two years, with monthly search updates and three full updates published in this time.",
+      "confidence": "medium",
+      "evidence": "Direct fetch of the primary source (PMC12018299, J Clin Epidemiol 2024;166, a peer-reviewed case study of the Cochrane e-cigarette LSR) confirms: (1) the abstract states the LSR \"has been 'living' for two years, with monthly search updates and three full updates published in this time\" \u2014 exactly matching the claim's core assertion of 3 full updates against monthly surveillance; (2) the paper's own title literally reads \"30 search updates and three review updates later,\" confirming the claim's parenthetical that the total is \"described elsewhere as 30\" \u2014 this is not a fabrication, it's the article's own title. The claim's \"24 by the two-year mark\" is a transparent arithmetic inference (2 years \u00d7 12 months) rather than a directly stated figure, and the claim appropriately flags it as inferred/reconciled rather than asserting a false single consistent number \u2014 reasonable hedging given the source itself doesn't reconcile the \"two years\"/24 vs. \"30 search updates\" tension (confirmed via a second fetch: \"The paper does not explicitly reconcile this discrepancy\"). The core substantive point \u2014 many cheap monthly search cycles, only a few (3) triggering expensive full review republication \u2014 is directly and unambiguously supported by the quoted sentence. WebSearch corroborates surrounding facts (review first published 2014, transitioned to LSR status 2020, subsequent published versions in 2016/2020/2021/2022 consistent with \"three full updates\" since going living) with no contradicting source found. Source quality (peer-reviewed methods paper in a reputable journal, primary source, non-extraordinary descriptive claim) matches the claim's strength, and the case-study facts (2020\u20132024) are not time-sensitive in a way that \"outdates\" by 2026.",
+      "vote": "3-0"
+    },
+    {
+      "claim": "Living systematic reviews are defined methodologically as an approach that keeps evidence current through frequent, ongoing surveillance and updating rather than a single static publication -- directly analogous to a knowledge-base entry needing periodic re-verification rather than permanent caching.",
+      "source": "https://www.ncbi.nlm.nih.gov/books/NBK579069/",
+      "quality": "primary",
+      "quote": "a relatively new approach of keeping the evidence in systematic reviews current by frequent surveillance and updating",
+      "confidence": "medium",
+      "evidence": "The quoted phrase is verified verbatim in the NCBI Bookshelf source (AHRQ EPC report, NBK579069) as the opening characterization of living systematic reviews (LSRs). WebFetch confirms the document frames LSRs as differing from static reviews via \"continuous nature\u2014they involve ongoing surveillance and periodic updates rather than existing as single, fixed publications,\" matching the claim's core assertion. This is corroborated by independent sources found via search: Elliott et al. (J Clin Epidemiol, foundational LSR paper) define LSR as \"continually updated, incorporating relevant new evidence as it becomes available\" via \"continual surveillance ... ongoing or frequent searches\"; a 2023 PMC scoping review states \"LSR is an approach to review updating, not a formal review methodology.\" The claim's added analogy to a knowledge-base entry needing periodic re-verification is presented as the claim-author's own inference/analogy, not attributed to the source, so it is not a misrepresentation. One minor wrinkle: the claim's phrase \"defined methodologically\" is slightly generous given the source itself says LSR \"standards ... are yet to be formalized\" and is \"not a formal review methodology\" \u2014 but read naturally, \"defined methodologically as an approach\" means \"defined, in terms of method, as an approach,\" which matches consensus across sources. Source (AHRQ/NCBI Bookshelf, a primary evidence-methods report) is appropriate quality for this claim's strength, and the definition is not outdated or contradicted by any source found.",
+      "vote": "3-0"
+    },
+    {
+      "claim": "Living systematic review (LSR) teams used external policy events\u2014not a fixed schedule\u2014as a trigger to publish an update, e.g. the US FDA's Emergency Use Authorization for convalescent plasma prompted an update decision.",
+      "source": "https://pmc.ncbi.nlm.nih.gov/articles/PMC8435072/",
+      "quality": "primary",
+      "quote": "the Emergency Use Authorization and statement by the US Food and Drug Administration (FDA) that convalescent plasma may be effective in treating COVID-19 was an important consideration in deciding to publish an update",
+      "confidence": "medium",
+      "evidence": "WebFetch of the primary source (PMC8435072, Section 5.1 \"Policy relevance\") confirms the FDA EUA convalescent-plasma quote is accurate and in-context: the authors explicitly frame \"policy relevance\" as \"an additional component influencing the updating decision, as policy triggers can indicate the need for an update,\" then cite the FDA EUA as the concrete illustration (their own Cochrane review). A second example in the same paper (WHO aviation guidance) reinforces the same point. The paper is a lessons-learned/methods paper drawing on 2 of the authors' own LSRs plus 6 additional reviews, not a formal survey of \"LSR teams\" broadly \u2014 so the claim's plural \"LSR teams used...\" is a mild generalization beyond a single paper's direct evidence base. However, independent WebSearch corroborates that this is not an idiosyncratic finding: broader LSR methodology literature (e.g., discussions of triggers vs. fixed-interval updating) independently states that \"updating according to fixed time intervals is perhaps too basic an approach\" and that signal/event-based triggers (including policy relevance) are the recommended alternative \u2014 consistent with the claim's core assertion that events, not fixed schedules, drive update decisions. The specific factual anchor (FDA EUA \u2192 update decision) is precisely and correctly quoted from a primary, peer-reviewed source appropriate to the claim's strength.",
+      "vote": "2-1"
+    },
+    {
+      "claim": "Some LSR teams tied re-verification/update cycles to the completion of specific high-value evidence sources (e.g., large platform trials) rather than a calendar-based rule.",
+      "source": "https://pmc.ncbi.nlm.nih.gov/articles/PMC8435072/",
+      "quality": "primary",
+      "quote": "to tie our updates to the completion of larger, well-planned studies, e.g. platform trials",
+      "confidence": "high",
+      "evidence": "WebFetch of the primary source (PMC8435072, Iannizzi et al., a Cochrane living systematic review methodology paper) confirms the claim directly. In Section 5.2 (\"Important Studies\"), the authors state in first person, describing their own LSR team's actual practice: \"To make optimal use of resources, we ultimately decided to tie our updates to the completion of larger, well-planned studies, e.g. platform trials.\" The fetch confirms this was an explicit event-based (not calendar-based) update-trigger decision, made because larger/better-designed studies produce higher-certainty evidence, and that the team maintained \"regular communication with study investigators\" to track when such studies would complete. This matches the claim's specific wording (event-completion-triggered updates vs. calendar-based rule) almost exactly. A WebSearch for contradicting or qualifying evidence on event-based vs. calendar-based LSR update triggers returned no direct hits disputing this \u2014 other sources describe different update cadences (weekly, quarterly) but none contradict that some LSR teams used event-based triggers tied to major trial completions. The claim is appropriately scoped (\"some LSR teams,\" not \"most\" or \"all\"), and the source is a primary, peer-reviewed academic account of the practice, which is adequate rigor for a claim of this (non-extraordinary, descriptive) strength.",
+      "vote": "2-1"
+    },
+    {
+      "claim": "There is no universal quantitative threshold for when a knowledge base entry must be re-verified; the decision is context-dependent on the topic's evolution, incoming evidence volume, and the review team's capacity/resources.",
+      "source": "https://pmc.ncbi.nlm.nih.gov/articles/PMC8435072/",
+      "quality": "primary",
+      "quote": "updating the methods of a LSR, or the LSR itself, is dependent not only on the evolving disease or the emerging evidence, but also on the individual PICO and the capacity as well as resources of the review team",
+      "confidence": "high",
+      "evidence": "Fetched the primary source (PMC8435072, \"Methodological challenges for living systematic reviews conducted during the COVID-19 pandemic,\" accepted Sept 2021). The section containing the quote directly states \"there is no clear standard for how frequent or at which time point updates of LSRs should be performed\" and lists the same three factors the claim cites: evolving disease/emerging evidence, individual PICO, and review-team capacity/resources \u2014 so the claim is a faithful restatement, not an overreach. A follow-up search for contradicting evidence found no source proposing a universal quantitative threshold; instead a related scoping review (Methods and guidance on conducting... living systematic reviews, PMC10722674) confirms Cochrane guidance offers two *approaches* (impact-triggered vs. fixed-interval) rather than one fixed numeric threshold, and notes \"major evidence gaps\" remain in LSR update guidance \u2014 corroborating rather than refuting the claim. The claim is modestly hedged (not extraordinary), the source is a peer-reviewed methods paper appropriate to its strength, and the 2021 publication date does not stale it since this is a general methodological point about evidence-synthesis practice, not a fast-moving empirical benchmark. Minor caveat: the source's domain is medical living systematic reviews, not LLM/software knowledge bases, so applying it to Cairn's epistemics layer is an analogy \u2014 but it is the closest real-world precedent for \"when must stored knowledge be re-verified,\" and the claim's wording (\"knowledge base entry\") is generic enough to carry the analogy without misrepresentation.",
+      "vote": "3-0"
+    },
+    {
+      "claim": "Cochrane/F1000Research define a Living Systematic Review as one that undergoes continual, scheduled updating via recurring literature searches rather than being fixed at publication.",
+      "source": "https://f1000research.com/for-authors/article-guidelines/living-systematic-reviews",
+      "quality": "secondary",
+      "quote": "a systematic review that is continually updated, incorporating relevant new evidence as it becomes available",
+      "confidence": "medium",
+      "evidence": "The F1000Research author-guidelines quote is corroborated near-verbatim by independent sources citing \"a systematic review that is continually updated, incorporating relevant new evidence as it becomes available\" as F1000Research's LSR definition. The \"scheduled\" and \"recurring literature searches\" element of the claim is directly confirmed by the Cochrane Handbook Chapter 22 (fetched), which states LSR methodology involves \"frequent searches (e.g. monthly)\" and that \"search methods and anticipated frequency of review updates are made explicit in the review protocol\" \u2014 i.e., continual, scheduled updating via recurring searches, not a fixed one-time publication. No contradicting source found; the definition is stable/foundational (Elliott et al. 2014/2017) rather than a fast-moving claim subject to staleness, and it is a plain methodological/definitional statement, not a marketing or benchmark claim. Direct WebFetch of the F1000Research URL itself returned HTTP 403, so verification relied on search-engine snippets reproducing that page's text plus the Cochrane Handbook as corroborating primary source \u2014 a minor limitation but not enough to overturn the claim given convergent independent confirmation.",
+      "vote": "3-0"
+    },
+    {
+      "claim": "LSR methodology only triggers a substantive update (and new peer review) when new evidence actually changes prior conclusions \u2014 not merely when new evidence exists \u2014 establishing a three-tier decision rule for whether cached knowledge needs re-verification: no new studies, new studies that don't change conclusions, or new studies that do.",
+      "source": "https://f1000research.com/for-authors/article-guidelines/living-systematic-reviews",
+      "quality": "secondary",
+      "quote": "Recurring searches can result in one of three outcomes: Search returns no new studies; Search returns new studies, but the findings do not affect the previous conclusions; Search returns new studies that change the previous conclusions.",
+      "confidence": "high",
+      "evidence": "The F1000Research quote directly lists the three outcomes of recurring searches: no new studies, new studies that don't affect conclusions, and new studies that do change conclusions \u2014 matching the claim's three-tier framing exactly. Independent web search confirms this is the established LSR framework (originating with Elliott et al. 2014, PLOS Medicine, \"Living Systematic Reviews: An Emerging Opportunity to Narrow the Evidence-Practice Gap,\" adopted by Cochrane and F1000Research), which explicitly ties tier 1 to \"no further review,\" tier 2 to \"modest form of review (editorial only),\" and tier 3 to \"rapid... peer and editorial review.\" A second search of F1000Research's own guidance confirms the platform tracks \"whether the LSR version has been peer reviewed or not\" based on this same three-tier logic, corroborating the claim's \"new peer review\" element even though that phrase isn't in the single supporting quote given. The claim is not an overreach \u2014 it accurately summarizes a well-established, still-current (post-2014, still cited as best practice) methodological framework, and the secondary source (F1000Research author guidelines) is appropriate weight for a claim describing editorial/methodological process rather than an empirical/quantitative result.",
+      "vote": "3-0"
+    },
+    {
+      "claim": "Regardless of how stable a topic appears, F1000Research mandates a hard ceiling on staleness: a living review must undergo a full new peer-review cycle at least once per year even if no new evidence has been found, as a check that the 'living' status and cadence are still warranted.",
+      "source": "https://f1000research.com/for-authors/article-guidelines/living-systematic-reviews",
+      "quality": "secondary",
+      "quote": "no LSR should go longer than a year without a new review . This is to ensure that any minor changes between updates have been reviewed and the living method is still appropriate, especially in scenario 1.",
+      "confidence": "high",
+      "evidence": "Verified directly against F1000Research's live guidelines page (fetched via r.jina.ai reader proxy after direct WebFetch was blocked with 403). The page defines three search-outcome scenarios for an LSR: Scenario 1 = \"Search returns no new studies\"; Scenario 2 = new studies found but conclusions unchanged; Scenario 3 = new studies that change conclusions. It states verbatim: \"Scenarios 1 and 2 will not require a new round of peer review in the majority of cases. Scenario 3 will always trigger a new round of peer review. The decision of when a new round of peer review should be started will be dependent on the update schedule. However, no LSR should go longer than a year without a new review. This is to ensure that any minor changes between updates have been reviewed and the living method is still appropriate, especially in scenario 1.\" This directly confirms: (1) Scenario 1 is precisely \"no new evidence found,\" (2) the yearly cap is explicitly framed as applying \"especially\" to that no-new-evidence scenario, overriding the normal exemption from review that scenarios 1/2 otherwise get, and (3) \"a new review\" in this context refers to the same \"round of peer review\" discussed in the immediately preceding sentences, not a lesser editorial check. The claim's wording (\"full new peer-review cycle... even if no new evidence has been found... check that the living status and cadence are still warranted\") matches the source's \"new round of peer review\" / \"living method is still appropriate\" almost exactly, with no overreach detected. Source is F1000Research's own primary editorial policy page (an authoritative first-party source for a claim about F1000Research's own rules), which is sufficient quality for this claim's strength. No contradicting evidence found in searches, and the policy reads as current (live page, not an archived/outdated snapshot).",
+      "vote": "3-0"
+    }
+  ],
+  "refuted": [
+    {
+      "claim": "Chain-of-Thought reasoning in the judge's response produces negligible improvement in human alignment or consistency when the rubric is well-specified, undercutting the assumption that judge reasoning traces add reliability.",
+      "vote": "0-3",
+      "source": "https://arxiv.org/abs/2506.13639"
+    },
+    {
+      "claim": "Self-preference bias is not primarily about a model recognizing/favoring its own generated text \u2014 it tracks perplexity (familiarity) of the output, and this pattern holds regardless of whether the LLM itself produced the text being judged.",
+      "vote": "0-3",
+      "source": "https://arxiv.org/pdf/2410.21819"
+    },
+    {
+      "claim": "Judge/verification errors propagate through agent tool-call trajectories at a measurable, human-calibrated rate: an injected parameter-level fault produces a wrong final answer roughly 62% of the time.",
+      "vote": "1-2",
+      "source": "https://arxiv.org/abs/2604.16706"
+    },
+    {
+      "claim": "Judge-specific position bias (sensitivity to question/answer order) is a major, quantified reliability failure mode: reordering the same evaluation input (original/reversed/permuted) can swing a judge's agreement rate by as much as 25 percentage points.",
+      "vote": "0-3",
+      "source": "https://arxiv.org/pdf/2605.24737"
+    },
+    {
+      "claim": "Binary (Pass/Fail) rubrics produce higher inter-rater reliability than 1-5 Likert-style scoring scales, which suffer from unstable, subjective boundaries between adjacent scores and central-tendency bias.",
+      "vote": "1-2",
+      "source": "https://arxiv.org/pdf/2602.18029"
+    },
+    {
+      "claim": "The field has not yet standardized decision rules for when accumulated new evidence is sufficient to trigger a change in conclusions -- i.e., there is no agreed-upon threshold or 'half-life' metric for evidence staleness, only an acknowledged need for one.",
+      "vote": "1-2",
+      "source": "https://www.ncbi.nlm.nih.gov/books/NBK579069/"
+    },
+    {
+      "claim": "Cosine similarity cannot reliably distinguish a contradicted (stale) fact from a duplicate/rephrased fact \u2014 AUROC is 0.59, near chance, and contradictions are on average MORE embedding-similar to the original than genuine rephrasings are, making similarity-threshold-based staleness detection structurally infeasible (max achievable precision at any threshold is 0.667, calibrated on 98 labeled pairs).",
+      "vote": "0-3",
+      "source": "https://arxiv.org/pdf/2606.26511"
+    },
+    {
+      "claim": "Naive RAG-style retrieval, when forced to answer a question whose underlying fact has changed, serves the superseded (stale) value 15-40% of the time across four evolving knowledge benchmarks (code mutation, config migration, dependency bump, API evolution); a deterministic supersession/versioning layer drives this stale-fact-error rate to ~0%.",
+      "vote": "1-2",
+      "source": "https://arxiv.org/pdf/2606.26511"
+    },
+    {
+      "claim": "LLM-as-judge position bias produces a 10-15 point swing on pairwise comparisons, citing Zheng et al. 2024.",
+      "vote": "0-3",
+      "source": "https://futureagi.com/blog/evaluating-llm-judge-bias-mitigation-2026/"
+    }
+  ],
+  "sources": [
+    {
+      "url": "https://arxiv.org/abs/2506.13639",
+      "quality": "primary",
+      "angle": "LLM-as-judge reliability and rubric design",
+      "claimCount": 5
+    },
+    {
+      "url": "https://aclanthology.org/2026.gem-main.19/",
+      "quality": "primary",
+      "angle": "LLM-as-judge reliability and rubric design",
+      "claimCount": 5
+    },
+    {
+      "url": "https://arxiv.org/pdf/2606.00093",
+      "quality": "primary",
+      "angle": "LLM-as-judge reliability and rubric design",
+      "claimCount": 4
+    },
+    {
+      "url": "https://arxiv.org/pdf/2410.21819",
+      "quality": "primary",
+      "angle": "Judge biases and failure modes (skeptical)",
+      "claimCount": 4
+    },
+    {
+      "url": "https://www.sciencedirect.com/science/article/pii/S2666675825004564",
+      "quality": "unreliable",
+      "angle": "Judge biases and failure modes (skeptical)",
+      "claimCount": 0
+    },
+    {
+      "url": "https://futureagi.com/blog/evaluating-llm-judge-bias-mitigation-2026/",
+      "quality": "blog",
+      "angle": "Judge biases and failure modes (skeptical)",
+      "claimCount": 5
+    },
+    {
+      "url": "https://arxiv.org/pdf/2605.24737",
+      "quality": "primary",
+      "angle": "Judge biases and failure modes (skeptical)",
+      "claimCount": 5
+    },
+    {
+      "url": "https://wandb.ai/site/articles/exploring-llm-as-a-judge/",
+      "quality": "blog",
+      "angle": "Judge biases and failure modes (skeptical)",
+      "claimCount": 5
+    },
+    {
+      "url": "https://arxiv.org/pdf/2602.18029",
+      "quality": "primary",
+      "angle": "Judge biases and failure modes (skeptical)",
+      "claimCount": 5
+    },
+    {
+      "url": "https://arxiv.org/abs/2604.16706",
+      "quality": "primary",
+      "angle": "Agent eval design: trajectory vs outcome, error propagation",
+      "claimCount": 5
+    },
+    {
+      "url": "https://arxiv.org/html/2604.16706v1",
+      "quality": "primary",
+      "angle": "Agent eval design: trajectory vs outcome, error propagation",
+      "claimCount": 5
+    },
+    {
+      "url": "https://docs.langchain.com/langsmith/trajectory-evals",
+      "quality": "primary",
+      "angle": "Agent eval design: trajectory vs outcome, error propagation",
+      "claimCount": 5
+    },
+    {
+      "url": "https://www.jclinepi.com/article/S0895-4356(17)30636-4/fulltext",
+      "quality": "primary",
+      "angle": "Evidence half-life and living review update triggers",
+      "claimCount": 5
+    },
+    {
+      "url": "https://pmc.ncbi.nlm.nih.gov/articles/PMC10726929/",
+      "quality": "primary",
+      "angle": "Evidence half-life and living review update triggers",
+      "claimCount": 5
+    },
+    {
+      "url": "https://pmc.ncbi.nlm.nih.gov/articles/PMC12018299/",
+      "quality": "primary",
+      "angle": "Evidence half-life and living review update triggers",
+      "claimCount": 4
+    },
+    {
+      "url": "https://www.ncbi.nlm.nih.gov/books/NBK579069/",
+      "quality": "primary",
+      "angle": "Evidence half-life and living review update triggers",
+      "claimCount": 4
+    },
+    {
+      "url": "https://pmc.ncbi.nlm.nih.gov/articles/PMC8435072/",
+      "quality": "primary",
+      "angle": "Evidence half-life and living review update triggers",
+      "claimCount": 5
+    },
+    {
+      "url": "https://f1000research.com/for-authors/article-guidelines/living-systematic-reviews",
+      "quality": "secondary",
+      "angle": "Evidence half-life and living review update triggers",
+      "claimCount": 5
+    },
+    {
+      "url": "https://hidekazu-konishi.com/entry/ai_agent_memory_design_guide.html",
+      "quality": "blog",
+      "angle": "Practitioner: agent memory staleness and re-verification policies",
+      "claimCount": 5
+    },
+    {
+      "url": "https://arxiv.org/html/2605.06527v1",
+      "quality": "primary",
+      "angle": "Practitioner: agent memory staleness and re-verification policies",
+      "claimCount": 5
+    },
+    {
+      "url": "https://arxiv.org/pdf/2606.26511",
+      "quality": "primary",
+      "angle": "Practitioner: agent memory staleness and re-verification policies",
+      "claimCount": 5
+    }
+  ],
+  "stats": {
+    "angles": 5,
+    "sourcesFetched": 21,
+    "claimsExtracted": 96,
+    "claimsVerified": 45,
+    "confirmed": 36,
+    "killed": 9,
+    "urlDupes": 0,
+    "budgetDropped": 9,
+    "agentCalls": 163,
+    "afterSynthesis": 20
+  }
+}

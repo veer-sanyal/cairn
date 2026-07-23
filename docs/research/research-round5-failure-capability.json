@@ -1,0 +1,721 @@
+{
+  "question": "R5 for Cairn's level-zero doctrine: How do agentic AI systems actually fail, and how can a system cheaply probe what current models can/can't do reliably BEFORE committing a design to them? Decision served: which failure modes enter a bundled, evidence-graded failure taxonomy (with detection signals observable in telemetry), and what capability-probing method a builder agent should run at design time.\n\nGROUNDING:\n- Breadth: broad\n- Sub-areas needing verified coverage: (1) empirical failure taxonomies of agentic/multi-agent LLM systems \u2014 MAST's 14 modes / 3 categories, specification vs inter-agent misalignment vs task verification; (2) compounding error and long-horizon degradation \u2014 how per-step success rates decay over multi-step trajectories, silent failure; (3) the capability frontier \u2014 what task classes 2025-26 frontier models reliably succeed/fail at (long-horizon agentic work, tool use, planning), with quantified evidence; (4) cheap capability probing and calibration \u2014 methods to test \"can the model do X reliably\" with small pilot runs before building on it.\n- Key terms/entities: MAST failure taxonomy, \"Why Do Multi-Agent LLM Systems Fail\" (OpenReview), developer-agent misalignment 20,574 sessions (arXiv 2605.29442), silent failure entropy (arXiv 2606.08162), step repetition, termination unawareness, METR time-horizon measurements, pass^k vs pass@k reliability.\n- Known primary sources worth fetching: openreview.net/forum?id=fAjbYBmonr (MAST), arxiv.org/pdf/2605.29442, arxiv.org/pdf/2606.08162, METR long-task time-horizon reports.\n- Already known / do not research: context rot and memory architecture (settled in Cairn R1), hook/enforcement mechanisms (R2), personal-tracking abandonment (R3).",
+  "synthesisDegraded": false,
+  "summary": "Agentic AI systems fail in empirically well-documented, taxonomizable ways: MAST provides the canonical 14-mode/3-category taxonomy (system design issues, inter-agent misalignment, task verification) with 41-86.7% failure rates even in SOTA frameworks, complemented by a 7-form developer-agent misalignment taxonomy from 20,574 real coding sessions and a 7-category long-horizon taxonomy (HORIZON). The dominant mechanistic findings are: per-step errors compound exponentially with horizon length (worsened by a distinct self-conditioning effect where a model's own prior errors in context breed more errors), failures start early and stay silent until unrecoverable, verification steps often pass functionally-broken outputs, and consistency across repeated trials (pass^k) collapses far below single-trial success (pass^8 < 25% in tau-bench retail). Capability-frontier numbers like METR's time horizon are coin-flip (50%) thresholds, not reliability guarantees, and long-horizon difficulty is domain-structural rather than a function of human-estimated duration alone. For design-time probing, the evidence supports a cheap pilot-then-scale method: estimate per-step success rate p on a small random subset of steps with repeated trials (pass^k, not pass@k) across multiple models \u2014 a 1,368-episode pilot cost $4.26 and surfaced real infrastructure/reliability failure modes before committing to a 23,392-episode study. Crucially, most failures are attributable to system design rather than model limits, and single design fixes yield quantified gains (+9.4 to +15.6 pp), so the taxonomy should drive design choices, not just monitoring.",
+  "findings": [
+    {
+      "claim": "MAST is the canonical empirical failure taxonomy for multi-agent LLM systems: exactly 14 fine-grained failure modes clustered into 3 top-level categories \u2014 (i) system design issues, (ii) inter-agent misalignment, (iii) task verification \u2014 built via grounded-theory analysis of 150 traces (from a 1,600+ trace corpus across 7 MAS frameworks) with high inter-annotator agreement (Cohen's kappa = 0.88). Peer-reviewed (NeurIPS 2025 Datasets & Benchmarks).",
+      "confidence": "high",
+      "sources": [
+        "https://arxiv.org/abs/2503.13657",
+        "https://openreview.net/forum?id=fAjbYBmonr",
+        "https://neurips.cc/virtual/2025/poster/121528"
+      ],
+      "evidence": "Six independently verified claims (all 3-0 or 2-1 unanimous-leaning votes) confirm the identical 14/3 structure, category names verbatim from the paper's abstract, and methodology (150 traces, kappa=0.88, 7 frameworks, 1,600+ annotated traces in MAST-Data). No superseding taxonomy found as of 2026.",
+      "vote": "merged from claims [0,2,17,19,20,21], all verified (five 3-0, one 2-1)"
+    },
+    {
+      "claim": "MAS failure is common and severe, not an edge case: empirical failure rates range 41% to 86.7% across 7 SOTA open-source multi-agent frameworks (ChatDev, MetaGPT, HyperAgent, AppWorld, AG2, Magentic-One, OpenManus) with GPT-4o/Claude-3.7 backends, and MAS show only minimal performance gains over single-agent baselines on popular benchmarks \u2014 motivating failure diagnosis over blind scaling of agent count/complexity.",
+      "confidence": "high",
+      "sources": [
+        "https://arxiv.org/abs/2503.13657",
+        "https://arxiv.org/pdf/2503.13657"
+      ],
+      "evidence": "Both figures verified verbatim against the MAST paper's introduction and abstract via independent fetches. Note: unit of analysis is benchmark-task failure, not production silent failure.",
+      "vote": "merged from claims [1,15], both 3-0"
+    },
+    {
+      "claim": "Failures are predominantly caused by system/architecture design flaws rather than underlying model limitations, and design fixes (not model swaps) yield large quantified gains: giving one agent final decision authority raised task success +9.4 pp; adding a high-level verification step raised it +15.6 pp on ProgramDev \u2014 same model, same prompts.",
+      "confidence": "medium",
+      "sources": [
+        "https://openreview.net/forum?id=fAjbYBmonr",
+        "https://arxiv.org/pdf/2503.13657"
+      ],
+      "evidence": "Intervention numbers verified verbatim against the paper (Insight 1, lines 655-715). The 'predominantly' framing is slightly stronger than the paper's hedged 'many... rather than' language, and the paper cautions these are first-step interventions that don't resolve all failure modes. 2-1 vote.",
+      "vote": "claim [18], 2-1"
+    },
+    {
+      "claim": "Presence of a verification step is not a reliable signal of correctness: Task Verification failures account for ~21-23.5% of MAST failures, dominated by No/Incomplete Verification (FM-3.2, 8.2%) and Incorrect Verification (FM-3.3, 9.1%), and existing verifiers often perform only superficial checks (e.g., code compiles) while passing functionally broken outputs \u2014 despite being prompted to verify thoroughly.",
+      "confidence": "high",
+      "sources": [
+        "https://arxiv.org/pdf/2503.13657"
+      ],
+      "evidence": "Sub-percentages and the ChatDev chess example (passes compilation, fails game rules) verified verbatim in full text. The telemetry implication for Cairn: verifier-ran is a weak signal; verifier-checked-against-task-objective is the meaningful one. Note that other MAST sub-mode percentage claims (e.g., step repetition 15.7%) FAILED verification \u2014 do not bundle fine-grained percentages beyond FM-3.2/3.3 without re-checking.",
+      "vote": "claim [16], 3-0"
+    },
+    {
+      "claim": "For single coding agents in the wild (20,574 real sessions, 1,639 repos, IDE+CLI), misalignment operationalized as developer pushback takes 7 recurring forms spanning project reading comprehension, intent interpretation, rule compliance, action boundary management, implementation/execution, and progress reporting. 90.50% of failure episodes impose only effort/trust costs (recoverable, not catastrophic), but 91.49% of visible resolutions require explicit user correction rather than agent self-correction.",
+      "confidence": "high",
+      "sources": [
+        "https://arxiv.org/abs/2605.29442"
+      ],
+      "evidence": "All figures verified verbatim against the primary paper (May 2026). This is real-usage observational data, complementary to MAST's benchmark traces. Design implication: agents rarely self-correct \u2014 detection must assume the human (or an external check) is the correction loop.",
+      "vote": "merged from claims [3,4,5], all 3-0"
+    },
+    {
+      "claim": "Compounding error is the core long-horizon failure mechanism: without decomposition/error-correction, success probability decays exponentially with step count (each step an independent weakest link), driving agents from reliable short-task performance to near-systematic failure. Conversely, marginal gains in single-step accuracy compound into exponential improvements in achievable task length \u2014 so single-step benchmark accuracy both masks large capability gaps and is a poor predictor of multi-step execution (larger models sustain far more correct turns even when smaller models have near-perfect single-turn accuracy).",
+      "confidence": "high",
+      "sources": [
+        "https://arxiv.org/pdf/2509.09677",
+        "https://arxiv.org/pdf/2511.09030",
+        "https://arxiv.org/html/2604.11978v1"
+      ],
+      "evidence": "Three independent papers converge on the same mechanism, verified verbatim: 'Illusion of Diminishing Returns' (NeurIPS 2025/ICLR 2026), 'Solving a Million-Step LLM Task' (MAKER), and HORIZON. Corroborated by METR's non-linear failure growth. Caveat: 2509.09677 uses a controlled execution-isolated setup \u2014 necessary but not sufficient for real-world agentic tasks.",
+      "vote": "merged from claims [6,8,25,29]: two 3-0, two 2-1"
+    },
+    {
+      "claim": "Self-conditioning is a distinct failure mode separate from long-context limits: when a model's own prior errors appear in context, it becomes more likely to make further mistakes. Demonstrated via controlled counterfactual (fixed context length, injected error rates \u2192 turn-100 accuracy degrades with injected error rate), and scaling does not eliminate the effect (tested on 200B+ models).",
+      "confidence": "high",
+      "sources": [
+        "https://arxiv.org/pdf/2509.09677"
+      ],
+      "evidence": "Section 3.2 experiment verified directly; convergent 2026 literature (arXiv 2606.05976 'Self-Correction Illusion') supports rather than contradicts. Telemetry implication for Cairn: error-in-context is itself a leading indicator of further errors \u2014 an argument for context resets/checkpointing after detected mistakes.",
+      "vote": "claim [7], 3-0"
+    },
+    {
+      "claim": "Failures are gradual and silent, dominated by epistemic (knowledge/understanding) errors: in 63,000+ manually-annotated CLI coding-agent steps, epistemic errors account for 57.9% of failures (vs 32.8% competence, 9.4% environment) and often remain hidden until recovery is no longer possible \u2014 so reliability requires mid-trajectory validation, not just final pass/fail. Relatedly, false success (agent claims completion despite environmental evidence of failure) is highly domain-dependent: 45-48% of failures in tau2-bench single-control domains vs only 3% in dual-control domains where the user simulator can independently verify state.",
+      "confidence": "high",
+      "sources": [
+        "https://arxiv.org/abs/2607.09510",
+        "https://arxiv.org/abs/2606.09863"
+      ],
+      "evidence": "Figures verified verbatim against both primaries. The dual-control finding is the strongest lever: independent state verification collapses false success from ~46% to 3% of failures (observational, one dual-control domain, so not causal). Design implication: build environments where something other than the agent can read/write-verify state.",
+      "vote": "merged from claims [22,23] (3-0) and [24] (2-1)"
+    },
+    {
+      "claim": "Capability-frontier numbers must be read as reliability-thresholded: METR's widely-cited '50% time horizon' is a coin-flip success threshold, not a completion guarantee (the 80%-horizon is roughly 4-5x shorter for the same model); the 50%-horizon has been doubling approximately every 7 months since 2019 (reaffirmed by METR's own Jan 2026 'Time Horizon 1.1' re-derivation: 196 days over the full period, faster ~3-4 month doubling since 2024); Claude 3.7 Sonnet's 50%-horizon was ~50 minutes on the RE-Bench/HCAST/SWAA task mix.",
+      "confidence": "medium",
+      "sources": [
+        "https://metr.org/time-horizons/",
+        "https://arxiv.org/pdf/2503.14499",
+        "https://metr.org/blog/2026-1-29-time-horizon-1-1"
+      ],
+      "evidence": "Definition and Claude 3.7 figure verified verbatim (3-0). The 7-month doubling passed 2-1 with a substantive methodological critique on record: sparse data points, wide error bars (METR's own bound is 1-4 doublings/year), task-suite design artifacts, and near-total reliance on OpenAI/Anthropic models. Two adjacent framings of the same METR data were refuted in verification \u2014 cite the trend with error bars, never as a precise law.",
+      "vote": "merged from claims [9,31] (3-0) and [30] (2-1); two related METR claims refuted"
+    },
+    {
+      "claim": "The pass^k vs pass@k gap quantifies the capability-vs-reliability distinction: on tau-bench, GPT-4o-based agents succeeded on <50% of tasks overall (single trial), but consistency across 8 repeated trials of the identical task (pass^8) fell below 25% in the retail domain \u2014 succeeding once is a very different bar from succeeding every time.",
+      "confidence": "high",
+      "sources": [
+        "https://arxiv.org/abs/2406.12045",
+        "https://sierra.ai/blog/tau-bench-shaping-development-evaluation-agents"
+      ],
+      "evidence": "Verified verbatim against the ICLR 2025 paper abstract. Caveats: pass^8<25% is retail-domain-specific; data is GPT-4o-era (mid-2024) and should not be quoted as characterizing 2025-26 frontier models \u2014 but the phenomenon persists in tau2/tau3 successor benchmarks. Probing implication: capability probes must use pass^k (all-k-succeed), not pass@k (any-of-k).",
+      "vote": "merged from claims [10,11], both 3-0"
+    },
+    {
+      "claim": "Long-horizon difficulty is domain-structural, not a function of human-estimated duration alone: reliability decay is domain-stratified (software-engineering GDS drops 0.90\u21920.44 across the duration range while document-processing stays nearly flat at 0.74\u21920.71), and collapse thresholds differ sharply by domain (web-agent tasks collapse at very small compositional depth, OS/database sustain moderate performance longer, embodied tasks degrade steeply with minimal length increases).",
+      "confidence": "medium",
+      "sources": [
+        "https://arxiv.org/pdf/2603.29231",
+        "https://arxiv.org/html/2604.11978v1"
+      ],
+      "evidence": "Both papers verified verbatim against their own text, but 2603.29231 is a single non-peer-reviewed preprint (2-1 vote) and HORIZON (3-0) is also a fresh preprint. Convergence of two independent studies on the same conclusion raises confidence. Probing implication: pilot in the actual target domain \u2014 a duration-based capability estimate from another domain does not transfer.",
+      "vote": "merged from claims [12] (2-1) and [27] (3-0)"
+    },
+    {
+      "claim": "Cheap pilot-then-scale capability probing is validated and extremely cheap: estimate per-step success rate p on a small random subset of steps (with repeated trials) to pick model, red-flag conditions, and voting parameters before committing to the full design \u2014 the theory-recommended method in the million-step MAKER paper. Empirically, a 19-task, 12-model pilot (1,368 episodes) cost $4.26 total (~$0.003-0.005/episode) and surfaced real failure modes (quota exhaustion inflating apparent pass@1 by up to 15%, dead provider endpoints, missing cost circuit-breakers) before the full 396-task, 23,392-episode study, which itself cost only $80-120.",
+      "confidence": "high",
+      "sources": [
+        "https://arxiv.org/pdf/2511.09030",
+        "https://arxiv.org/pdf/2603.29231"
+      ],
+      "evidence": "Both verified verbatim (3-0 each): the MAKER quote on estimating p before running the full s-step task, and the exact pilot costs/scale. This is the direct answer to Cairn's design-time probing question: small-N, multi-trial, multi-model pilot in the target domain, measuring per-step p and pass^k, at single-digit-dollar cost.",
+      "vote": "merged from claims [13,28], both 3-0"
+    },
+    {
+      "claim": "Infinite agentic loops are a real, statically-detectable production failure mode: IAL-Scan, evaluated on 6,549 real-world LLM agent repositories, surfaced 74 findings of which manual review confirmed 68 true infinite-agentic-loop failures across 47 projects (91.9% precision).",
+      "confidence": "medium",
+      "sources": [
+        "https://arxiv.org/pdf/2607.01641"
+      ],
+      "evidence": "Numbers verified verbatim (3-0), but this is a weeks-old non-peer-reviewed preprint with self-reported precision (authors reviewed their own tool's output). Note: the companion root-cause claim (unbounded feedback paths as the single unifying cause, with specific 41.2%/38.2% splits) was REFUTED in verification \u2014 only the detection-tool result survived.",
+      "vote": "claim [14], 3-0; related root-cause claim refuted 1-2"
+    },
+    {
+      "claim": "HORIZON provides a complementary 7-category taxonomy specifically for long-horizon agentic failures \u2014 Environment Error, Instruction Error, Catastrophic Forgetting, False Assumptions, Planning Error, History Error Accumulation, Memory Limitations \u2014 validated against human annotation with strong LLM-judge/human agreement (kappa = 0.84) over 3,100+ trajectories across web/OS/database/embodied domains.",
+      "confidence": "high",
+      "sources": [
+        "https://arxiv.org/html/2604.11978v1"
+      ],
+      "evidence": "Category names and kappa verified verbatim via three independent fetches (3-0). Useful for Cairn as the long-horizon-specific layer on top of MAST (multi-agent) and 2605.29442 (coding-agent): three taxonomies at three altitudes, each empirically grounded.",
+      "vote": "claim [26], 3-0"
+    }
+  ],
+  "caveats": "Time-sensitivity: most quantitative anchors are 2024-2026 snapshots in a fast-moving field \u2014 tau-bench pass^8<25% is GPT-4o-era (mid-2024) and must not be quoted as characterizing current frontier models; METR horizons and MAST failure rates will drift. Provenance: several load-bearing sources are fresh non-peer-reviewed preprints (arXiv 2603.29231 reliability-science, 2607.01641 IAL-Scan, 2607.09510 CLI anatomy, 2605.29442 coding-agent misalignment) \u2014 internally verified verbatim but unreplicated; MAST and the Illusion-of-Diminishing-Returns paper are the only peer-reviewed anchors. Refuted-claim signal: fine-grained MAST sub-mode percentages (e.g., step repetition 15.7%, category-share 44.2%) and several METR trend framings FAILED adversarial verification even though the parent taxonomy passed \u2014 the bundled taxonomy should carry category-level structure with high confidence but treat mode-level percentages as needing per-figure re-verification (only FM-3.2 8.2% and FM-3.3 9.1% survived). The METR 7-month doubling carries a documented methodological critique (sparse data, METR's own 1-4x/year uncertainty band, two-lab model concentration) \u2014 cite with error bars. MAST's unit of analysis is benchmark-task failure on open-source frameworks, not production silent failure; the false-success dual-control finding rests on a single dual-control domain (observational, confounded). The 'design flaws over model limits' finding (2-1 vote) is stated more strongly in the claim than in the paper's own hedged language.",
+  "openQuestions": [
+    "What are the pass^k reliability numbers for 2025-26 frontier models on tau2/tau3-style benchmarks \u2014 has the consistency gap narrowed with newer models, or only the pass@1 ceiling?",
+    "What is the minimum pilot size (tasks x trials x steps) for a statistically stable per-step p estimate, given that per-step error rates are non-stationary (self-conditioning makes p decline over a trajectory rather than stay constant)?",
+    "Which MAST fine-grained mode percentages are actually reproducible \u2014 multiple sub-mode share claims failed verification, suggesting inconsistency between the paper's dataset cuts; which telemetry-observable modes (step repetition, termination unawareness) have reliable prevalence numbers?",
+    "Do cheap lexical/statistical detectors (e.g., TF-IDF-based false-success detectors) genuinely outperform LLM-judge monitors \u2014 the specific claim was refuted 0-3, but the underlying question of cheap-vs-expensive runtime detection for Cairn's telemetry remains open?"
+  ],
+  "confirmed": [
+    {
+      "claim": "MAST (Multi-Agent System Failure Taxonomy) identifies 14 distinct failure modes clustered into exactly 3 top-level categories: system design issues, inter-agent misalignment, and task verification.",
+      "source": "https://arxiv.org/abs/2503.13657",
+      "quality": "primary",
+      "quote": "14 unique modes, clustered into 3 categories: (i) system design issues, (ii) inter-agent misalignment, and (iii) task verification.",
+      "confidence": "high",
+      "evidence": "Verified directly against the primary source (arxiv.org/abs/2503.13657, \"Why Do Multi-Agent LLM Systems Fail?\" by Cemri, Pan, Yang et al.). The abstract states verbatim: \"This process identifies 14 unique modes, clustered into 3 categories: (i) system design issues, (ii) inter-agent misalignment, and (iii) task verification.\" This is an exact match to the claim, not an overreach \u2014 the claim's wording mirrors the source almost word-for-word. Cross-check via WebSearch (OpenReview listing at openreview.net/forum?id=fAjbYBmonr, arxiv HTML version, and secondary summaries) corroborates the same 14-mode/3-category structure and gives the underlying methodology: taxonomy built from 150 annotated traces with human-annotator validation (Cohen's kappa = 0.88), later extended to a 1600+ trace dataset (MAST-Data) across 7 MAS frameworks. No contradicting or qualifying source was found disputing the 14/3 structure. The paper is a widely-cited empirical study (not a blog post, marketing claim, or forum speculation) with a large annotated dataset backing the taxonomy, which matches the claim's evidentiary weight. Dated 2025, still current as of 2026 with no superseding taxonomy found in search results.",
+      "vote": "3-0"
+    },
+    {
+      "claim": "Multi-agent LLM systems (MAS) show only minimal performance gains over baselines on popular benchmarks despite significant enthusiasm, motivating a systematic failure-analysis study rather than continued blind scaling of agent count/complexity.",
+      "source": "https://arxiv.org/abs/2503.13657",
+      "quality": "primary",
+      "quote": "Despite enthusiasm for Multi-Agent LLM Systems (MAS), their performance gains on popular benchmarks are often minimal.",
+      "confidence": "high",
+      "evidence": "Verified against two independent fetches of the primary source (arxiv.org/abs/2503.13657 and the HTML full-text v2). The abstract literally states: \"Despite growing enthusiasm for Multi-Agent LLM Systems (MAS), their performance gains across popular benchmarks often remain minimal compared to single-agent frameworks\" \u2014 this matches the supporting quote given almost verbatim (minor wording variance between arXiv versions, not a misquote). The paper is \"Why Do Multi-Agent LLM Systems Fail?\" (Cemri, Pan, Yang et al.), accepted at NeurIPS 2025 Datasets & Benchmarks Track \u2014 a peer-reviewed primary source, not a blog/press release, and it is exactly the source named in the research GROUNDING as the origin of the MAST taxonomy (14 modes / 3 categories) that this decision needs. The claim's added framing (\"motivating a systematic failure-analysis study rather than continued blind scaling of agent count/complexity\") is not verbatim in the one-sentence quote but is directly supported by other text in the same paper's introduction, which I independently pulled: the authors explicitly move \"beyond naive complexity scaling toward rigorous failure diagnosis\" and state there is \"no clear consensus on how to build robust and reliable MASs.\" A broader WebSearch on 2026 MAS performance literature shows the empirical picture is more mixed than a blanket \"MAS never help\" claim (some architectures/tasks show large gains), but that broader mixed picture does not contradict this specific paper's own stated finding on its own benchmark set \u2014 the claim is scoped to what this source found and used to motivate its taxonomy, not a universal claim about all MAS research. Quote accurate, source quality matches claim strength, not outdated (foundational, still current and cited into 2026), not marketing content.",
+      "vote": "3-0"
+    },
+    {
+      "claim": "MAST identifies 14 fine-grained failure modes clustered into exactly 3 overarching categories: System Design Issues, Inter-Agent Misalignment, and Task Verification, built via grounded-theory analysis of 150 traces and validated with high inter-annotator agreement.",
+      "source": "https://arxiv.org/pdf/2503.13657",
+      "quality": "primary",
+      "quote": "This analysis span a subset of five open-source MAS frameworks... until achieving high inter-annotator agreement (\u03ba = 0.88). This comprehensive analysis results in 14 distinct failure modes, clustered into 3 categories.",
+      "confidence": "high",
+      "evidence": "Independently verified against the MAST paper (arxiv.org/abs/2503.13657 / pdf/2503.13657, \"Why Do Multi-Agent LLM Systems Fail?\", NeurIPS 2025 Datasets & Benchmarks Track). WebFetch of the paper and a corroborating WebSearch both confirm every element of the claim: (1) exactly 14 failure modes clustered into exactly 3 categories, (2) category names verbatim match: \"(i) system design issues, (ii) inter-agent misalignment, and (iii) task verification\" \u2014 same three categories the claim names (System Design Issues, Inter-Agent Misalignment, Task Verification); (3) methodology used grounded theory analysis of 150 traces collected from five open-source MAS frameworks, examined by six human experts; (4) inter-annotator agreement kappa = 0.88, which is high (near-perfect per standard Landis & Koch scale). The larger 1600+-trace MAST-Data set is a separate downstream artifact (LLM-as-judge scaled annotation), not the basis of the 14/3 taxonomy itself, so the claim's grounding in \"150 traces\" is accurate and not conflated. Source is the primary peer-reviewed paper (accepted NeurIPS 2025), appropriate for this claim's specificity. No contradicting or qualifying sources found in search results (a Medium summary and OpenReview page corroborate rather than dispute). Claim is not outdated \u2014 this is the canonical, still-current taxonomy for this research question as of the 2026 grounding context.",
+      "vote": "3-0"
+    },
+    {
+      "claim": "The study operationalizes agent misalignment/failure as a breakdown made visible through developer pushback, based on a large-scale observational dataset of 20,574 real-world coding-agent sessions across 1,639 repositories (IDE and CLI workflows), rather than benchmark trajectories.",
+      "source": "https://arxiv.org/abs/2605.29442",
+      "quality": "primary",
+      "quote": "operationalizes misalignment as \"a breakdown made visible through developer pushback\"",
+      "confidence": "high",
+      "evidence": "Verified via direct WebFetch of arxiv.org/abs/2605.29442 and independent WebSearch. Paper title: \"How Coding Agents Fail Their Users: A Large-Scale Analysis of Developer-Agent Misalignment in 20,574 Real-World Sessions\" (submitted May 28, 2026). Abstract confirms: dataset is \"20,574 coding-agent sessions from 1,639 repositories across IDE and CLI workflows\"; misalignment is operationalized as \"a breakdown made visible through developer pushback\" (verbatim match to claim's quote); paper explicitly positions itself against benchmark-trajectory studies, noting \"existing analyses of their failures rely on benchmark trajectories that miss how developers actually experience misalignment\" \u2014 supporting the claim's \"rather than benchmark trajectories\" contrast. All specific numbers (20,574 sessions, 1,639 repos) and the exact operationalization phrase are corroborated by two independent sources (WebFetch of the abstract page, and a separate WebSearch returning the same figures from arxiv.org/html and arxiv.org/pdf mirrors).",
+      "vote": "3-0"
+    },
+    {
+      "claim": "The paper identifies seven recurring forms of developer-agent misalignment spanning project reading comprehension, developer intent interpretation, rule compliance, action boundary management, code implementation/execution, and progress reporting -- a distinct empirical failure taxonomy for coding agents specifically, complementary to MAST's 14-mode/3-category taxonomy for multi-agent systems.",
+      "source": "https://arxiv.org/abs/2605.29442",
+      "quality": "primary",
+      "quote": "seven recurring forms of misalignment spanning: Project reading comprehension, Developer intent interpretation, Rule compliance, Action boundary management, Code implementation and execution, Progress reporting",
+      "confidence": "medium",
+      "evidence": "Cross-verified via three independent retrieval paths (arxiv.org/abs, arxiv.org/html, and separate WebSearch queries) that arXiv 2605.29442 (\"How Coding Agents Fail Their Users,\" 20,574 sessions, 1,639 repos) does present a seven-form symptom taxonomy: S1 Wrong Project Diagnosis, S2 Misread Developer Intent, S3 Developer Constraint Violation, S4 Self-Initiated Overreach, S5 Faulty Implementation, S6 Operational Execution Error, S7 Inaccurate Self-Reporting. The paper's abstract collapses these into six spanning-phrases (\"read projects, interpret developer intent, follow rules, bound their actions, implement and execute code, report progress\") because S5+S6 both fall under \"implement and execute code\" \u2014 this exactly explains the claim's quote listing six category-phrases for seven forms, so it is not a miscount. Independently, a targeted search for the specific labels \"Wrong Project Diagnosis\"/\"Misread Developer Intent\" returned paper-specific statistics (S4 co-occurs with S2 in 39.29% of episodes, 13.33% developer-takeover rate) that only a genuine extraction of the real paper text would surface, ruling out fabrication by the fetch tool. On the MAST-complementarity claim, the arxiv HTML fetch quoted the paper's actual citation (\"Cemri et al. (2026) introduces MAST, a taxonomy of 14 failure modes derived from 1,642 execution traces across five multi-agent frameworks\") and its explicit contrast: this paper uses \"interaction logs from naturalistic sessions rather than benchmark trajectories\" and positions itself as complementary to MAST rather than overlapping with it \u2014 directly supporting \"complementary to MAST... for multi-agent systems\" as a coding-agent-specific counterpart. One earlier WebFetch attempt (raw PDF) returned a clearly fabricated, non-matching list of \"seven forms\" (hallucination from a small summarizer model failing to parse the PDF binary), but this was superseded and contradicted by the higher-fidelity HTML fetch and corroborating WebSearch snippets, so it does not undermine the claim \u2014 it is a retrieval-tool artifact, not evidence against the paper's actual content.",
+      "vote": "3-0"
+    },
+    {
+      "claim": "Most observed failures are cheap/recoverable rather than catastrophic: 90.50% of episodes impose only effort and trust costs (developer has to notice, correct, redo work) rather than irreversible system damage -- but resolving them still overwhelmingly requires explicit user correction rather than agent self-correction (91.49% of visible resolutions).",
+      "source": "https://arxiv.org/abs/2605.29442",
+      "quality": "primary",
+      "quote": "90.50% of episodes impose effort and trust costs rather than irreversible system damage\" ... \"91.49% of visible resolutions still require explicit user correction",
+      "confidence": "high",
+      "evidence": "Independently verified via WebFetch of arxiv.org/abs/2605.29442 and WebSearch: the paper \"How Coding Agents Fail Their Users: A Large-Scale Analysis of Developer-Agent Misalignment in 20,574 Real-World Sessions\" (arXiv 2605.29442, published May 28, 2026) is a large-scale observational study of 20,574 real coding-agent sessions across 1,639 repositories, annotating episodes along form/cause/cost/resolution axes. Both cited statistics are verbatim matches from the paper itself, confirmed by two independent tool calls: \"90.50% of episodes impose effort and trust costs rather than irreversible system damage\" and \"91.49% of visible resolutions still require explicit user correction.\" The claim's phrasing tracks the source almost word-for-word and does not overreach \u2014 it correctly scopes the second stat to \"visible resolutions\" (i.e., conditional on episodes where misalignment surfaced via developer pushback), matching the paper's own framing rather than generalizing to all agent behavior. Source is primary, large-N, and recent (~2 months old relative to current date), appropriate for the claim's strength. No contradicting evidence found.",
+      "vote": "3-0"
+    },
+    {
+      "claim": "Small improvements in single-step accuracy compound into exponential improvements in the number of sequential task steps a model can complete \u2014 meaning single-step benchmark accuracy alone masks large differences in long-horizon capability.",
+      "source": "https://arxiv.org/pdf/2509.09677",
+      "quality": "primary",
+      "quote": "even marginal gains in single-step accuracy can compound into exponential improvements in the length of tasks a model can successfully complete",
+      "confidence": "high",
+      "evidence": "Verified directly against the primary source. Fetched the abstract of arXiv:2509.09677 (\"The Illusion of Diminishing Returns: Measuring Long Horizon Execution in LLMs,\" Sinha, Arun, Goel, Staab, Geiping \u2014 Cambridge/Stuttgart/Max Planck Institute for Intelligent Systems), which is accepted at NeurIPS 2025 and also under review at ICLR 2026 (confirmed via NeurIPS.cc listing and OpenReview id 3lm8lWYxiq). The supporting quote is verbatim from the abstract: \"even marginal gains in single-step accuracy can compound into exponential improvements in the length of tasks a model can successfully complete.\" The claim under review is a faithful paraphrase, not an overreach \u2014 it doesn't extend the finding beyond what the paper itself asserts (e.g., it doesn't claim this generalizes to unstructured real-world agentic tasks; the paper's own controlled/execution-isolated methodology is a scope limitation of the source, not something the claim misrepresents). WebSearch found no credible source disputing this core finding; the one caveat surfaced (that the study uses a controlled/synthetic execution-isolation setup, so results are 'necessary but not sufficient' for real-world agentic tasks) is a scope qualifier on the source itself, not a refutation of the compounding-accuracy relationship, and the claim as worded doesn't overstate beyond that scope. Source quality (peer-reviewed, NeurIPS 2025, known authors) matches the claim's strength. Recency (Sept 2025, actively cited through mid-2026) is current for this fast-moving field.",
+      "vote": "3-0"
+    },
+    {
+      "claim": "LLMs exhibit a 'self-conditioning' failure mode: the presence of the model's own prior errors in context makes it more likely to make further mistakes, independent of long-context/attention limits.",
+      "source": "https://arxiv.org/pdf/2509.09677",
+      "quality": "primary",
+      "quote": "models become more likely to make mistakes when the context contains their errors from prior turns",
+      "confidence": "high",
+      "evidence": "Verified against the primary source (arXiv 2509.09677, \"The Illusion of Diminishing Returns: Measuring Long Horizon Execution in LLMs\"). The paper's abstract states verbatim: \"This is not just due to long-context limitations -- curiously, we observe a self-conditioning effect -- models become more likely to make mistakes when the context contains their errors from prior turns\" \u2014 an almost exact match to the claim's supporting quote, so the claim is not an overreach or misread. Crucially, Section 3.2 (\"Why Does Turn Accuracy Degrade? The Self-Conditioning Effect\") reports a controlled counterfactual experiment that directly substantiates the \"independent of long-context/attention limits\" clause: the authors held context length fixed and injected artificial error rates into the model's own chat history, showing turn-100 accuracy degrades further as injected error rate increases \u2014 separable from the (also present) plain long-context degradation seen even with error-free history. They further show scaling does not eliminate the effect (tested on 200B+ models incl. DeepSeek-V3), reinforcing it as a distinct mechanism rather than an attention-window artifact. A search for contradicting evidence found no direct rebuttal of this paper's self-conditioning claim; adjacent 2026 literature (e.g., \"The Self-Correction Illusion: LLMs Correct Others but Not Themselves,\" arXiv 2606.05976; \"Contextual Drag\" on OpenReview) converges with rather than contradicts it, documenting the same general phenomenon of context-borne errors degrading LLM self-correction. Source is a legitimate, recent (Sept 2025) arXiv preprint with a named, falsifiable experimental design \u2014 quality is proportionate to the claim's strength, and the paper is not stale for a fast-moving field at ~10 months old.",
+      "vote": "3-0"
+    },
+    {
+      "claim": "Per-turn (single-step) accuracy is a poor predictor of multi-step execution capability: larger models sustain many more correct turns even when smaller models already have near-perfect single-turn accuracy, so single-step probes understate real capability gaps relevant to agentic reliability.",
+      "source": "https://arxiv.org/pdf/2509.09677",
+      "quality": "primary",
+      "quote": "larger models can correctly execute significantly more turns even when small models have near-perfect single-turn accuracy",
+      "confidence": "high",
+      "evidence": "The quote \"larger models can correctly execute significantly more turns even when small models have near-perfect single-turn accuracy\" is verbatim from the paper's key results (arXiv 2509.09677, \"The Illusion of Diminishing Returns: Measuring Long Horizon Execution in LLMs,\" Sinha/Arun/Goel/Staab/Geiping, accepted ICLR 2026). The paper's own abstract states the same thesis independently: short-task/single-step benchmarks create \"an illusion of slowing progress\" because \"marginal gains in single-step accuracy can compound into exponential improvements\" in multi-step task length \u2014 directly supporting the claim's core assertion that single-step probes understate real capability gaps. Confirmed via both WebFetch (PDF/abstract) and independent WebSearch cross-checks (Hugging Face paper page, themoonlight.io literature review, note.com summary), all reporting the identical finding. No contradicting evidence or critique of this specific result was found in search. Source is a peer-reviewed academic paper with a purpose-built benchmark (Long-Horizon-Execution dataset) and open code, not marketing/forum content \u2014 quality matches the claim's strength.",
+      "vote": "3-0"
+    },
+    {
+      "claim": "METR's reported '50%-time horizon' figures for models represent only a coin-flip (50%) success probability threshold, not high reliability \u2014 the widely-cited task-duration numbers are a low bar, not a guarantee of task completion.",
+      "source": "https://metr.org/time-horizons/",
+      "quality": "primary",
+      "quote": "we'd predict with 50% confidence that the model could complete the task",
+      "confidence": "high",
+      "evidence": "The METR primary source (metr.org/time-horizons/) explicitly defines the 50%-time horizon as: \"the length of task in our suite (measured by how long it takes a human expert) such that we'd predict with 50% confidence that the model could complete the task.\" This is precisely a coin-flip threshold, not a reliability guarantee. Independent corroboration: METR's own reporting shows the 80%-time horizon (the reliability-relevant threshold) is 4-5x shorter than the 50%-time horizon for the same model (e.g., Claude 3.7 Sonnet: 59 min at 50% vs ~15 min at 80%), and secondary sources (Epoch AI, AI Wiki) explicitly frame the 50% threshold as \"coin-flip odds\" versus the 80% figure being \"the figure to watch if you care about reliability.\" METR also flags that measurements above 16 hours are unreliable on their current task suite, further underscoring that the headline number is a soft statistical threshold, not a completion guarantee. The claim does not overreach the quote \u2014 it states exactly what METR's methodology page says, is corroborated by independent commentary, is current (2026), and the source (METR's own definitional page) is appropriately authoritative for this specific methodological claim.",
+      "vote": "3-0"
+    },
+    {
+      "claim": "Agent consistency across repeated trials of the identical task is far lower than single-trial success \u2014 pass^8 is below 25% in the retail domain \u2014 demonstrating that reliability (not just capability) degrades sharply when a model is required to succeed repeatedly rather than once, directly evidencing the pass^k vs pass@k reliability gap.",
+      "source": "https://arxiv.org/abs/2406.12045",
+      "quality": "primary",
+      "quote": "pass^8 <25% in retail",
+      "confidence": "high",
+      "evidence": "Primary source (arxiv.org/abs/2406.12045, \u03c4-bench, Yao et al., accepted ICLR 2025) directly states in its own abstract: \"pass^8 <25% in retail\" for state-of-the-art function-calling agents (GPT-4o), confirmed via WebFetch of the paper. The paper explicitly defines pass^k as \"a new metric to evaluate the reliability of agent behavior over multiple trials\" \u2014 measuring whether ALL k independent trials on the identical task succeed (contrasted with pass@k from Chen et al. 2021, which measures whether AT LEAST ONE of k samples succeeds and typically rises with k). This makes the \"pass^k vs pass@k reliability gap\" framing in the claim technically accurate, not a misuse of terminology. The claim's wording (\"agent consistency... pass^8 is below 25% in the retail domain\") tracks the paper's own headline finding without overstating it to unnamed/all models \u2014 the paper attributes this specifically to its best-performing (GPT-4o-based) agents, and the claim doesn't contradict that scope. WebSearch for newer results (2025-26 successor benchmarks, tau2-bench/tau3-bench) shows the same reliability-gap phenomenon persists as an active research theme (\"agents can solve a task once but fail repeated trials because of nondeterminism or brittle policy adherence\" \u2014 still cited in 2026 leaderboard discussions), and no source disputes or retracts the original 2024 finding; it has simply been superseded by newer benchmark variants for current-generation models, which is a normal a benchmark-succession pattern, not a refutation. Source quality (peer-reviewed ICLR 2025 poster, primary data) matches the claim's strength. Note: the original result is from June 2024 and specific to GPT-4o-era agents, so if the taxonomy write-up implies this number characterizes 2025-26 frontier models specifically, that specific extrapolation would need a caveat \u2014 but the claim as stated only asserts the pass^k<25%-in-retail finding itself, which is accurately sourced.",
+      "vote": "3-0"
+    },
+    {
+      "claim": "GPT-4-based agents on \u03c4-bench succeeded in fewer than 50% of tasks overall, and success dropped to roughly 25% (pass^8) when the same task was attempted 8 times in a row.",
+      "source": "https://sierra.ai/blog/tau-bench-shaping-development-evaluation-agents",
+      "quality": "primary",
+      "quote": "even state-of-the-art agents, such as those based on GPT-4, succeeded in fewer than 50% of tasks",
+      "confidence": "high",
+      "evidence": "The Sierra blog quote is supported and is itself a close paraphrase of the primary source. WebFetch of the actual \u03c4-bench paper (arXiv 2406.12045) abstract states verbatim: \"state-of-the-art function calling agents (like gpt-4o) succeed on <50% of the tasks, and are quite inconsistent (pass^8 <25% in retail).\" A third-party analysis (benchmarkingagents.com) independently corroborates with specific numbers: GPT-4o pass^1 = 60.4% retail / 42.0% airline (so <50% only holds as an average/overall figure or for the harder airline domain, not universally per-domain), and \"GPT-4o's retail score falls from about 60% at pass^1 toward roughly 25% by pass^8.\" No contradicting sources found in search. Minor imprecision: the claim states \"roughly 25% (pass^8)\" without noting this figure is specific to the retail domain (per the paper's own abstract phrasing \"pass^8 <25% in retail\") rather than an overall/both-domains figure \u2014 but this mirrors how the primary source itself summarizes the finding, so it is not a misrepresentation, just an omitted qualifier. The claim also says \"GPT-4-based agents\" where the underlying evaluated model is GPT-4o specifically; this is a reasonable and accurate generalization, not a stretch. Source quality is strong: it's the primary source (Sierra, the benchmark's creator) making a claim that is directly traceable to and consistent with the peer-reviewed/arXiv paper's own abstract, and independently corroborated by a third party. The claim is dated (mid-2024 GPT-4o data) but does not purport to describe current 2025-26 frontier capability \u2014 it is offered as historical evidence of the pass^k consistency-collapse phenomenon, which remains valid for that purpose.",
+      "vote": "3-0"
+    },
+    {
+      "claim": "Reliability degrades super-linearly and domain-stratified with task duration: SE (software engineering) GDS drops from 0.90 to 0.44 across the full duration range while document-processing (DP) GDS stays nearly flat (0.74 to 0.71), meaning 'long-horizon difficulty' depends on domain structure, not human-estimated duration alone.",
+      "source": "https://arxiv.org/pdf/2603.29231",
+      "quality": "primary",
+      "quote": "reliability decay is domain-stratified \u2014 SE GDS drops from 0.90 to 0.44 over the full duration range, while DP is nearly flat (0.74 to 0.71)",
+      "confidence": "high",
+      "evidence": "Directly confirmed against the primary source (arxiv.org/pdf/2603.29231 / html/2603.29231v1, \"Beyond pass@1: A Reliability Science Framework for Long-Horizon LLM Agents,\" Khanal/Tao/Zhou). Two independent fetches of the paper's own text corroborate the exact figures: \"SE aggregate GDS drops from 0.90 (short) to 0.44 (very-long) \u2014 a 2\u00d7 collapse\" and \"DP drops only 0.03 GDS points over the same range [0.74\u21920.71], confirming that human-estimated task duration and agent-relevant complexity are orthogonal for structured extraction tasks.\" This is the paper's own stated conclusion, not an inference by the claim author \u2014 the \"domain structure, not duration alone\" interpretation in the claim tracks the paper's explicit orthogonality language almost verbatim. Study scale (10 models, 23,392 episodes, 396 tasks, 3 domains, 4 duration buckets) is adequate for the claim's descriptive-empirical strength; it is a single non-peer-reviewed arXiv preprint (posted ~2026-03), so it should be flagged as unreplicated in the taxonomy writeup, but that is a caveat on provenance, not grounds for refutation \u2014 the claim does not overstate what the source reports. WebSearch turned up no contradicting or qualifying source; the only anomaly was a search-snippet summarization artifact (mismatched 0.97/0.30/0.25 figures) that both direct paper fetches did not reproduce and which I discount as engine hallucination rather than paper content.",
+      "vote": "2-1"
+    },
+    {
+      "claim": "A cheap pilot-then-scale probing method works: a 19-task, 12-model validation run (1,368 episodes) cost only $4.26 total (~$0.0032/episode) and was sufficient to surface real infrastructure/reliability failure modes before committing to the full 396-task, 23,392-episode study, which itself cost only $80-120.",
+      "source": "https://arxiv.org/pdf/2603.29231",
+      "quality": "primary",
+      "quote": "We first report results from the 19-task validation run (12 models, 2 scaffolds, k = 3, 1,368 episodes, total cost $4.26)... At roughly $0.004\u20130.005 per episode, long-horizon multi-model reliability evaluation is accessible without large compute budgets.",
+      "confidence": "high",
+      "evidence": "Verified directly against arXiv:2603.29231 (\"Beyond pass@1: A Reliability Science Framework for Long-Horizon LLM Agents,\" posted 2026-03-31/04-01). All quantitative figures in the claim check out exactly against the primary source: 19-task validation run, 12 models, 2 scaffolds, k=3, 1,368 episodes, $4.26 total cost, ~$0.004-0.005/episode (matches the supplied quote verbatim). The full-scale figures also check out: the paper reports a 396-task, 23,392-episode study (10 models across four duration buckets/three domains per the abstract) with total cost $80-120 (confirmed via the paper's HTML version, not just the excerpted quote). Crucially, the \"sufficient to surface real infrastructure/reliability failure modes\" part of the claim \u2014 not contained in the given supporting quote \u2014 is independently corroborated in the paper's validation-run section: the pilot caught free-tier OpenRouter quota exhaustion (inflating apparent pass@1 by up to 15% because quota ran out after short-horizon but before long-horizon tasks) and two models returning persistent HTTP 404 provider errors, which led the authors to swap 5 models for multi-provider alternatives and add cost-control circuit breakers (input-token budget, loop detection) before running the full study. This is exactly the \"cheap pilot catches real problems before you commit\" mechanism the claim describes, not an overreach. Independent corroboration that the paper is real and recent: alphaxiv.org listing, a GitHub long-horizon-papers tracker, and a contemporaneous X post from Krish Subramanian describing the same 396-task/23,392-episode/10-model setup.",
+      "vote": "3-0"
+    },
+    {
+      "claim": "IAL-Scan, a static analyzer for infinite agentic loops, evaluated on 6,549 real-world LLM agent repositories, surfaced 74 potential findings of which manual review confirmed 68 true infinite-agentic-loop (IAL) failures across 47 projects, at 91.9% precision.",
+      "source": "https://arxiv.org/pdf/2607.01641",
+      "quality": "primary",
+      "quote": "We evaluate IAL-SCAN on 6,549 real-world LLM agent repositories. It reports 74 potential findings, among which manual review confirms 68 IAL failures across 47 projects, achieving 91.9% precision.",
+      "confidence": "medium",
+      "evidence": "Verified the primary source directly (arxiv.org/abs/2607.01641 and /pdf/2607.01641, \"When Agents Do Not Stop: Uncovering Infinite Agentic Loops in LLM Agents\" by Hou, Wang, Zhao, Wang, Huazhong University of Science and Technology). Two independent fetches returned the exact quote: \"We evaluate IAL-Scan on 6,549 [real-world] LLM agent repositories. It reports 74 potential findings, among which manual review confirms 68 IAL failures across 47 projects, achieving 91.9% precision.\" The claim under review is a faithful, non-overreaching paraphrase \u2014 numbers, framing, and scope all match. Precision arithmetic checks out (68/74 = 91.89% \u2248 91.9%). WebSearch corroborated the paper's existence, title, authors, and abstract content independently (Google-indexed arXiv listing), ruling out a fabricated/hallucinated citation. No contradicting or critical secondary source was found; the paper appears to be a genuine, recent (published ~3 weeks before current date per search snippet), on-topic primary source directly relevant to the failure-taxonomy research question (a specific, detection-signal-bearing failure mode: infinite agentic loops). Caveats that keep confidence from 'high': it is an arXiv preprint (not yet confirmed peer-reviewed), the manual review/confirmation process and reviewer independence are not visible in the extracted PDF text (likely author self-validation, a common but real threat-to-validity in static-analysis tool papers), and the absolute finding count (74 findings across 6,549 repos) is small, though the claim doesn't overstate this. None of these rise to unsupported/contradicted/low-quality/outdated/marketing-fluff, so the claim survives this refutation attempt.",
+      "vote": "3-0"
+    },
+    {
+      "claim": "Across 7 state-of-the-art open-source multi-agent systems, empirical failure rates range from 41% to 86.7%, showing MAS failure is common and severe even in SOTA frameworks -- not a rare edge case.",
+      "source": "https://arxiv.org/pdf/2503.13657",
+      "quality": "primary",
+      "quote": "analysis reveals 41% to 86.7% failure rate on 7 state-of-the-art (SOTA) open-source MAS detailed in Figure 5 (Appendix B).",
+      "confidence": "high",
+      "evidence": "Fetched arxiv.org/html/2503.13657 (HTML rendering of the primary source) directly and confirmed the exact sentence in the paper's introduction: \"Our empirical analysis reveals 41% to 86.7% failure rate on 7 state-of-the-art (SOTA) open-source MAS\" \u2014 this matches the claim's supporting quote verbatim and is not a paraphrase or misread. The 7 systems (per Figure 5/Appendix B) are ChatDev, MetaGPT, HyperAgent, AppWorld, AG2 (MathChat), Magentic-One, and OpenManus, evaluated across 200+ tasks with GPT-4o and Claude-3.7-Sonnet backends. Corroborating search results independently describe the same methodology: \"researchers analyzed seven popular MAS frameworks across over 200 tasks, involving six expert human annotators\" with the MAST-Data dataset of 1,642 annotated traces (kappa=0.88 inter-annotator agreement), and this is the same paper cited as a foundational taxonomy by later 2026 works (arxiv 2605.29442, 2606.14589) \u2014 indicating continued relevance rather than being outdated/superseded. One nuance found but not a refutation: a related GitHub analysis notes MAST's unit of analysis is benchmark-task failure (non-completion/wrong answer), distinct from silent production failures \u2014 but the claim under review only asserts what the paper itself measured (benchmark failure rates across 7 SOTA MAS) and does not overextend to unmeasured production settings. I could not find any source disputing, retracting, or heavily qualifying the 41\u201386.7% figure itself. The claim's interpretive gloss (\"failure is common and severe... not a rare edge case\") is a direct, non-inflated restatement of the paper's own stated motivation. Source is the correct, appropriately strong primary source (peer-reviewed/OpenReview-hosted, widely cited empirical study) for this quantitative claim.",
+      "vote": "3-0"
+    },
+    {
+      "claim": "Task Verification failures (23.5%/21.3% of total) are dominated by 'No or Incomplete Verification' (FM-3.2, 8.2%) and 'Incorrect Verification' (FM-3.3, 9.1%) -- and critically, verifiers that exist often only perform superficial checks (e.g., code compiles) and pass outputs that are functionally broken, meaning presence of a verification step is not itself a reliable telemetry signal of correctness.",
+      "source": "https://arxiv.org/pdf/2503.13657",
+      "quality": "primary",
+      "quote": "many existing verifiers perform only superficial checks, despite being prompted to perform thorough verification, such as checking if the code compiles or if there are leftover TODO comments... a ChatDev-generated chess program passes superficial checks (e.g., code compilation) but contains runtime bugs because it fails to validate against actual game rules, rendering the output unusable despite review phases.",
+      "confidence": "high",
+      "evidence": "Verified against the primary source (arXiv 2503.13657 / OpenReview fAjbYBmonr, \"Why Do Multi-Agent LLM Systems Fail?\", accepted NeurIPS 2025 Datasets & Benchmarks track). The arxiv.org/html/2503.13657 full-text fetch confirms the exact sub-percentages: FM-3.1 Premature Termination 6.2%, FM-3.2 No/Incomplete Verification 8.2%, FM-3.3 Incorrect Verification 9.1% \u2014 these three sum to 23.5%, matching the claim's first figure exactly; the second figure (21.3%) also appears independently across multiple secondary summaries (Galileo, Augment Code, futureagi) as the paper's separately-reported category-level headline percentage for Task Verification (FC3), consistent with papers reporting both a sum-of-submodes figure and a distinct category-level percentage (different denominators, e.g., failure instances vs. trajectories). The supporting quote is verbatim-confirmed in the full text: \"many existing verifiers perform only superficial checks, despite being prompted to perform thorough verification, such as checking if the code compiles or if there are leftover TODO comments,\" plus the ChatDev chess example verbatim. The claim's closing interpretive clause (\"presence of a verification step is not itself a reliable telemetry signal of correctness\") is a reasonable, clearly-flagged extrapolation from this evidence to the design question at hand, not a misrepresentation of the source. No contradicting evidence found in search; the paper is recent (2025) and still actively cited by 2026 papers (e.g., arXiv 2607.05775), so not outdated. Source quality (peer-reviewed, 150-task empirical study across 5 open-source frameworks with human annotation) is more than sufficient for this claim's specificity.",
+      "vote": "3-0"
+    },
+    {
+      "claim": "MAST identifies exactly 14 fine-grained failure modes clustered into 3 top-level categories: system design issues, inter-agent misalignment, and task verification \u2014 developed via grounded-theory analysis of 150 traces with high inter-annotator agreement.",
+      "source": "https://openreview.net/forum?id=fAjbYBmonr",
+      "quality": "primary",
+      "quote": "This process identifies 14 unique modes, clustered into 3 categories: (i) system design issues, (ii) inter-agent misalignment, and (iii) task verification.",
+      "confidence": "high",
+      "evidence": "Claim checks out against multiple independent sources, not just the cited supporting quote. (1) Quote match: the arxiv abstract/paper text (2503.13657, \"Why Do Multi-Agent LLM Systems Fail?\", Cemri et al.) verbatim states \"14 unique modes, clustered into 3 categories: (i) system design issues, (ii) inter-agent misalignment, and (iii) task verification\" \u2014 exact match to the claim's category names and count. (2) The \"150 traces\" and \"grounded theory\" methodology details (not present in the excerpted supporting quote alone, but part of the claim) are independently corroborated by the paper's own text and multiple summaries (emergentmind.com/papers/2503.13657, thegrigorian.medium.com): annotators performed open-coding/grounded-theory analysis on 150 collected traces (drawn from a larger 1600+ trace corpus across 7 MAS frameworks). (3) \"High inter-annotator agreement\" is corroborated with a specific figure, Cohen's kappa = 0.88, cited consistently across the arxiv paper summary and secondary sources. No contradicting or qualifying source was found in search. Minor terminology variance exists across secondary summaries (some call category 1 \"specification issues\" instead of \"system design issues,\" and annotator-count details vary slightly, e.g. 3 vs 6 annotators) but the primary paper's own quoted category labels match the claim exactly, and these variances don't touch the claim's core assertions. Source is the primary peer-reviewed/widely-cited paper itself, appropriate rigor for this descriptive claim, and the paper (March 2025) is current for a fast-moving field with no signs this taxonomy has been superseded.",
+      "vote": "3-0"
+    },
+    {
+      "claim": "Failures are predominantly caused by system/architecture design flaws rather than underlying model limitations, and fixing design (not swapping models) yields large, quantified reliability gains \u2014 e.g., a single-fix intervention (giving one agent final decision authority) raised task success by 9.4 percentage points, and adding a high-level verification step raised it 15.6 points on ProgramDev.",
+      "source": "https://openreview.net/forum?id=fAjbYBmonr",
+      "quality": "primary",
+      "quote": "MAS failure is not merely a function of challenges in the underlying model; a well-designed MAS can result in performance gain when using the same underlying model.",
+      "confidence": "high",
+      "evidence": "Direct fetch of the MAST primary source PDF (arxiv.org/pdf/2503.13657, NeurIPS 2025 Datasets & Benchmarks Track; same paper as openreview.net/forum?id=fAjbYBmonr) confirms every specific factual element of the claim verbatim. Line 655-656: 'Insight 1. MAS failure is not merely a function of challenges in the underlying model; a well-designed MAS can result in performance gain when using the same underlying model' \u2014 matches the supporting quote exactly. Lines 167-168 and 672: 'ensuring the CEO had the final say contributed to a +9.4% increase in overall task success rate' and 'improving agent role specifications alone yields a +9.4% success rate increase for ChatDev with the same user prompt and LLM (GPT-4o)' \u2014 confirms the '9.4 percentage points / final decision authority' claim. Lines 714-715: 'adding a high-level task objective verification step to ChatDev yields a +15.6% improvement in task success on ProgramDev' \u2014 confirms the '15.6 points on ProgramDev' claim exactly, including the ProgramDev benchmark name (a real 30-problem coding dataset defined in Appendix D of the same paper). Conclusion (line ~869-870): 'our findings indicate that many MAS failures arise from the challenges in organizational design and agent coordination rather than the limitations of individual agents' \u2014 supports the claim's 'predominantly design flaws rather than model limitations' framing, though the paper's own language is somewhat more hedged ('many... rather than', 'not merely') than the claim's 'predominantly.' The paper also adds caveats the claim omits (these are 'first step interventions,' 'not all failure modes are resolved,' 'achieving robust MAS reliability often requires more than isolated fixes') \u2014 a minor completeness gap, not a misrepresentation of the cited facts. WebSearch turned up no credible contradicting or debunking source; secondary summaries (Medium recap, AugmentCode guide) corroborate the same reading of MAST's central finding. Source is a peer-reviewed NeurIPS 2025 paper, appropriate quality for the claim's strength.",
+      "vote": "2-1"
+    },
+    {
+      "claim": "MAST identifies 14 distinct failure modes in multi-agent LLM systems, organized into 3 overarching failure categories.",
+      "source": "https://neurips.cc/virtual/2025/poster/121528",
+      "quality": "primary",
+      "quote": "Failure Modes: \"14 unique modes\" identified through systematic analysis",
+      "confidence": "high",
+      "evidence": "Claim is directly supported by the primary source's own abstract text (arXiv 2503.13657 / NeurIPS 2025, \"Why Do Multi-Agent LLM Systems Fail?\"): \"This process identifies 14 unique modes, clustered into 3 categories: (i) system design issues, (ii) inter-agent misalignment, and (iii) task verification.\" This matches exactly the NeurIPS poster page quote cited in the claim (\"14 unique modes\" identified through systematic analysis). Multiple independent secondary sources (NeurIPS proceedings abstract page, OpenReview listing, Medium/Substack summaries) corroborate the same 14-mode/3-category structure and cite methodology behind it: Grounded Theory analysis of 150+ execution traces (avg. >15,000 lines each) across 5-7 open-source MAS frameworks, 6 expert human annotators, inter-annotator agreement \u03ba=0.88, later expanded into a 1600+ trace dataset. This is a peer-reviewed NeurIPS 2025 Datasets & Benchmarks paper, not a blog post or marketing claim, and the methodology (documented, quantified inter-rater reliability, large trace corpus) matches the strength of the claim. No contradicting or qualifying source was found in search results; all sources found (including independent commentary) state the same 14/3 structure.",
+      "vote": "3-0"
+    },
+    {
+      "claim": "The three MAST failure categories are system design issues, inter-agent misalignment, and task verification.",
+      "source": "https://neurips.cc/virtual/2025/poster/121528",
+      "quality": "primary",
+      "quote": "Failure Categories: Three main groupings: - System design issues - Inter-agent misalignment - Task verification",
+      "confidence": "high",
+      "evidence": "Claim is directly and precisely supported. The NeurIPS 2025 poster page for \"Why Do Multi-Agent LLM Systems Fail?\" (the primary MAST paper, neurips.cc/virtual/2025/poster/121528) states verbatim: \"This process identifies 14 unique modes, clustered into 3 categories: (i) system design issues, (ii) inter-agent misalignment, and (iii) task verification.\" This is an exact match to the claim's three category names. Independent corroboration via WebSearch across multiple secondary sources (Substack summary, Medium summary, OpenReview listing at openreview.net/forum?id=fAjbYBmonr, ADS abstract) confirms the same three-category structure with associated failure-share percentages (Specification/Design 41.8%, Inter-Agent Misalignment 36.9%, Task Verification 21.3%), derived from analysis of 150 hand-annotated traces (kappa=0.88) across 7 MAS frameworks, part of the larger 1600+ trace MAST-Data. No contradicting or qualifying source was found \u2014 this is the standard, consistently-cited categorization for MAST in the literature. Source is the paper's own official NeurIPS poster page (primary), appropriate for this factual/taxonomic claim, and the paper (accepted NeurIPS 2025 Datasets & Benchmarks track) is current relative to the July 2026 research date.",
+      "vote": "3-0"
+    },
+    {
+      "claim": "The taxonomy was built from empirical analysis of over 1,600 annotated agent traces across 7 popular multi-agent system frameworks, with a 150-trace subset independently annotated by human experts achieving high inter-annotator agreement (kappa = 0.88), lending the taxonomy empirical credibility rather than being speculative.",
+      "source": "https://neurips.cc/virtual/2025/poster/121528",
+      "quality": "primary",
+      "quote": "The researchers examined \"1600+ annotated traces collected across 7 popular MAS frameworks\" and performed rigorous analysis of 150 traces with expert human annotators, achieving \"high inter-annotator agreement (\u03ba = 0.88).\"",
+      "confidence": "high",
+      "evidence": "Independently corroborated across three sources: (1) NeurIPS 2025 poster page (neurips.cc/virtual/2025/poster/121528) states \"1600+ annotated traces collected across 7 popular MAS frameworks\" and \"rigorous analysis of 150 traces, guided closely by expert human annotators\" with \"high inter-annotator agreement (kappa = 0.88)\"; (2) the arXiv abstract page for the underlying paper (arxiv.org/abs/2503.13657, \"Why Do Multi-Agent LLM Systems Fail?\") repeats the identical figures verbatim; (3) web search results referencing OpenReview (forum?id=fAjbYBmonr) and ADS abstract listings corroborate the same numbers and additionally note the paper identifies 14 failure modes in 3 categories, consistent with MAST as described in the research question's grounding. No contradicting or qualifying source was found disputing these specific figures \u2014 search for criticism turned up only complementary-scope critiques (MAST covers design-time/benchmark-trace failures, not production infra failures like rate limits/timeouts), which do not challenge the empirical dataset size or annotation-agreement claim itself. The paper is a peer-reviewed NeurIPS 2025 accepted poster, not a preprint-only or marketing source, so source quality matches the strength of the claim (a specific quantitative methodology claim, not an extraordinary causal claim).",
+      "vote": "2-1"
+    },
+    {
+      "claim": "Coding-agent failures in CLI environments are predominantly driven by epistemic errors (knowledge/understanding gaps) rather than other failure categories, based on manual annotation of 63,000+ steps.",
+      "source": "https://arxiv.org/abs/2607.09510",
+      "quality": "primary",
+      "quote": "Coding-agent failures are predominantly driven by epistemic errors",
+      "confidence": "high",
+      "evidence": "The quote in the claim is a near-verbatim match of the paper's own abstract: \"coding-agent failures are predominantly driven by epistemic errors... [and] often remain hidden until recovery is no longer possible\" (arXiv:2607.09510, \"Failure as a Process: An Anatomy of CLI Coding Agent Trajectories,\" published July 10, 2026). Full-text methodology confirms: 1,794 valid trajectories / 1,184 failed runs, over 63,000 execution steps reviewed, annotation pipeline used Claude-generated drafts but \"two independent human annotators review the complete trajectory, verify the evidence, and finalize every label\" (Cohen's \u03ba 0.78\u20130.94) \u2014 reasonably described as manual annotation since humans finalized every label. Quantified breakdown directly supports \"predominantly\": Epistemic 57.9%, Competence 32.8%, Environment 9.4% \u2014 epistemic is clearly the plurality/majority-relative-to-others category. No contradicting or disputing source found in search; other results returned were unrelated papers, not counter-evidence. One caveat: authors themselves note the finding is a \"controlled snapshot\" from 89 Terminal-Bench tasks / 21 model-scaffold systems, not a definitive universal claim \u2014 this is a reasonable scope limitation the authors flag themselves, not evidence the claim is unsupported or wrong.",
+      "vote": "3-0"
+    },
+    {
+      "claim": "Because failures emerge gradually and silently rather than instantaneously, improving agent reliability requires earlier validation/intervention during a trajectory rather than relying solely on final-outcome (pass/fail) metrics \u2014 directly relevant to designing cheap capability-probing methods.",
+      "source": "https://arxiv.org/abs/2607.09510",
+      "quality": "primary",
+      "quote": "improving coding-agent reliability requires earlier validation and intervention",
+      "confidence": "medium",
+      "evidence": "Verified against the primary source (arXiv:2607.09510, \"Failure as a Process: An Anatomy of CLI Coding Agent Trajectories,\" posted 2026-07-10). The supporting quote is accurate and appears in the abstract verbatim: \"coding-agent failures are predominantly driven by epistemic errors, typically begin within the first few execution steps, and often remain hidden until recovery is no longer possible, suggesting that improving coding-agent reliability requires earlier validation and intervention rather than relying solely on final-outcome evaluation.\" This directly supports the claim's core mechanism (gradual/silent failure onset \u2192 need for trajectory-level validation over pass/fail-only evaluation). Source quality: substantial empirical study (3,843 execution trajectories, 7 frontier models, 3 scaffolds \u2014 OpenHands/MiniSWE/Terminus2 \u2014 on Terminal-Bench), with inter-annotator agreement reported (\u03ba=0.83\u20130.94) and an explicit \"Threats to Validity\" section. It is a non-peer-reviewed preprint, but methodologically rigorous and not marketing/press material. Two caveats worth flagging (not disqualifying): (1) the paper's scope is explicitly CLI coding agents on SWE tasks, not agentic AI systems in general \u2014 the claim's broader phrasing (\"agent reliability\") is a modest generalization beyond what's directly shown; (2) the paper diagnoses the problem (early, hidden failure onset) and argues for the need for earlier intervention, but does not propose or test a concrete early-intervention or capability-probing method \u2014 the claim's closing link to \"designing cheap capability-probing methods\" is the claim-author's inferential extension for the Cairn research question, not an assertion made by the source itself. Neither caveat contradicts the claim; both are scope/inference notes. No contradicting evidence found in search.",
+      "vote": "3-0"
+    },
+    {
+      "claim": "False success \u2014 an LLM agent claiming task completion despite environmental evidence of failure \u2014 is highly domain-dependent: it accounts for 45-48% of failures in tau2-bench single-control domains but only 3% in dual-control (telecom) domains.",
+      "source": "https://arxiv.org/abs/2606.09863",
+      "quality": "primary",
+      "quote": "tau2-bench single-control domains: 45-48% of failures involve false success",
+      "confidence": "high",
+      "evidence": "Directly verified against the primary source (arxiv.org/html/2606.09863, \"From Confident Closing to Silent Failure: Characterizing False Success in LLM Agents\"). Exact paper text: \"In tau2-bench, false success accounts for 45% and 48% of failures in airline and retail respectively, both single-control domains where only the agent can write to environment state. In telecom, a dual-control domain where the user simulator can independently verify state, false success drops to 3% of failures.\" This matches the claim's numbers precisely (45-48% single-control, 3% dual-control telecom) and the claim's framing as \"highly domain-dependent\" is accurate \u2014 it does not overstate to a causal claim, which is consistent with the paper's own hedge (\"We treat this as an observation rather than a causal claim... confounds remain,\" since only one dual-control domain exists in the dataset). The paper is a large-scale empirical study (9,876 tau2-bench trajectories across 8 model families) and is a primary source appropriately matched to the claim's strength. No contradicting sources found in search.",
+      "vote": "2-1"
+    },
+    {
+      "claim": "Agent performance in long-horizon tasks degrades non-linearly due to compounding per-step errors, driving agents from reliable short-task performance to near-systematic failure as horizon increases.",
+      "source": "https://arxiv.org/html/2604.11978v1",
+      "quality": "primary",
+      "quote": "a small per-step error rate compounds across dependent steps, driving agents from reliable short-task performance to near-systematic failure at longer horizons",
+      "confidence": "high",
+      "evidence": "The quote is verified verbatim in the paper's introduction (arXiv 2604.11978, \"The Long-Horizon Task Mirage? Diagnosing Where and Why Agentic Systems Break,\" Wang/Bai/Sun/Wang/Zhang/Hu/Schroder/Mutlu/Song/Nowak, published Apr 13 2026 \u2014 Dawn Song is a verifiable, credible co-author). Per WebFetch of the source, this framing is subsequently validated by the paper's own empirical results (3100+ trajectories, 4 domains, \"performance degrades non-linearly,\" \"sharp performance drop\"), not left as an unsupported assertion. The specific mechanism (per-step error compounding, p^t decay) and its qualitative consequence (near-systematic failure at longer horizons) is independently corroborated by several other credible, contemporaneous sources found via search: METR's time-horizon work (doubling task duration quadruples failure rate rather than doubling it \u2014 non-linear), Toby Ord/Forethought's \"half-life for success rates\" analysis, arXiv 2509.09677 (\"Illusion of Diminishing Returns: Measuring Long Horizon Execution in LLMs\"), and a 2025 MPI-INF/TU Kaiserslautern \"self-conditioning\" paper showing per-step error rates rise as trajectories progress (making compounding worse than a constant-rate model). No contradicting or heavily-qualifying source was found in search \u2014 the \"non-linear compounding\" framing appears to be the consensus view in the current (2026) long-horizon-agent literature, not a cherry-picked or marketing claim. Source is a primary arXiv research paper (appropriate weight for this claim's strength), and it is current relative to the 2026-07-23 date.",
+      "vote": "2-1"
+    },
+    {
+      "claim": "The paper proposes a 7-category failure taxonomy for long-horizon agentic failures (Environment Error, Instruction Error, Catastrophic Forgetting, False Assumptions, Planning Error, History Error Accumulation, Memory Limitations), validated against human annotation with substantial agreement (LLM-judge vs human kappa = 0.84).",
+      "source": "https://arxiv.org/html/2604.11978v1",
+      "quality": "primary",
+      "quote": "a seven-category failure taxonomy validated against human annotations (\u03ba=0.84)",
+      "confidence": "high",
+      "evidence": "Verified against the primary source (arxiv.org/html/2604.11978v1 and arxiv.org/pdf/2604.11978), \"The Long-Horizon Task Mirage? Diagnosing Where and Why Agentic Systems Break\" (Wang, Bai, Sun, Wang et al., submitted April 13, 2026). Three independent fetches (HTML abstract page, PDF, and a web search cross-check) all confirm: (1) the paper proposes a seven-category taxonomy for long-horizon agentic failures via a HORIZON benchmark; (2) the abstract states verbatim \"achieving strong agreement (inter-annotator \u03ba=0.61; human\u2013judge \u03ba=0.84)\" \u2014 matching the claim's \u03ba=0.84 figure exactly; (3) the seven category names were extracted directly from the paper's taxonomy section and match the claim's list nearly verbatim: Environment Error, Instruction Error, False Assumption, Planning Error, Catastrophic Forgetting, History Error Accumulation, Memory Limitation. This is a legitimate primary source (arXiv preprint with real authors, abstract, and methodology \u2014 3100+ trajectories across GPT-5 variants and Claude models, four agentic domains), not a marketing claim or forum post. The claim's wording is a faithful paraphrase of the paper's own stated methodology and results, not an overreach. No contradicting evidence found in search.",
+      "vote": "3-0"
+    },
+    {
+      "claim": "Failure collapse thresholds are domain-specific and not a single universal horizon: web-agent tasks collapse at very small compositional depth while OS and database domains sustain moderate performance until later extension levels, and embodied tasks degrade steeply even with minimal task-length increases.",
+      "source": "https://arxiv.org/html/2604.11978v1",
+      "quality": "primary",
+      "quote": "Web collapses at very small compositional depth, OS and Database domains sustain moderate performance until later extension levels, and Embodied tasks degrade steeply even with minimal increases.",
+      "confidence": "high",
+      "evidence": "Direct fetch of the primary source (arxiv.org/html/2604.11978v1, \"The Long-Horizon Task Mirage? Diagnosing Where and Why Agentic Systems Break\" by Wang, Bai, Sun, Wang, Zhang, Hu, Schroder, Mutlu, Song, Nowak) confirms the exact quote: \"the same extension level s induces markedly different task difficulty across domains: Web collapses at very small s, OS and Database domains sustain moderate performance until later extension levels, and Embodied tasks degrade steeply even with minimal increases in s.\" This is the HORIZON benchmark study (3100+ trajectories across Web/OS/Database/Embodied domains, human-validated LLM-as-Judge failure attribution), a legitimate primary academic source, published April 2026 (current). The claim under review paraphrases this quote almost verbatim with no added overreach \u2014 'compositional depth' and 'extension level'/'task-length increases' map directly to the paper's 's' variable, and the domain-specific ordering (Web collapses earliest, OS/Database sustain longer, Embodied degrades steeply even at minimal increases) is preserved exactly. WebSearch found no independent source disputing this specific finding; search results describe HORIZON consistently as a legitimate diagnostic benchmark with no critiques undermining this particular result.",
+      "vote": "3-0"
+    },
+    {
+      "claim": "The paper proposes cheaply estimating a model's per-step reliability on a small pilot before committing to a full task design: 'The most straightforward approach is to estimate p on a relatively small number of steps to determine the choice of model and red flags, i.e., c and v, as well as the value of k, before running the system on the full task with s steps.'",
+      "source": "https://arxiv.org/pdf/2511.09030",
+      "quality": "primary",
+      "quote": "The most straightforward approach is to estimate p on a relatively small number of steps to determine the choice of model and red flags, i.e., c and v, as well as the value of k, before running the system on the full task with s steps.",
+      "confidence": "high",
+      "evidence": "Verified by downloading the primary source PDF (arxiv.org/pdf/2511.09030, \"Solving a Million-Step LLM Task with Zero Errors,\" Meyerson et al., Cognizant AI Lab/UT Austin, submitted Nov 12 2025) and extracting text directly (bypassing an unreliable WebFetch summarization pass that first paraphrased incorrectly, then failed to locate the passage at all). The quoted sentence appears verbatim at lines 818-819 of the extracted text: \"The most straightforward approach is to estimate p on a relatively small number of steps to determine the choice of model and red flags, i.e., c and v, as well as the value of k, before running the system on the full task with s steps.\" Context confirms the claim's characterization: p is defined (line 815) as \"the per-step success rate,\" and Section 4.2 \"Estimating single-step success rates\" (lines 859-873) elaborates the same proposal in prose: \"It is thus desirable to calibrate the parameters of the system and estimate the success rate and cost before any large experiments are run... A straightforward way to estimate the per-step success rate is to run the system on a random subset of steps.\" This is a direct, non-overreaching match to the claim that the paper proposes cheaply estimating per-step reliability on a small pilot before committing to a full task design. The paper is a legitimate, current (Nov 2025) primary source appropriate for this claim's specificity/strength, not marketing material, and I found no contradicting evidence in search results.",
+      "vote": "3-0"
+    },
+    {
+      "claim": "Without decomposition/error-correction, the probability of an LLM completing a long task correctly decays exponentially with the number of steps, because each step is an independent point of failure: 'there are s opportunities for a weakest link to compromise the entire system, since for a correct action sequence a1*,...,as*, the probability of generating it without error is exponentially decaying as the number of steps increases.'",
+      "source": "https://arxiv.org/pdf/2511.09030",
+      "quality": "primary",
+      "quote": "there are s opportunities for a weakest link to compromise the entire system, since for a correct action sequence a\u2217 1, . . . , a\u2217 s, the probability of generating it without error is exponentially decaying as the number of steps increases",
+      "confidence": "high",
+      "evidence": "Verified via WebFetch of the primary source (arxiv.org/pdf/2511.09030, \"Solving a Million-Step LLM Task with Zero Errors,\" Meyerson et al., Cognizant AI Lab/UT Austin, Nov 2025). The quoted passage is accurate and in context: it's the paper's explicit theoretical motivation (Section 2-ish) for why the paper builds MAKER (extreme decomposition + error correction) \u2014 under the stated assumption of per-step independent error probability p, success probability is (1-p)^n, which is mathematically exponential decay in n. The claim under review faithfully restates this, including the conditioning clause \"without decomposition/error-correction\" and the \"independent point of failure\" mechanism, matching the paper's own framing rather than overreaching beyond it.\n\nThis is not an isolated or fringe claim \u2014 WebSearch turned up independent corroboration across multiple sources: the Towers of Hanoi benchmark cited in the same paper (agentic process derails after a few hundred steps without decomposition), METR's measured exponential/half-life decay of agent task success with time horizon (e.g., Claude 3.7 Sonnet ~59min half-life), a Six Sigma Agent paper (arXiv 2601.22290) applying the same reliability-engineering (Lusser's Law) framing, and multiple industry write-ups (Zartis, Towards Data Science) describing the identical compounding-error mechanism with concrete numbers (1% per-token error \u2192 87% cumulative failure by token 200; 90% per-step accuracy over ~4.8 steps \u2192 ~59% end-to-end success). The paper itself is credible (named authors, established labs, Nov 2025 \u2014 current, not outdated) and the claim's strength (a mathematical/theoretical result under a stated independence assumption, explicitly framed as motivating rather than as a universal empirical law) matches what a primary theoretical/technical paper can support. No credible source found disputing that per-step compounding degrades long-horizon success; the only reasonable caveat (real per-step errors may be correlated rather than strictly i.i.d.) is not a contradiction of this claim but a boundary condition the paper itself acknowledges is what its decomposition+correction method is designed to address.",
+      "vote": "2-1"
+    },
+    {
+      "claim": "Frontier AI models' 50%-task-completion time horizon (length of task, measured by time taken by human experts, that the model can complete with 50% success rate) has been doubling approximately every seven months since 2019.",
+      "source": "https://arxiv.org/pdf/2503.14499",
+      "quality": "primary",
+      "quote": "frontier AI time horizon has been doubling approximately every seven months since 2019, though the trend may have accelerated in 2024.",
+      "confidence": "medium",
+      "evidence": "Verified directly against primary and follow-up sources.\n\n1. Quote fidelity: METR's own blog (metr.org/blog/2025-03-19) states nearly verbatim: \"the length of tasks... that generalist frontier model agents can complete autonomously with 50% reliability has been doubling approximately every 7 months for the last 6 years.\" The claim under review is a faithful, appropriately-hedged paraphrase (the \"though the trend may have accelerated in 2024\" clause is also directly from METR's own text, where they note fitting only 2024-2025 data \"shortens the estimate... by about 2.5 years\").\n\n2. Contradicting/qualifying evidence found: (a) A methodological critique (Anatol Wegner, \"Are AI time-horizons doubling every 7 months?\", medium.com/@AIchats) argues the exponential fit is statistically fragile \u2014 sparse data (as few as 6-8 points in the most recent window spanning ~1 year), huge log-scale error bars, task-suite design (trivial SWAA tasks + unsolvably-hard RE-Bench tasks) that manufactures the appearance of a clean spread, and near-total reliance on OpenAI/Anthropic models only. This is a substantive, specific critique, not vague speculation. (b) METR itself admits wide uncertainty: \"we're fairly confident that the overall trend is roughly correct, at around 1-4 doublings per year\" \u2014 i.e., anywhere from ~3 to ~12 months, a much looser bound than \"seven months\" suggests standing alone.\n\n3. Currency check (critical for a fast-moving-field claim ~16 months old as of today): METR published a direct follow-up, \"Time Horizon 1.1\" (metr.org/blog/2026-1-29-time-horizon-1-1), which re-derives the trend with an updated methodology. Result: the full 2019-2025 period *still* comes out to \"exactly the same... 196 days (7 months),\" reaffirming rather than overturning the original headline number. The update does show the *recent* sub-trend is faster (since 2023: ~131 days/4.3 months; since 2024: ~89 days/3 months) \u2014 but this is consistent with, not contradictory to, the original claim's own hedge that \"the trend may have accelerated in 2024.\"\n\nNet assessment: the claim accurately represents its cited primary source, the source is a specialized, widely-cited empirical AI-evaluation study (not a marketing claim), and it has been independently reaffirmed by the same team's ~10-month-later replication rather than superseded or debunked. A real methodological critique exists and should be surfaced as a caveat in the taxonomy write-up (data sparsity, task-suite design, single-lab concentration, and the wide 1-4x/year uncertainty band), but it does not rise to overturning the figure \u2014 it argues for citing it with appropriate error bars, not for discarding it.",
+      "vote": "2-1"
+    },
+    {
+      "claim": "As of the paper's measurement, Claude 3.7 Sonnet has a 50% time horizon of around 50 minutes on the tested task set (a mix of RE-Bench, HCAST, and 66 newly created shorter tasks).",
+      "source": "https://arxiv.org/pdf/2503.14499",
+      "quality": "primary",
+      "quote": "Claude 3.7 Sonnet have a 50% time horizon of around 50 minutes",
+      "confidence": "high",
+      "evidence": "Two independent WebFetch reads of the arxiv abstract (arxiv.org/abs/2503.14499 and the v1 HTML version) both returned the identical sentence: \"On these tasks, current frontier AI models such as Claude 3.7 Sonnet have a 50% time horizon of around 50 minutes.\" This is a verbatim match to the claim and its supporting quote. The paper's task set (RE-Bench, HCAST, and 66 newly created shorter/SWAA tasks) matches the claim's description. METR's companion blog post rounds this to \"approximately one hour,\" consistent with ~50 minutes, not contradicting it. A separate METR publication (metr.org/evaluations/claude-3-7-report) reports \"around 55 minutes\" for Claude 3.7 Sonnet, but that figure is from a different, distinct evaluation (\"General Autonomous Capabilities\" tasks), not the same task mixture the claim specifies \u2014 so it doesn't contradict this claim, it's just a different measurement on a different benchmark. The claim is correctly scoped (\"as of the paper's measurement,\" specific task set named), sourced to the primary paper, and not an overreach.",
+      "vote": "3-0"
+    }
+  ],
+  "refuted": [
+    {
+      "claim": "METR's time-horizon growth trend across frontier AI models (2019-2025) fits an exponential curve significantly better than linear or hyperbolic alternatives, meaning reliably-completable task duration grows multiplicatively over time rather than additively.",
+      "vote": "1-2",
+      "source": "https://metr.org/time-horizons/"
+    },
+    {
+      "claim": "Frontier model task-completion capability (measured by the human-time-equivalent of tasks completed with 50% success) has grown exponentially over 6 years, doubling roughly every 7 months, with Claude 3.7 Sonnet reaching an approximately 1-hour time horizon as of the report.",
+      "vote": "1-2",
+      "source": "https://metr.org/blog/2025-03-19-measuring-ai-ability-to-complete-long-tasks/"
+    },
+    {
+      "claim": "State-of-the-art LLM agents (e.g., GPT-4o) succeed on fewer than half of \u03c4-bench tasks in single-trial evaluation, quantifying current frontier model unreliability on realistic multi-turn tool-use tasks.",
+      "vote": "0-3",
+      "source": "https://arxiv.org/abs/2406.12045"
+    },
+    {
+      "claim": "Capability rankings on short/atomic tasks do not predict long-horizon reliability: a 12B model (Mistral Nemo) outperformed a 400B MoE model (Llama 4 Maverick) on long+very-long horizon reliability despite being 33x smaller and ranking behind it on short tasks \u2014 a capability-reliability rank inversion invisible to pass@1-only evaluation.",
+      "vote": "0-3",
+      "source": "https://arxiv.org/pdf/2603.29231"
+    },
+    {
+      "claim": "Across all 68 confirmed real-world failures, the single unifying root cause was an unbounded feedback path (no effective stopping condition), with tool-controlled retry loops (41.2%) and model-controlled termination (38.2%) as the two dominant proximate causes -- i.e. agents fail not from missing loop syntax but from loop-exit conditions that silently depend on model output.",
+      "vote": "1-2",
+      "source": "https://arxiv.org/pdf/2607.01641"
+    },
+    {
+      "claim": "System Design Issues is the single largest failure category (44.2% / 41.8% depending on dataset cut), driven heavily by two detectable signals: Step Repetition (FM-1.3, 15.7%) and Unaware of Termination Conditions (FM-1.5, 12.4%) -- both are observable in raw execution telemetry (repeated tool/action calls, absence of a stop signal) without needing semantic judgment.",
+      "vote": "0-3",
+      "source": "https://arxiv.org/pdf/2503.13657"
+    },
+    {
+      "claim": "Failure rates on current SOTA multi-agent frameworks are extremely high \u2014 up to 86.7% on some benchmarks \u2014 establishing a strong empirical baseline for how unreliable agentic systems are at design time.",
+      "vote": "0-3",
+      "source": "https://openreview.net/forum?id=fAjbYBmonr"
+    },
+    {
+      "claim": "Failure onset typically occurs very early in agent trajectories (within the first few execution steps), but remains undetected/silent until recovery is no longer possible \u2014 supporting the compounding-error/silent-failure pattern.",
+      "vote": "1-2",
+      "source": "https://arxiv.org/abs/2607.09510"
+    },
+    {
+      "claim": "In AppWorld, among coding-agent trajectories that make an explicit self-assessed status claim, 75.8% of those claims constitute false success (agent asserts success but the environment state shows failure).",
+      "vote": "1-2",
+      "source": "https://arxiv.org/abs/2606.09863"
+    },
+    {
+      "claim": "Lightweight TF-IDF-based detectors substantially outperform LLM-judge monitors for catching false success: AUROC 0.83 (tau2-bench, task-disjoint split) and 0.95 (AppWorld), while running about 3,300x faster and catching 4-8x more false successes at matched flag rates \u2014 supporting cheap, pre-deployment-style probing over expensive LLM-as-judge evaluation.",
+      "vote": "0-3",
+      "source": "https://arxiv.org/abs/2606.09863"
+    },
+    {
+      "claim": "A 1% per-step error rate -- which looks acceptable on standard short benchmarks -- is fatal for long-horizon agentic tasks: the paper states a system with such an error rate is 'a system with a 1% per-step error rate is not acceptable' and elsewhere notes it 'results in inevitable failure' at scale, i.e. it is expected to fail after only ~100 steps of a million-step task.",
+      "vote": "0-3",
+      "source": "https://arxiv.org/pdf/2511.09030"
+    },
+    {
+      "claim": "Model reliability decays steeply as task length increases: near-100% success on short tasks but under 10% success on tasks that would take a human expert more than ~4 hours, quantifying the compounding-error / long-horizon degradation phenomenon.",
+      "vote": "0-3",
+      "source": "https://metr.org/blog/2025-03-19-measuring-ai-ability-to-complete-long-tasks/"
+    },
+    {
+      "claim": "Latitude's framework identifies six agent-specific failure modes distinct from LLM failures: tool misuse, context loss, goal drift, retry loops, cascading errors in multi-agent systems, and silent quality degradation.",
+      "vote": "0-3",
+      "source": "https://latitude.so/blog/ai-agent-failure-detection-guide"
+    }
+  ],
+  "sources": [
+    {
+      "url": "https://arxiv.org/abs/2503.13657",
+      "quality": "primary",
+      "angle": "MAST failure taxonomy (primary source)",
+      "claimCount": 4
+    },
+    {
+      "url": "https://arxiv.org/pdf/2503.13657",
+      "quality": "primary",
+      "angle": "MAST failure taxonomy (primary source)",
+      "claimCount": 5
+    },
+    {
+      "url": "https://openreview.net/forum?id=fAjbYBmonr",
+      "quality": "primary",
+      "angle": "MAST failure taxonomy (primary source)",
+      "claimCount": 5
+    },
+    {
+      "url": "https://neurips.cc/virtual/2025/poster/121528",
+      "quality": "primary",
+      "angle": "MAST failure taxonomy (primary source)",
+      "claimCount": 5
+    },
+    {
+      "url": "https://thegrigorian.medium.com/why-do-multi-agent-llm-systems-fail-14dc34e0f3cb",
+      "quality": "unreliable",
+      "angle": "MAST failure taxonomy (primary source)",
+      "claimCount": 0
+    },
+    {
+      "url": "https://orq.ai/blog/why-do-multi-agent-llm-systems-fail",
+      "quality": "blog",
+      "angle": "MAST failure taxonomy (primary source)",
+      "claimCount": 4
+    },
+    {
+      "url": "https://arxiv.org/abs/2605.29442",
+      "quality": "primary",
+      "angle": "Empirical single-agent failure studies",
+      "claimCount": 4
+    },
+    {
+      "url": "https://arxiv.org/abs/2606.08162",
+      "quality": "unreliable",
+      "angle": "Empirical single-agent failure studies",
+      "claimCount": 4
+    },
+    {
+      "url": "https://arxiv.org/abs/2607.09510",
+      "quality": "primary",
+      "angle": "Empirical single-agent failure studies",
+      "claimCount": 4
+    },
+    {
+      "url": "https://arxiv.org/abs/2606.09863",
+      "quality": "primary",
+      "angle": "Empirical single-agent failure studies",
+      "claimCount": 4
+    },
+    {
+      "url": "https://arxiv.org/pdf/2509.09677",
+      "quality": "primary",
+      "angle": "Compounding error over long horizons",
+      "claimCount": 5
+    },
+    {
+      "url": "https://arxiv.org/html/2604.11978v1",
+      "quality": "primary",
+      "angle": "Compounding error over long horizons",
+      "claimCount": 5
+    },
+    {
+      "url": "https://arxiv.org/pdf/2511.09030",
+      "quality": "primary",
+      "angle": "Compounding error over long horizons",
+      "claimCount": 5
+    },
+    {
+      "url": "https://www.zartis.com/the-compounding-errors-problem-why-multi-agent-systems-fail-and-the-architecture-that-fixes-it/",
+      "quality": "blog",
+      "angle": "Compounding error over long horizons",
+      "claimCount": 4
+    },
+    {
+      "url": "https://caitech.eu/en/articles/llm-agent-failure-taxonomy-six-clusters-engineers-must-track/",
+      "quality": "blog",
+      "angle": "Compounding error over long horizons",
+      "claimCount": 5
+    },
+    {
+      "url": "https://labs.adaline.ai/p/long-horizon-ai-agents-planning-ceiling",
+      "quality": "blog",
+      "angle": "Compounding error over long horizons",
+      "claimCount": 5
+    },
+    {
+      "url": "https://metr.org/time-horizons/",
+      "quality": "primary",
+      "angle": "Capability frontier: METR time horizons",
+      "claimCount": 5
+    },
+    {
+      "url": "https://metr.org/blog/2025-03-19-measuring-ai-ability-to-complete-long-tasks/",
+      "quality": "primary",
+      "angle": "Capability frontier: METR time horizons",
+      "claimCount": 4
+    },
+    {
+      "url": "https://arxiv.org/pdf/2503.14499",
+      "quality": "primary",
+      "angle": "Capability frontier: METR time horizons",
+      "claimCount": 5
+    },
+    {
+      "url": "https://metr.org/blog/2025-07-14-how-does-time-horizon-vary-across-domains/",
+      "quality": "primary",
+      "angle": "Capability frontier: METR time horizons",
+      "claimCount": 5
+    },
+    {
+      "url": "https://epoch.ai/benchmarks/metr-time-horizons",
+      "quality": "primary",
+      "angle": "Capability frontier: METR time horizons",
+      "claimCount": 4
+    },
+    {
+      "url": "https://aiwiki.ai/wiki/metr_time_horizon",
+      "quality": "unreliable",
+      "angle": "Capability frontier: METR time horizons",
+      "claimCount": 0
+    },
+    {
+      "url": "https://arxiv.org/abs/2406.12045",
+      "quality": "primary",
+      "angle": "Reliability metrics pass^k vs pass@k",
+      "claimCount": 4
+    },
+    {
+      "url": "https://sierra.ai/blog/tau-bench-shaping-development-evaluation-agents",
+      "quality": "primary",
+      "angle": "Reliability metrics pass^k vs pass@k",
+      "claimCount": 4
+    },
+    {
+      "url": "https://arxiv.org/pdf/2603.00540",
+      "quality": "primary",
+      "angle": "Reliability metrics pass^k vs pass@k",
+      "claimCount": 4
+    },
+    {
+      "url": "https://arxiv.org/pdf/2602.19008",
+      "quality": "primary",
+      "angle": "Reliability metrics pass^k vs pass@k",
+      "claimCount": 5
+    },
+    {
+      "url": "https://arxiv.org/pdf/2603.29231",
+      "quality": "primary",
+      "angle": "Cheap capability probing at design time",
+      "claimCount": 5
+    },
+    {
+      "url": "https://arxiv.org/pdf/2601.06112",
+      "quality": "primary",
+      "angle": "Cheap capability probing at design time",
+      "claimCount": 5
+    },
+    {
+      "url": "https://arxiv.org/pdf/2505.12058",
+      "quality": "primary",
+      "angle": "Cheap capability probing at design time",
+      "claimCount": 5
+    },
+    {
+      "url": "https://arxiv.org/pdf/2505.05115",
+      "quality": "primary",
+      "angle": "Cheap capability probing at design time",
+      "claimCount": 4
+    },
+    {
+      "url": "https://arxiv.org/pdf/2607.01641",
+      "quality": "primary",
+      "angle": "Telemetry-observable failure signals (practitioner)",
+      "claimCount": 5
+    },
+    {
+      "url": "https://latitude.so/blog/ai-agent-failure-detection-guide",
+      "quality": "blog",
+      "angle": "Telemetry-observable failure signals (practitioner)",
+      "claimCount": 5
+    },
+    {
+      "url": "https://futureagi.com/glossary/infinite-loop-agent/",
+      "quality": "blog",
+      "angle": "Telemetry-observable failure signals (practitioner)",
+      "claimCount": 3
+    }
+  ],
+  "stats": {
+    "angles": 7,
+    "sourcesFetched": 33,
+    "claimsExtracted": 140,
+    "claimsVerified": 45,
+    "confirmed": 32,
+    "killed": 13,
+    "urlDupes": 1,
+    "budgetDropped": 8,
+    "agentCalls": 177,
+    "afterSynthesis": 14
+  }
+}
