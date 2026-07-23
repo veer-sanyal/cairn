@@ -1,5 +1,15 @@
 # Changelog
 
+## 0.5.0 — builder/governor wiring (SP3 of the level-zero umbrella)
+
+- **Environment census + data-access ladder** — the builder enumerates this machine's MCP servers/surfaces and records a rung (1 API → 5 manual) with provenance per data need; the governor re-censuses at review and proposes rung upgrades when the environment improves.
+- **pass^k capability probes** — every "the model can do X reliably" assumption is probed (k=5 repeated trials) before scaffolding commits to it; results are dated decisions[] entries the governor can re-probe.
+- **Doctrine sweeps in the validator** — `research_expired` (RESEARCH.md Refresh-by dates), `census_stale` (>180d), `proxy_revalidation_due` (annual Goodhart re-check of every lever→north-star link, P18/P22). Deterministic detection, human-gated disposition.
+- **Failure-mode telemetry + de-automation** — `/log` friction events carry `failure_mode=` tags (spec/verify/context/overreach/tooling/upkeep, P16); same task class + same tag ≥3 since last review → the governor proposes de-automation or a checked verifier.
+- **Boundary contract** — instances carry an autonomy table (act/ask/never, graded by irreversibility) and an ask-budget (default 1/session); v1 enforcement is instructional + telemetry-audited, recorded as a BET.
+
+Umbrella: SP1 (0.3.0) research engine · SP2 (0.4.0) doctrine · SP3 (this) wiring · SP4 (/cairn:audit) next.
+
 ## 0.4.0 — level-zero doctrine (SP2 of the level-zero umbrella)
 
 - **PRINCIPLES.md v2** — nine new principles from research rounds R5–R9 (~860 verification agents, 3-vote adversarial): P16 failure taxonomy, P17 capability frontier & probing, P18 Goodhart-resistant objectives, P19 human-agent boundary (ask-budgets, blast radius), P20 orchestration & model tiering, P21 verification & eval design, P22 epistemics & knowledge decay, P23 mechanism selection, P24 cold start [BET].
