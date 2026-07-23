@@ -25,6 +25,9 @@ Build-config JSON fields (all required unless noted):
                      apply with a 7-day boot-visible revert window)
   initial_now        str  (optional)
   initial_next       str  (optional)
+  census             {"date", "mcp_servers", ...}          (optional) — passed through
+  data_paths         [{"need", "rung", "why", "date"}, ...] (optional) — passed through
+  boundary           {"ask_budget_per_session", "autonomy"} (optional) — passed through
 """
 import json, sys, shutil, datetime
 from pathlib import Path
@@ -86,15 +89,19 @@ def main():
         "cairn_version": CAIRN_VERSION,
         "instance": {"name": cfg["instance_name"], "created": today},
         "caps": CAPS,
-        "cadence": {"review_days": 30, "min_sessions": 10, "min_days": 28},
+        "cadence": {"review_days": 30, "min_sessions": 10, "min_days": 28,
+                    "proxy_revalidation_days": 365},
         "intents": cfg["intents"],
         "metrics": {"north_star": cfg["north_star"], "inputs": cfg.get("inputs", []),
-                    "guardrails": cfg.get("guardrails", [])},
+                    "guardrails": cfg.get("guardrails", []), "last_revalidated": today},
         "triggers": cfg["triggers"],
         "privacy": {"capture_content": False},
         "auto_adopt": {"armed": bool(cfg.get("auto_adopt", False))},
         "decisions": cfg.get("decisions", []),
     }
+    for opt in ("census", "data_paths", "boundary"):
+        if opt in cfg:
+            manifest[opt] = cfg[opt]
     (target / "manifest.json").write_text(json.dumps(manifest, indent=2) + "\n")
     print(f"scaffolded {cfg['instance_name']} at {target}")
 

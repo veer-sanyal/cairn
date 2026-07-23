@@ -58,3 +58,24 @@ def test_refuses_nonempty_target(tmp_path):
     r = subprocess.run([sys.executable, str(REPO / "skills" / "build" / "scaffold.py"),
                         str(cfg), str(t)], capture_output=True, text=True)
     assert r.returncode != 0   # scaffolder is the ONE script allowed to hard-fail: it's plugin-side
+
+def test_optional_boundary_fields_pass_through(tmp_path):
+    cfg = dict(CFG, census={"date": "2026-07-23", "mcp_servers": ["gmail"]},
+               data_paths=[{"need": "chart data", "rung": 4, "why": "no API", "date": "2026-07-23"}],
+               boundary={"ask_budget_per_session": 1,
+                         "autonomy": {"act": ["log"], "ask": ["restructure"], "never": ["delete archive"]}})
+    cfg_file = tmp_path / "cfg2.json"
+    cfg_file.write_text(json.dumps(cfg))
+    target = tmp_path / "inst2"
+    r = subprocess.run([sys.executable, str(REPO / "skills" / "build" / "scaffold.py"),
+                        str(cfg_file), str(target)], capture_output=True, text=True)
+    assert r.returncode == 0, r.stderr
+    m = json.loads((target / "manifest.json").read_text())
+    assert m["census"]["mcp_servers"] == ["gmail"]
+    assert m["data_paths"][0]["rung"] == 4
+    assert m["boundary"]["ask_budget_per_session"] == 1
+
+def test_revalidation_stamps_always_present(tmp_path):
+    m = json.loads((scaffold(tmp_path) / "manifest.json").read_text())
+    assert m["metrics"]["last_revalidated"] == m["instance"]["created"]
+    assert m["cadence"]["proxy_revalidation_days"] == 365
