@@ -270,6 +270,32 @@ Sources: Manheim & Garrabrant (arXiv 1803.04585) + MIRI summary; 3-0 votes acros
 - The builder's metric-contract interview cites mechanisms, not folklore: each input lever gets a causal-validity check, each metric an extreme-range question, and audits look for concealment, not just drift.
 - Extends P12: watched-not-chased is not taste — it is the structural mitigation for Goodhart under agentic optimization power, and it needs the revalidation lifecycle above because no static contract stays safe.
 
+## 19. Autonomy is graded by blast radius; asks are a budget
+Perishability: durable · Verified: 2026-07 · Round: R8
+
+**[VERIFIED]** Humans are structurally bad at sustained oversight of reliable automation: failure detection was 33% under constant-reliability automation vs 82% under variable reliability — a 149% difference — though the same malfunctions were caught ~97% single-task (Parasuraman & Manzey 2010, reproducing Parasuraman/Molloy/Singh 1993; replicated). Expertise and practice do NOT fix it — pilots and controllers show the effect too (one merged claim 2-1). Automation bias hits competent professionals: erroneous advice followed at RR 1.26 (95% CI 1.11–1.44), and users reversed their own CORRECT decisions for wrong system advice in 6–11% of cases (Goddard et al., JAMIA systematic review).
+**[REFUTED — do not cite]** "Complacency appears ONLY under multi-task load" (0-3); "moderate ~70% reliability is optimal for monitoring" (1-2).
+
+**[VERIFIED]** Uniform per-action gating rubber-stamps in practice: users approved ~93% of Claude Code permission prompts — Anthropic's own first-party telemetry, framed by Anthropic as approval fatigue, not review. Their stated alternative grades containment by likelihood-of-failure × damage (blast radius), not uniform human-in-the-loop.
+**[REFUTED — do not cite]** The companion mechanism claim, "auto mode + OS sandboxing cut prompts 84%" (0-3) — cite only the 93% figure and the two-factor risk framework.
+
+**[VERIFIED]** The graded structure is Horvitz (CHI 1999): act/ask/do-nothing as an expected-utility computation over four outcomes with TWO thresholds (inaction/dialog and dialog/action) that shift with context — rising when the user is absorbed, falling when rushed. **[PREPRINT]** Feng et al. 2025 (arXiv 2506.12469) define five autonomy levels by the USER's role (operator → collaborator → consultant → approver → observer) and flag L4 approver rubber-stamping — including misaligned agents exploiting user disengagement to gain autonomy — as open and unsolved.
+**[REFUTED — do not cite]** "Horvitz ties action COST to the threshold" (0-3) — the verified threshold-shifters are attention depth and time pressure; the blast-radius link comes from Anthropic's framework, not Horvitz.
+
+**[VERIFIED — medium; two of three claims 2-1]** Ask FREQUENCY drives abandonment: prompting on every visit vs 25% of visits worsened retention (HR 0.78, p=0.003) even though each prompt took a median 1.55 seconds — frequency, not per-decision cost, burns users out. Users prefer deferred re-commitment ("not now, ask later") over permanently locking in an easier setting. (Kovacs et al., CHI 2021 randomized experiment, 8,000+ users. Caveats: dose-response not monotonic — occasional beats constant, never-asking wasn't better; single browsing-nudge case study, not an AI agent.)
+
+**[VERIFIED]** When an ask IS spent on a genuinely risky action, make it inhibitive: forcing interaction (type/swipe/delay) before the risky choice is possible cut unsafe choices by up to 50%, was 2–3x better at surfacing new critical information under extreme habituation, and the active variants (Swipe, Type) stayed effective after many exposures while passive attention-directing designs decayed; interstitial warnings were bypassed 45% vs 82.5% for passive contextual ones. (Bravo-Lillo et al. SOUPS 2013/2014, Kaiser et al. USENIX Security 2021; MTurk lab settings — transfer to agent confirmation UIs is inferential.)
+
+**[VERIFIED]** A small, even token, override channel largely cures algorithm aversion: adoption of an imperfect-but-superior model jumped from 32% (unmodifiable) to 73–76% (adjustable), and shrinking the allowed adjustment by 80% changed nothing (71%/71%/68%, p=.809) — people need a nonzero channel, not discretionary power (Dietvorst, Simmons & Massey, Management Science 2018). The underlying aversion: one visible algorithm error costs disproportionate trust — asymmetric confidence updating, algorithm errors damaging confidence in all four studies, human errors in only one, despite humans making 15–97% more error (JEP: General 2015; replication limits — treat as a first-exposure effect, not a universal law).
+
+**[VERIFIED — one claim 3-0, two 2-1]** Where effective oversight cannot actually be performed, mandating it is theater: across 41 government-algorithm oversight policies, people are structurally unable to perform the assumed functions, so the mandates legitimize flawed systems, create a false sense of security, and function as liability shields (Green, Computer Law & Security Review 2022; evidence base is government algorithmic decision-making).
+
+**Design implications:**
+- Every instance carries an ask-budget and a blast-radius table (SP3): asks are a rationed resource spent only where load-bearing; per action class, act/ask/do-nothing is set by likelihood-of-failure × blast radius, never uniform per-action gating.
+- Irreversible + externally-visible actions are never autonomous — and their gate is inhibitive (forced interaction with the consequential element), never a passive confirm dialog.
+- Always leave a user-editable override knob, even token-sized, including when telemetry says the default is right — the channel's existence, not its width, buys adoption.
+- "A human approved it" is not evidence of review (converges with P16's "a verifier ran"). Extends P13: ask friction spends the same budget upkeep burden does — trust & adoption fold in here, and rationing asks is an anti-abandonment lever.
+
 ---
 
 ## Research provenance
