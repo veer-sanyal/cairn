@@ -15,6 +15,10 @@ Run from inside a cairn instance. Never silent, never destructive (P10: versione
 3. Hook scripts are plugin-owned and never user-edited: copy every file from
    ${CLAUDE_PLUGIN_ROOT}/templates/hooks/ directly over the instance's .claude/hooks/
    (report each file replaced).
+   The research workflow is plugin-owned too: copy
+   ${CLAUDE_PLUGIN_ROOT}/skills/research/deep-research.js over the instance's
+   .claude/workflows/deep-research.js (create the directory if a pre-0.3.0 instance
+   lacks it).
    Command files are managed-but-rendered: render each new
    ${CLAUDE_PLUGIN_ROOT}/templates/instance/commands/*.md by substituting
    {{cairn_version}} (the NEW version) and {{intents}} (from manifest.json) into a temp dir.

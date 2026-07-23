@@ -49,12 +49,13 @@ in agent-systems evidence — WITHOUT the user having to ask for research.
 3. **Announce the plan in one short list** ("I'll research: X to set Y, Z to set W") and
    proceed by default; the user may trim or skip items. If they skip, every affected
    decision is graded BET in the manifest — never silently ungrounded.
-4. **Execute — prefer the strongest available engine.** If a deep-research skill or workflow
-   exists in this environment (check the available-skills list for e.g. `deep-research`),
-   invoke it with the framed questions. Otherwise run the built-in fallback: for each
-   question, spawn 2-3 search subagents on DIFFERENT angles (academic, practitioner,
-   contrarian); fetch primary sources over listicles; then for each load-bearing claim spawn
-   one adversarial verifier prompted to REFUTE it against the source. Keep only survivors.
+4. **Execute — via the vendored engine.** Follow the /cairn:research skill
+   (${CLAUDE_PLUGIN_ROOT}/skills/research/SKILL.md): frame each question as the decision it
+   serves, write a GROUNDING block, and launch the plugin's own deep-research workflow
+   (Workflow({scriptPath: "${CLAUDE_PLUGIN_ROOT}/skills/research/deep-research.js", ...}) —
+   pre-scaffold there is no instance copy yet). If the Workflow tool is unavailable, use
+   that skill's degraded mode: 2-5 angle subagents, then per-claim adversarial verifiers
+   prompted to REFUTE (≥2/3 refutations kill); degraded-mode grades cap at THIN.
 5. **Grade and persist.** Write `docs/RESEARCH.md` in the instance: each finding with
    sources, a grade — VERIFIED (multi-source, survived refutation) / THIN (single source) /
    BET (no usable evidence) — a date stamp, and the claims that were refuted (do-not-build-on
