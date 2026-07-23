@@ -296,6 +296,31 @@ Perishability: durable · Verified: 2026-07 · Round: R8
 - Always leave a user-editable override knob, even token-sized, including when telemetry says the default is right — the channel's existence, not its width, buys adoption.
 - "A human approved it" is not evidence of review (converges with P16's "a verifier ran"). Extends P13: ask friction spends the same budget upkeep burden does — trust & adoption fold in here, and rationing asks is an anti-abandonment lever.
 
+## 20. Default single-threaded; fan-out is bought with tokens
+Perishability: semi-durable · Verified: 2026-07 · Round: R9
+
+**[VERIFIED]** The complexity ladder: direct model call → single agent with tools → multi-agent orchestration. Take the lowest rung that reliably works and escalate only when measurement shows context limits, parallelism needs, or specialization gains justify the coordination cost — "decision-making and flow-control overhead often exceed the benefits of breaking the task into multiple agents"; single-agent-with-tools is the stated default.
+Sources: Microsoft Azure Architecture Center (updated 2026-05; 3-0, 2-1) + independent practitioner corroboration (3-0).
+
+**[VERIFIED]** Multi-agent pays off on research-shaped breadth, and the premium IS the mechanism: Anthropic's Opus-4-lead + Sonnet-4-subagent system beat single-agent Opus 4 by 90.2% on their internal research eval — but agents use ~4x and multi-agent ~15x the tokens of a chat interaction, token usage alone explained 80% of performance variance (3 factors: 95%), and upgrading the model beat doubling the token budget. Fan-out is parallel token spend, not architectural magic; the task's value must cover the bill. Fit: heavy parallelization, information exceeding one context window, many complex tool surfaces. Coding is explicitly a poor fit — fewer truly parallelizable subtasks, and agents aren't yet good at real-time delegation. (Anthropic engineering post, first-party; 3-0 x3, 2-1. Scoped "in our data" — one deployment context, not a universal law.)
+
+**[VERIFIED — medium; practitioner doctrine, not benchmarked]** The single-writer principle: parallel multi-agent writes fail because context isn't shared thoroughly enough and independent actions carry implicit decisions that conflict — so readers/advisors/reviewers may be many, but write/action authority stays with ONE agent. (Cognition "Don't Build Multi-Agents" + 2026 follow-up, which narrows rather than retracts; 2-1, 3-0.) Extends P3: condensed-return fan-out is for reads and analysis; writes never fan out.
+
+**[VERIFIED — medium; single official doc, 3-0 x2]** Subagent delegation criteria (LangChain deepagents docs): DO delegate multi-step tasks that would clutter main context, specialized domains needing custom instructions/tools, tasks needing different model capabilities, and to keep the main agent on high-level coordination. DON'T delegate simple single-step tasks, tasks needing maintained intermediate context, or where delegation overhead outweighs the benefit.
+
+**[VERIFIED]** Cascade routing — cheap model first, confidence-gated escalation — is the strongest-evidenced cost lever: FrugalGPT matched GPT-4 accuracy at 50–98% cost reduction (98.3% finance headlines, 73.3% legal, 59.2% reading comprehension — savings are domain-dependent) or beat GPT-4 by up to 4% at equal cost; a GPT-J → J1-Large → GPT-4 cascade hit 0.872 accuracy vs GPT-4's 0.857 at $6.5 vs $33.1. (Stanford, TMLR 2024 peer-reviewed; 3-0 x4, 2-1. 2023 dollar figures are stale — carry the structure, not the prices.) **[PREPRINT]** Modern two-stage cascades stay within ~1–2pp of the strongest model with the cheap model absorbing ~59% of queries; the escalation classifier and confidence calibration are where the value is. (2026 preprints, narrow benchmarks; 2-1 x2, 3-0 x2.)
+
+**[PREPRINT]** Quality beats diversity in cheap-model swarms: best-of-n repeated sampling from the single best model (Self-MoA) beats mixing diverse models by 6.6pp on AlpacaEval 2.0 (65.7 vs 59.1 LC win rate) and 3.8% average across MMLU/CRUX/MATH; regression shows output quality dominates diversity (α > β on all datasets, p<0.001) — mixing in weaker models for diversity actively hurts. (Self-MoA arXiv 2502.00674, preprint-only rebuttal of the peer-reviewed ICLR 2025 MoA result; 3-0 x3, 2-1 x2.)
+
+**[VERIFIED]** Two-model consistency-switching (ModelSwitch): repeated-sample two comparable cheap models, stop when their answers agree — matches or beats single-model self-consistency at ~34% fewer samples on average (81% on MATH with 35 samples vs Gemini 1.5 Flash's 79.8% at 512), and beats debate/judge topologies outright on MMLU-Pro: 63.2% vs MAD 45%, AgentVerse 38%, ChatEval 43%, MoA 50.8% at a unified budget. No verified positive case for debate/judge panels survived R9 at all. (AAAI 2026 peer-reviewed; 3-0 x2, 2-1. Caveat: debate baselines author-reproduced; the stronger multi-LLM MAD variant, 50.2%, was omitted from the headline — 63.2% still clears it.)
+
+**[REFUTED — do not build on]** The folk numbers died wholesale: "open-source heterogeneous swarm beats GPT-4o by a large margin" (0-3); topology token multipliers "fan-out costs 4-5x, swarm 2-10x" (0-3); "orchestrator + cheap task-specific workers cuts costs 40-60%" (0-3) and "Microsoft recommends per-agent model tiering" (0-3) — cross-agent tiering as vendor-prescribed guidance currently has NO verified source, even though cascade economics support the idea; "Princeton study: single agent matched multi-agent on 64% of tasks" (0-3); "40% of multi-agent pilots fail within six months" (0-3).
+
+**Design implications:**
+- The builder's orchestration selector (SP3) encodes the ladder + cascade, not the folk version: default single agent with tools, escalate only on measured evidence, multi-agent reserved for research-shaped breadth whose value covers ~15x tokens.
+- Side-effectful work is single-writer by construction: spawn readers/advisors freely (P3's condensed-return fan-out), never parallel write authority.
+- When buying redundancy, prefer best-of-n from the strongest affordable model or a 2-model consistency switch over heterogeneous swarms or debate panels.
+
 ---
 
 ## Research provenance
