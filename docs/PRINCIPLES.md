@@ -9,7 +9,7 @@ Research-derived design principles. Every principle carries an evidence grade:
 
 Every principle carries an annotation line: `Perishability: durable|semi-durable|perishable · Verified: YYYY-MM · Round: R<n>` — durable refreshes on contradiction only, semi-durable within ~2 releases, perishable is probe-not-recall (short windows). The governor's expiry sweep (SP3) reads these fields.
 
-Sources are listed per principle. Rounds: R1 = context/memory (103 agents, 19/25 claims confirmed), R2 = enforcement/self-improvement (103 agents, 16/25 confirmed), R3 = telemetry/abandonment + elicitation/prior art (pending); R5–R9 (failure/capability, verification/epistemics, objective design, human-agent boundary, orchestration/tiering) are pending synthesis — full provenance lands in a later task.
+Sources are listed per principle. Rounds: R1 = context/memory, R2 = enforcement/self-improvement, R3 = telemetry/abandonment, R4 = elicitation/prior art, R5 = failure/capability, R6 = verification/epistemics, R7 = objective design/Goodhart, R8 = human-agent boundary, R9 = orchestration/tiering. Full per-round provenance is in "## Research provenance" at the end of this file.
 
 ---
 
@@ -369,6 +369,29 @@ Perishability: durable · Verified: 2026-07 · Round: R6
 - Refresh loops are rationed by the entry/exit criteria: decision priority × low certainty × likely new evidence; anything failing them goes static.
 - By this principle's own logic, R6's judge magnitudes carry their own re-verification triggers — hence P21's semi-durable magnitudes.
 
+## 23. Mechanism selection: context cost first, then the decision tree
+Perishability: perishable · Verified: 2026-07 · Round: docs-verified (claude-code-guide)
+
+**[VERIFIED — first-party docs]** The first question for any new capability is context cost: resident (CLAUDE.md is fully loaded every session; each MCP server holds ~100 tokens of tool list) vs on-demand (skills, subagents, saved workflows load only when used). Resident tokens are P1's distractors — default to on-demand.
+
+**[VERIFIED — first-party docs]** Given the cost class, the selection tree:
+- Fires automatically on an event, no judgment call → hook (deterministic; P9's enforcement primitive).
+- Reusable procedure requiring judgment → skill (on-demand; subsumes legacy slash commands).
+- Context-bloating side task → subagent (isolated window; P3's condensed-return fan-out).
+- More than a handful of agents, or multi-stage verification → saved workflow (state lives in script vars, outside model context).
+- An external system is the source of truth → MCP server.
+- Facts every session genuinely needs → CLAUDE.md (and nothing regenerable).
+- Distribution/versioning of any of the above → plugin.
+
+**[VERIFIED — first-party docs]** Census enumerability is asymmetric: MCP servers are enumerable (`claude mcp list` / `system-init` array), but tool schemas are not programmatically queryable and no registry-search API exists — so the builder census infers capability from server identity, and rung 2 of the data-access ladder ("a connector exists but isn't installed") is a manual-assisted web-lookup + user-approval flow, never automatic.
+
+Detail file: `docs/research/research-mechanisms-claude-code-2026-07.md` (full selection matrix, hook-event surface, plugin packaging limits) — refresh-by next release or any Claude Code minor-version jump; this principle expires with it.
+
+## 24. Cold start: doctrine governs until instance data earns authority
+Perishability: durable · Verified: n/a · Round: none — explicit BET
+
+**[BET]** A fresh instance has zero telemetry — nothing to tune on, nothing to review against. Its defensible defaults are inherited, not measured: level-zero doctrine supplies the ask-budget and blast-radius table (P19), single-writer orchestration (P20), and the metric-contract shape (P12/P18); the build-time research round supplies whatever domain claims it verified. Control shifts from doctrine to instance data on a declared schedule, not silently: the first governor review is the handover point — from then on the instance's own telemetry outranks generic doctrine wherever the two conflict, and doctrine retains only the invariants (hooks, caps, privacy). This cold start rule has no dedicated research round; the umbrella gaps ledger names it. Graded [BET] end to end — revisit if it earns evidence.
+
 ---
 
 ## Research provenance
@@ -376,3 +399,7 @@ Perishability: durable · Verified: 2026-07 · Round: R6
 4 deep-research rounds, ~415 subagents, ~20.6M subagent tokens, July 19 2026.
 R1 context/memory (19/25 claims confirmed) · R2 enforcement/self-improvement (16/25) · R3 telemetry/metrics/abandonment (11 findings) · R4 elicitation/prior art (7 findings).
 Raw outputs: research-round{1..4}-*.json alongside this file. 21+ claims refuted across rounds are listed inline — they are load-bearing negatives; do not resurrect them.
+
+5 further rounds, 861 agent calls total, 3-vote adversarial verification, July 23 2026:
+R5 failure/capability (177 agents, 32 confirmed / 13 killed, research-round5-failure-capability.json) · R6 verification/epistemics (163 agents, 36 confirmed / 9 killed, research-round6-verification-epistemics.json) · R7 objective design/Goodhart (171 agents, 30 confirmed / 15 killed, research-round7-objective-design-goodhart.json) · R8 human-agent boundary (181 agents, 34 confirmed / 11 killed, research-round8-human-agent-boundary.json) · R9 orchestration/tiering (169 agents, 30 confirmed / 15 killed, research-round9-orchestration-tiering.json).
+Mechanisms reference: research-mechanisms-claude-code-2026-07.md — docs-verified against official Claude Code documentation by a claude-code-guide agent, 2026-07-23 (first-party docs, no adversarial round; carries its own refresh-by convention).

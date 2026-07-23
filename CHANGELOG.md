@@ -1,5 +1,13 @@
 # Changelog
 
+## 0.4.0 — level-zero doctrine (SP2 of the level-zero umbrella)
+
+- **PRINCIPLES.md v2** — nine new principles from research rounds R5–R9 (~860 verification agents, 3-vote adversarial): P16 failure taxonomy, P17 capability frontier & probing, P18 Goodhart-resistant objectives, P19 human-agent boundary (ask-budgets, blast radius), P20 orchestration & model tiering, P21 verification & eval design, P22 epistemics & knowledge decay, P23 mechanism selection, P24 cold start [BET].
+- **Perishability annotations** — every principle (P1–P24) now carries `Perishability · Verified · Round`; durable refreshes on contradiction, semi-durable within ~2 releases, perishable is probe-not-recall. This is the structural expiry metadata the governor's SP3 sweep will read.
+- **Curated [REFUTED] ledger** — folk claims that failed 3-vote verification (fixed sub-mode percentages, heterogeneous-swarm superiority, unscoped CoT-judging gains, ...) are carried as do-not-build-on entries.
+
+Doctrine only — no behavior changes. SP3 (builder/governor wiring) follows.
+
 ## 0.3.0 — vendored research engine (SP1 of the level-zero umbrella)
 
 - **`/cairn:research`** — the engine front door: frame the decision, write a GROUNDING block, launch, persist. Builder Stage 2.5 and governor research proposals now route through it; no dependency on any globally-installed research skill.

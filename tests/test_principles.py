@@ -10,7 +10,7 @@ def blocks():
 
 def test_headers_present_and_unique():
     b = blocks()
-    for n in range(1, 23):          # extended to 25 by later tasks
+    for n in range(1, 25):
         assert n in b, f"P{n} missing"
     nums = re.findall(r"\n## (\d+)\. ", TEXT)
     assert len(nums) == len(set(nums)), "duplicate principle number"
@@ -20,7 +20,7 @@ def test_every_principle_annotated():
         first_line = block.split("\n", 1)[1].split("\n", 1)[0]
         assert re.search(r"Perishability: (durable|semi-durable|perishable)", first_line), \
             f"P{n} missing/misplaced annotation line"
-        assert re.search(r"Verified: 20\d\d-\d\d", first_line), f"P{n} missing Verified date"
+        assert re.search(r"Verified: (20\d\d-\d\d|n/a)", first_line), f"P{n} missing Verified date"
 
 def test_p16_p17_tokens():
     b = blocks()
@@ -50,6 +50,13 @@ def test_p21_p22_tokens():
         assert tok in b[21], f"P21 missing '{tok}'"
     for tok in ["living", "event-triggered", "self-detect", "surveillance", "ceiling"]:
         assert tok in b[22], f"P22 missing '{tok}'"
+
+def test_p23_p24_tokens():
+    b = blocks()
+    for tok in ["hook", "census", "skill", "workflow", "mechanisms-claude-code"]:
+        assert tok in b[23], f"P23 missing '{tok}'"
+    for tok in ["cold start", "BET", "first governor review"]:
+        assert tok in b[24], f"P24 missing '{tok}'"
 
 def test_grade_vocabulary_defined():
     head = TEXT.split("## 1. ", 1)[0]
