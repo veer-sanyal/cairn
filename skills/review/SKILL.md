@@ -58,8 +58,11 @@ For each friction cluster or guardrail regression, draft a proposal. HARD RULES:
   today's date whatever the outcome — the check is the event, not the change.
 - **De-automation rule (P16/P17).** If the same task class carries the same failure_mode tag
   ≥3 times since the last review, propose de-automating that task — move it below the
-  autonomy line (act → ask, or ask → never) or add a checked verifier — citing the events. Agents rarely
-  self-correct (91.49% of resolutions needed explicit user correction); the correction loop
+  autonomy line (act → ask, or ask → never) or add a checked verifier — citing the events.
+  If the task class carries a VERIFIED-probed decisions[] entry, re-run its pass^k probe
+  (build Stage 2.6 protocol) first — a failed re-probe is the strongest citation for
+  de-automating; a passing one points the diagnosis at design, not capability (P16).
+  Agents rarely self-correct (91.49% of resolutions needed explicit user correction); the correction loop
   is the human plus this rule, not model self-review.
 - **Tag and order by blast.** Every proposal carries `[blast: low|med|high]` (how many
   other decisions / manifest fields / files would have to change if it were adopted then
