@@ -2,7 +2,7 @@
 """SessionStart: session event + gap look-back + banner from manifest trigger rules."""
 import json, sys, os, datetime, subprocess
 from pathlib import Path
-from cairn_lib import find_root, manifest, append_event, load_events, parse_ts, registry_upsert
+from cairn_lib import find_root, manifest, append_event, load_events, parse_ts, pos_int, registry_upsert
 
 def days_since(ts):
     return (datetime.datetime.now(datetime.timezone.utc) - parse_ts(ts)).days
@@ -53,14 +53,17 @@ def main():
                 lines.append("Previous session logged no intent/outcome — cause unknown "
                              "(forgot / upkeep / skipped?). Worth typing it via /log.")
         # 3. trigger rules (welcome-back tone, never guilt — spec §3.3)
+        # pos_int on every day-count field: a hand-edited "7" (string) must not
+        # TypeError its way into losing the whole banner at the >= compare
         t = trig(m, "gap_nudge")
-        if t and sessions and days_since(sessions[-1]["ts"]) >= t.get("days", 7):
+        if t and sessions and days_since(sessions[-1]["ts"]) >= (pos_int(t.get("days")) or 7):
             lines.append(f"Welcome back — {days_since(sessions[-1]['ts'])}-day gap since last session. "
                          "Here's where things stand (see HOT.md).")
         t = trig(m, "review_due")
         reviews = [e for e in evs if e["type"] == "proposal"]
         anchor = reviews[-1]["ts"] if reviews else evs[0]["ts"]
-        if t and days_since(anchor) >= t.get("days", m.get("cadence", {}).get("review_days", 30)):
+        if t and days_since(anchor) >= (pos_int(t.get("days"))
+                                        or pos_int(m.get("cadence", {}).get("review_days")) or 30):
             lines.append("A review is due — run /cairn:review when convenient.")
         t = trig(m, "friction_accumulator")
         if t:
@@ -90,9 +93,16 @@ def main():
                          f"{e.get('revert_until')}; say 'revert #{e.get('id')}' to undo.")
 
     # guardrail regression flag (spec §2.1): standing anti-bloat check
-    for g in m.get("metrics", {}).get("guardrails", []):
-        gmax = g.get("max")
-        if gmax is None:
+    # type-guarded end to end: metrics as a list, a bare-string guardrail entry, or a
+    # string max are all hand-edit shapes that must not AttributeError/TypeError the banner
+    metrics = m.get("metrics") if isinstance(m.get("metrics"), dict) else {}
+    guardrails = metrics.get("guardrails")
+    for g in (guardrails if isinstance(guardrails, list) else []):
+        if not isinstance(g, dict):
+            continue
+        try:
+            gmax = float(g.get("max"))
+        except (TypeError, ValueError):
             continue
         if g.get("name") == "boot_context_bytes":
             val = resident

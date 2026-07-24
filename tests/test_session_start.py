@@ -150,6 +150,40 @@ def test_unwritable_registry_never_costs_the_banner(instance, _cairn_home):
     assert "cairn boot:" in out["systemMessage"]  # banner intact
 
 
+def _rewrite_manifest(instance, mutate):
+    m = json.loads((instance / "manifest.json").read_text())
+    mutate(m)
+    (instance / "manifest.json").write_text(json.dumps(m))
+
+def _assert_full_banner(instance):
+    seed_event(instance, days_ago=9, type="session", phase="start", session_id="s1")
+    seed_event(instance, days_ago=9, type="intent", intent="plan", session_id="s1")
+    out = boot(instance)
+    assert "cairn boot:" in ctx(out)
+
+def test_trigger_days_as_string_does_not_blank_banner(instance):
+    # days "7" used to TypeError at the >= compare → empty stdout, no banner (A2)
+    def mutate(m):
+        for t in m["triggers"]:
+            if "days" in t:
+                t["days"] = str(t["days"])
+    _rewrite_manifest(instance, mutate)
+    _assert_full_banner(instance)
+
+def test_metrics_as_list_does_not_blank_banner(instance):
+    _rewrite_manifest(instance, lambda m: m.update(metrics=["north_star"]))
+    _assert_full_banner(instance)
+
+def test_guardrail_entry_as_string_does_not_blank_banner(instance):
+    _rewrite_manifest(instance, lambda m: m["metrics"].update(guardrails=["boot_context_bytes"]))
+    _assert_full_banner(instance)
+
+def test_guardrail_max_as_string_does_not_blank_banner(instance):
+    _rewrite_manifest(instance,
+                      lambda m: m["metrics"]["guardrails"][0].update(max="1"))
+    _assert_full_banner(instance)
+
+
 def test_malformed_triggers_type_does_not_blank_banner(instance):
     # triggers as a dict (hand-edited manifest) must not AttributeError away the banner
     m = json.loads((instance / "manifest.json").read_text())
