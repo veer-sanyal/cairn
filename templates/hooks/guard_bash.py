@@ -10,6 +10,13 @@ PATTERNS = [
     re.compile(r"(?<!>)>(?!>)\s*\S*" + PROTECTED),          # single-> truncation (>> is allowed)
     re.compile(r"\b(truncate|shred)\b[^;&|\n]*" + PROTECTED),
     re.compile(r"\bmv\b[^;&|\n]*state/archive\.jsonl"),
+    # overwrite-verb parity: a protected path as the WRITE target of these is the same
+    # truncation `>` already denies (reads — cp FROM, sed without -i — stay allowed)
+    re.compile(r"\b(cp|install)\b[^;&|\n]*\s\S*" + PROTECTED + r"\s*(?:$|[;&|\n])"),  # dest = last arg
+    re.compile(r"\btee\b[^;&|\n]*" + PROTECTED),
+    re.compile(r"\bdd\b[^;&|\n]*\bof=\S*" + PROTECTED),
+    re.compile(r"\bsort\b[^;&|\n]*-o\s*\S*" + PROTECTED),
+    re.compile(r"\bsed\b[^;&|\n]*\s-i[^;&|\n]*" + PROTECTED),
 ]
 
 def main():

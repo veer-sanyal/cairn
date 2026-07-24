@@ -36,6 +36,14 @@ def test_working_new_file_write_allowed(instance):
 def test_hard_cap_projected_write_denied(instance):
     assert denied(hook(instance, "Write", "CLAUDE.md", content="x" * 9000))
 
+def test_relative_archive_path_denied(instance, tmp_path):
+    # a relative file_path resolves against the payload cwd, not the process cwd —
+    # the process cwd is the harness's, which used to silently allow (A6)
+    r = run_script("guard_files.py", cwd=tmp_path, payload={
+        "hook_event_name": "PreToolUse", "cwd": str(instance),
+        "tool_name": "Write", "tool_input": {"file_path": "state/archive.jsonl", "content": "x"}})
+    assert denied(r)
+
 def test_outside_instance_allowed(tmp_path):
     r = run_script("guard_files.py", cwd=tmp_path, payload={
         "tool_name": "Write", "cwd": str(tmp_path),
