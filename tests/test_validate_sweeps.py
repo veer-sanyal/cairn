@@ -29,6 +29,21 @@ def test_research_expired(instance):
 def test_no_research_file_is_silent(instance):
     assert checks(instance, "research_expired") == []
 
+def test_annual_ceiling_fires_on_old_durable_entry(instance):
+    (instance / "docs").mkdir()
+    (instance / "docs" / "RESEARCH.md").write_text(
+        f"## x — researched {days_ago(400)}\n"
+        f"Perishability: durable · Refresh-by: on contradiction · Engine: x\n")
+    assert len(checks(instance, "research_annual_ceiling")) == 1
+    assert checks(instance, "research_expired") == []
+
+def test_annual_ceiling_silent_on_recent(instance):
+    (instance / "docs").mkdir()
+    (instance / "docs" / "RESEARCH.md").write_text(
+        f"## x — researched {days_ago(100)}\n"
+        f"Perishability: durable · Refresh-by: on contradiction · Engine: x\n")
+    assert checks(instance, "research_annual_ceiling") == []
+
 def test_census_stale_and_fresh(instance):
     set_manifest(instance, census={"date": days_ago(200), "mcp_servers": []})
     assert len(checks(instance, "census_stale")) == 1

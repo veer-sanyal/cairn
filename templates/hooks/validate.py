@@ -6,7 +6,9 @@ from cairn_lib import find_root, manifest
 SENTINEL_TTL_H = 24
 STAMP = re.compile(r"Last reconciled: (\d{4}-\d{2}-\d{2})")
 REFRESH = re.compile(r"Refresh-by: (\d{4}-\d{2}-\d{2})")
+RESEARCHED = re.compile(r"— researched (\d{4}-\d{2}-\d{2})")
 CENSUS_STALE_DAYS = 180
+ANNUAL_CEILING_DAYS = 365
 
 def cap_for(rel, caps):
     for pat, cap in caps.items():
@@ -24,6 +26,13 @@ def sweeps(root, m, today):
                 if datetime.date.fromisoformat(d) < today:
                     out.append({"check": "research_expired", "level": "soft",
                                 "file": "docs/RESEARCH.md", "refresh_by": d})
+            except ValueError:
+                pass
+        for d in RESEARCHED.findall(research.read_text()):
+            try:
+                if (today - datetime.date.fromisoformat(d)).days > ANNUAL_CEILING_DAYS:
+                    out.append({"check": "research_annual_ceiling", "level": "soft",
+                                "file": "docs/RESEARCH.md", "researched": d})
             except ValueError:
                 pass
     census = m.get("census")

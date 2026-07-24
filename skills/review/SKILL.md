@@ -94,9 +94,10 @@ For each friction cluster or guardrail regression, draft a proposal. HARD RULES:
 - **Research is a valid proposal.** If a friction cluster traces to a design decision the
   manifest grades BET or THIN, propose a research run via the /cairn:research skill (frame
   the decision, GROUNDING block, launch the instance's own .claude/workflows/deep-research.js,
-  persist through doctrine_write.py) instead of guessing a new value. Also flag docs/RESEARCH.md if its
-  date stamp is over a year old in a fast-moving domain — stale evidence is a BET wearing a
-  VERIFIED badge.
+  persist through doctrine_write.py) instead of guessing a new value. Also surface any
+  `research_annual_ceiling` finding from the validator: P22's hard annual ceiling re-reviews
+  every entry after 365 days regardless of Refresh-by — durable entries usually re-confirm
+  cheaply, the check is the event. Stale evidence is a BET wearing a VERIFIED badge.
 
 ### Decision lifecycle — ids are immutable (referential integrity)
 `manifest.json` `decisions[]` ids are stable keys, never status labels. Never renumber,
