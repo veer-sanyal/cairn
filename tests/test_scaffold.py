@@ -126,6 +126,27 @@ def test_user_content_with_double_braces_still_scaffolds(tmp_path):
     assert r.returncode == 0, r.stderr
     assert "{{handlebars}}" in (target / "CLAUDE.md").read_text()   # literal, not an error
 
+# --- SP6 cross-instance registry: purpose in manifest + register at build ---
+
+def test_manifest_carries_purpose(tmp_path):
+    m = json.loads((scaffold(tmp_path) / "manifest.json").read_text())
+    assert m["instance"]["purpose"] == CFG["one_line_purpose"]
+
+def test_scaffold_registers_instance(tmp_path, _cairn_home):
+    t = scaffold(tmp_path)
+    reg = json.loads((_cairn_home / "registry.json").read_text())
+    assert str(t.resolve()) in reg["instances"]
+
+def test_registry_failure_warns_but_scaffold_succeeds(tmp_path, _cairn_home):
+    _cairn_home.parent.mkdir(parents=True, exist_ok=True)
+    _cairn_home.write_text("file blocking the dir")
+    target = tmp_path / "inst"
+    r = _run(CFG, target, tmp_path)
+    assert r.returncode == 0, r.stderr
+    assert (target / "manifest.json").exists()
+    assert "registry" in r.stderr.lower()
+
+
 def test_user_content_naming_a_real_placeholder_is_preserved(tmp_path):
     # "{{today}}" inside user content must stay the user's literal words (single-pass render)
     cfg = dict(CFG, one_line_purpose="track deadlines using {{today}} as the anchor date")
