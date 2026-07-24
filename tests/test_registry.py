@@ -69,6 +69,8 @@ def test_registry_remove(instance, _cairn_home):
     cairn_lib.registry_upsert(instance)
     assert cairn_lib.registry_remove(str(instance.resolve())) is True
     assert read_reg(_cairn_home)["instances"] == {}
+    # second remove: path already absent -> False, not an error
+    assert cairn_lib.registry_remove(str(instance.resolve())) is False
 
 
 def test_no_temp_files_left_behind(instance, _cairn_home):
