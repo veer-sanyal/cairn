@@ -15,8 +15,8 @@ def months_old(ym, today):
 
 def expired_principles(text, today):
     """Doctrine expiry sweep for THIS repo (P22 annual ceiling; locked decision 6).
-    Returns [(principle number, reason)]. 'Verified: n/a' is exempt — reserved for
-    P24, the one [BET]-through-and-through principle with no research round."""
+    Returns [(principle number, reason)]. 'Verified: n/a' is exempt as a capability
+    (see test_no_principle_uses_verified_na) — no shipped principle currently uses it."""
     out = []
     for n, block in blocks(text).items():
         line = block.split("\n", 1)[1].split("\n", 1)[0]
@@ -34,10 +34,16 @@ def expired_principles(text, today):
 
 def test_headers_present_and_unique():
     b = blocks()
-    for n in range(1, 25):
+    for n in range(1, 26):
         assert n in b, f"P{n} missing"
     nums = re.findall(r"\n## (\d+)\. ", TEXT)
     assert len(nums) == len(set(nums)), "duplicate principle number"
+
+def test_p25_tokens():
+    b = blocks()
+    # P25 (R11): objectives pass grounded in Keeney/Bond decision science, JTBD/OST refuted.
+    for tok in ["Objectives before metrics", "Keeney", "fundamental", "means", "REFUTED"]:
+        assert tok in b[25], f"P25 missing '{tok}'"
 
 def test_every_principle_annotated():
     for n, block in blocks().items():

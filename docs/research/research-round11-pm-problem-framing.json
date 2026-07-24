@@ -1,0 +1,630 @@
+{
+  "question": "R11 for Cairn's level-zero doctrine: should the builder add an explicit PM/problem-framing step before the metric contract (build Stage 3), and what evidence-validated moves should it contain? Sub-areas: JTBD/Outcome-Driven Innovation, design-cognition problem-framing/co-evolution, Keeney value-focused thinking / objectives hierarchies, and Torres continuous-discovery / opportunity-solution-trees — each graded, with n=1 (solo self-builder) transfer flagged.\n\nFor EACH sub-area: the validated method (concrete moves/questions, not vibes), the EVIDENCE it improves outcomes (distinguish peer-reviewed/empirical from consultant track-record claims), the documented failure modes, and — critically — whether it TRANSFERS to a SINGLE-USER personal system (most of this literature assumes a market of many customers or an org decision; one person building a system for themselves is not a market — flag where the transfer breaks).\n\nSub-areas:\n1. JOBS-TO-BE-DONE / Outcome-Driven Innovation (Christensen; Ulwick): the desired-outcome-statement method (improvement direction + metric + object + context), forces-of-progress, job statements. Is there real evidence JTBD framing improves product/solution outcomes, or is it mostly practitioner track-record? Does it need a statistically-valid customer sample (i.e., does it even apply to n=1)?\n2. PROBLEM-FRAMING / problem-space-before-solution (Dorst frame creation; Schön reflective practice; Cross design cognition; problem-solution co-evolution): evidence that how you frame the problem determines solution quality; what expert framing concretely consists of.\n3. VALUE-FOCUSED THINKING / objectives hierarchies (Keeney): articulate fundamental vs. means objectives BEFORE generating alternatives; the maximize/minimize objectives lens. Evidence it improves decision quality and generates better alternatives.\n4. CONTINUOUS DISCOVERY / opportunity-solution trees, outcome-vs-output (Torres): the outcome→opportunity→solution structure; evidence base (likely practitioner/thin) and whether the \"product outcome = measurable behavior change\" framing adds anything beyond Cairn's existing metric contract.\n\nGROUNDING:\n- Breadth: standard (4 distinct sub-areas, each needs its own verified coverage + verification floor; don't let JTBD's loud consultant literature starve the peer-reviewed framing/decision-science areas)\n- Sub-areas needing verified coverage: (1) JTBD/ODI method + evidence + n=1 applicability; (2) design-cognition problem-framing evidence; (3) Keeney value-focused thinking / objectives hierarchies decision-quality evidence; (4) continuous-discovery outcome-over-output evidence\n- Key terms/entities: Jobs-to-be-Done, Clayton Christensen, Tony Ulwick Outcome-Driven Innovation, desired outcome statements, forces of progress, Kees Dorst frame creation / Frame Innovation, Donald Schön reflective practitioner, Nigel Cross design cognition, problem-solution co-evolution (Maher/Dorst-Cross), Ralph Keeney value-focused thinking, fundamental vs means objectives, objectives hierarchy, Teresa Torres continuous discovery, opportunity solution tree, outcome vs output\n- Known primary sources worth fetching: Dorst \"Frame Innovation\" (MIT Press) and Dorst & Cross 2001 \"Creativity in the design process: co-evolution of problem-solution\" (Design Studies); Keeney \"Value-Focused Thinking\" (Harvard UP 1992) + his decision-quality papers; Ulwick Strategyn ODI materials and \"What Customers Want\"; Christensen \"Competing Against Luck\" / HBR \"Know Your Customers' Jobs to Be Done\"; Torres \"Continuous Discovery Habits\" / producttalk.org; arXiv 2508.07058 (framing & problem-solution co-evolution)\n- Already known / do not research: Cairn's existing artifact-based elicitation (R4/P14 — user authors goals, prototyping beats open interview, VERIFIED), the metric contract mechanics (P12 north-star/inputs/guardrails), and Goodhart resistance (P18). Research the PROBLEM-FRAMING discipline that would sit BEFORE the metric contract and whether an explicit framing step is worth a build-interview stage for a SOLO user — not the elicitation or metric basics.\n- Output: for each of the 4 sub-areas, a settle-able recommendation with an evidence grade, plus one overall recommendation: add an explicit PM-framing step (and its concrete moves) or keep it BET. Preserve confidence, sources, votes, and the refuted list per finding. Flag every place the evidence assumes a multi-customer market rather than a single self-building user.",
+  "synthesisDegraded": false,
+  "summary": "Recommendation: ADD a lightweight objectives-framing move before the metric contract, but ground it in decision science (Keeney/Bond), NOT in JTBD/ODI or continuous-discovery product literature. The single strongest, most transferable evidence is Bond, Carlson & Keeney's peer-reviewed, award-winning experiments (VERIFIED): individuals making real personal decisions omit up to half the objectives they later call important, and a trivial category-based prompt recovers ~62% more objectives rated equally important — this is n=1 evidence (dissertation/MBA choices), the only sub-area whose method transfers cleanly to a solo self-builder. Design-cognition co-evolution research (Dorst & Cross 2001 and replications, also VERIFIED/peer-reviewed) independently confirms that framing determines solution quality, but with a critical caveat that CUTS AGAINST a heavyweight upfront gate: framing is continuous and bidirectional, not a one-time step before solutioning — so the move should be a cheap, revisable objectives pass, not a locked \"problem-definition phase.\" JTBD/ODI (Ulwick) is practitioner IP (THIN evidence; the headline 86%/5x figures are unsubstantiated vendor track record) whose core mechanic — surveying a statistically-valid sample of 180–600+ customers — is structurally a market-segmentation technique that REFUTES transfer to a single user; borrow only its desired-outcome-statement sentence shape as a formatting heuristic. Continuous discovery / opportunity-solution-trees (Torres) is practitioner-origin with no empirical validation of the method itself (THIN); its one useful idea, outcome-vs-output, is already covered by Cairn's north-star/input-lever metric contract and adds little.",
+  "findings": [
+    {
+      "claim": "SUB-AREA 3 (Value-Focused Thinking / Keeney objectives) — VERIFIED, and the only sub-area with clean n=1 transfer. Articulating objectives via a structured category prompt BEFORE choosing metrics measurably improves the completeness of what gets optimized: unaided, people miss up to half their own later-acknowledged objectives; a small named-category review recovers ~62% more, rated equally important.",
+      "confidence": "high",
+      "evidence": "Bond, Carlson & Keeney, 'Improving the Generation of Decision Objectives,' Decision Analysis 7(3) 2010 (INFORMS, peer-reviewed, DAS Best Publication Award 2012) and the underlying Bond et al. 2008 Management Science paper. Study 1: N=20 doctoral students choosing a dissertation topic listed 7.25 objectives unaided, added 4.5 more (62%) after a 5-category prompt (t(19)=4.75, p<.01); added objectives rated 7.3 vs 7.7 importance (n.s.) — just as important as the originals. The omission finding used real personally-consequential decisions (MBA-program choice, dissertation topic), i.e. n=1-style personal framing, not a customer panel. This is genuine experimental data, not consultant track record. Note: the paper's own Study 2 cautions part of the gain may be the 'second chance' rather than the categories per se — but the direction and magnitude hold. This directly validates a maximize/minimize/avoid objectives pass sitting before the metric contract.",
+      "sources": [
+        "https://www.scheller.gatech.edu/directory/research/marketing/bond/pdf/bond-carlson-keeney-da-2010.pdf"
+      ],
+      "vote": "3-0 (both underlying claims unanimous)",
+      "confidence_grade": "VERIFIED; transfers to n=1"
+    },
+    {
+      "claim": "SUB-AREA 2 (Problem-framing / co-evolution) — VERIFIED that how you frame determines solution quality, but the SAME evidence base establishes framing is a CONTINUOUS, bidirectional activity, not a discrete phase that precedes solution/metric work. This argues for a cheap revisable framing move, not a heavyweight one-time gate before Stage 3.",
+      "confidence": "high",
+      "evidence": "Dorst & Cross 2001 'Creativity in the design process: co-evolution of problem-solution' (Design Studies 22, peer-reviewed) — protocol/think-aloud study of n=9 experienced industrial designers working solo; empirically confirmed the problem-solution co-evolution model. Wiltschnig, Christensen & Ball 2013 (Design Studies 34(5)) replicated it in real-world professional team practice (63 co-evolution episodes across 9h/7414 segments), explicitly refuting a 'frame-once-then-search' sequence: episodes were distributed throughout (13.6% of segments), bidirectional (75% requirement→solution, 19% solution→requirement). Parsons & Shukla, arXiv 2508.07058 (accepted IEEE VIS 2025), n=11 expert viz practitioners: 'framing is not a preliminary step but a continuous activity embedded in design.' Consistent across three independent peer-reviewed/venue-accepted studies. Implication for Cairn: DON'T model this as a locked upfront 'problem-definition stage'; wire a framing pass that can be re-entered as the metric contract and build evolve.",
+      "sources": [
+        "https://research.tue.nl/en/publications/creativity-in-the-design-process-co-evolution-of-problem-solution/",
+        "http://analogi.dk/wp-content/uploads/2019/11/2013-Wiltschnig-Christensen-Ball.pdf",
+        "https://arxiv.org/abs/2508.07058"
+      ],
+      "vote": "3-0 (co-evolution confirmation, real-world replication); 2-1 (continuous-framing thesis)",
+      "confidence_grade": "VERIFIED (mechanism); the 'continuous not upfront' finding qualifies the build design"
+    },
+    {
+      "claim": "SUB-AREA 2 n=1 TRANSFER — PARTIAL. The design-cognition evidence is mostly multi-person/professional-consultancy, but framing is NOT exclusively a team/market phenomenon: a substantial minority of co-evolution episodes are generated by a single individual reasoning alone, and the method (solo protocol study, n=9) was originally individual cognition. So the framing discipline plausibly applies to a solo builder, though no study tests a self-building-for-oneself context directly.",
+      "confidence": "medium",
+      "evidence": "Wiltschnig et al. 2013: of 63 episodes, 42 (67%) collaborative but 21 (33%) generated by a single individual, and the authors note silent individual episodes go unrecorded, so individual framing is likely undercounted (inter-rater kappa .90). Dorst & Cross 2001 is itself solo individual cognition (each of 9 designers worked alone). COUNTER-caveat: Dorst's applied 'Frame Innovation' nine-step method (archaeology→paradox→context→field→themes→frames→futures→transformation→integration) and all three of its flagship case studies (Kings Cross policing, IDEO/Rockefeller food waste, IMEND repair) are multi-stakeholder consultancy engagements with a distinct 'problem owner' plus competing 'key stakeholders' — that applied apparatus assumes a multi-party market/org setting and does NOT transfer to one person. Transfer verdict: the underlying co-evolution cognition transfers to n=1; Dorst's stakeholder-reconciliation choreography does not.",
+      "sources": [
+        "http://analogi.dk/wp-content/uploads/2019/11/2013-Wiltschnig-Christensen-Ball.pdf",
+        "https://aijcr.thebrpi.org/journals/Vol_11_No_1_March_2021/2.pdf"
+      ],
+      "vote": "3-0 (individual-episode finding; Dorst method structure; multi-stakeholder case base)",
+      "confidence_grade": "VERIFIED evidence, PARTIAL n=1 transfer (cognition yes, Dorst's applied stakeholder method no)"
+    },
+    {
+      "claim": "SUB-AREA 1 (JTBD / Outcome-Driven Innovation) EVIDENCE QUALITY — THIN / practitioner track record, NOT peer-reviewed science. Real evidence that ODI improves outcomes does not exist in the independent literature; the loud '86% success / 5x more predictable' figures are unsubstantiated vendor self-reports.",
+      "confidence": "high",
+      "evidence": "ODI is sole-inventor IP: Anthony Ulwick, 12 patents (first 1999), no independent academic derivation (Wikipedia). The '86% success rate, 5x industry average' claim appears four times in Strategyn's own whitepaper with ZERO citation in an otherwise heavily-footnoted document; the sole backing is a self-commissioned 'track record study' (43 clients, 21 launches, 18 self-rated successes — small n, no control, survivorship/selection bias, not peer-reviewed). Ulwick's own writing: '5x more predictable' with 'our 25-year track record... offers that evidence.' The one case cited across practitioner blogs (Strategyn circular-saw, '~30% of tradesmen had 14 unmet outcomes') is a single uncontrolled case study. No independent academic or third-party validation of ODI effectiveness was located. Verdict: borrow the desired-outcome-statement sentence STRUCTURE (direction + metric + object + context) as a cheap Goodhart-adjacent formatting heuristic, but claim no evidentiary weight for it.",
+      "sources": [
+        "https://en.wikipedia.org/wiki/Outcome-Driven_Innovation",
+        "https://innovationroundtable.com/summit/wp-content/uploads/2014/05/Strategyn_what_is_Outcome_Driven_Innovation.pdf",
+        "https://www.marketingjournal.org/how-to-fail-at-jobs-to-be-done-anthony-ulwick/",
+        "https://gopractice.io/product/jobs-to-be-done-the-theory-and-the-frameworks/"
+      ],
+      "vote": "3-0 (inventor/patent IP; 86% unsubstantiated; 5x track-record; single-case evidence)",
+      "confidence_grade": "THIN (practitioner track record; not peer-reviewed)"
+    },
+    {
+      "claim": "SUB-AREA 1 n=1 TRANSFER — REFUTED for a solo user. ODI's defining mechanic is administering an importance/satisfaction survey to a statistically-valid sample of the target market (typically 180–600, up to 3,000 respondents) and running the Opportunity Algorithm to segment the population. Statistical validity is mathematically undefined at n=1; the method has no defined analog for one person building a system for themselves.",
+      "confidence": "high",
+      "evidence": "Convergent across Strategyn's own site, Ulwick's whitepaper and Medium/Wikipedia summaries: 'Survey a statistically valid population to measure importance and current satisfaction of each desired outcome'; sample sizes '180–600' (blog) to '180 to 3,000' (Strategyn); 'a market is not defined around a customer... it is a group of people plus the core functional job'; segmentation via factor/cluster analysis; Opportunity Score = Importance + max(Importance−Satisfaction, 0) requires many raters. The discovery unit is explicitly a market, not a person. Multiple searches for a documented n=1/self-applied ODI adaptation found none. Verdict: the elicitation MACHINERY does not transfer; only the outcome-statement grammar is portable to a solo builder.",
+      "sources": [
+        "https://strategyn.com/jobs-to-be-done/",
+        "https://en.wikipedia.org/wiki/Outcome-Driven_Innovation",
+        "https://medium.com/@AlexJupiter/outcome-driven-innovation-3377252aec15",
+        "https://gopractice.io/product/jobs-to-be-done-the-theory-and-the-frameworks/"
+      ],
+      "vote": "3-0 (multiple independent claims on the sampling mechanic)",
+      "confidence_grade": "REFUTED for n=1 (multi-customer market mechanic; does not degrade to one user)"
+    },
+    {
+      "claim": "SUB-AREA 4 (Continuous Discovery / Opportunity Solution Trees, Torres) — THIN practitioner method; the OST is a visualization/organization device with no empirical validation of its own, and its one transferable idea (outcome-vs-output) is already covered by Cairn's existing north-star/input-lever/guardrail metric contract, so it adds little.",
+      "confidence": "high",
+      "evidence": "OST created by Teresa Torres (product-discovery coach, not academic) in 2016; defined by Torres herself as 'a simple way of visually representing the paths you might take to reach a desired outcome' — a representational aid, not a validated causal technique. No controlled studies, before/after data, or peer-reviewed evaluation of OST exist; support is named-company anecdotes (e.g. 'Opportunity Mapping Led to a 20% Lift in LTV at Grailed' with zero method detail) and, in secondary write-ups, general goal-setting theory (Locke & Latham) applied to the outcome node — not evidence for OST itself. The outcome-vs-output discipline ('measure engagement, not article count') is real and sound but is precisely what a north-star + guardrail metric contract already encodes. Additional n=1 caveat: OST opportunities are meant to be 'patterns discovered across a customer base' via multiple interviews — a market-oriented sourcing that doesn't map to a solo builder's own stated problem.",
+      "sources": [
+        "https://www.producttalk.org/opportunity-solution-trees/",
+        "https://www.shortform.com/blog/teresa-torres-opportunity-solution-tree/",
+        "https://www.chameleon.io/blog/opportunity-solution-tree",
+        "https://docondev.substack.com/p/opportunity-solution-trees",
+        "https://www.productplan.com/glossary/opportunity-solution-tree"
+      ],
+      "vote": "3-0 across definitional/no-evidence/outcome-vs-output/customer-base claims (2-1 on a couple of scoping sub-claims)",
+      "confidence_grade": "THIN (practitioner origin, no method-level evidence); low marginal value over existing metric contract"
+    },
+    {
+      "claim": "OVERALL DECISION — ADD a lightweight objectives-framing move before the metric contract, but scoped as a Keeney-style objectives pass, NOT a JTBD/PM 'problem-definition stage'. Concrete evidence-validated moves below. Grade of the build decision itself: the framing PRINCIPLE is VERIFIED; the specific step design is a well-grounded BET.",
+      "confidence": "high",
+      "evidence": "Rationale from the graded findings: (1) Keeney/Bond (VERIFIED, n=1) is the only evidence that both improves outcomes AND transfers to a solo user — it validates a structured objectives-elicitation prompt. (2) Design-cognition (VERIFIED) says framing determines solution quality but must be continuous, so make the move revisable, not a locked gate. (3) JTBD/ODI and continuous-discovery evidence is THIN and their machinery is market-scoped (REFUTED for n=1), so do NOT import survey/tree apparatus. Validated concrete moves for the step: (a) CATEGORY-PROMPTED OBJECTIVES PASS — after the user authors the goal (Stage 2), prompt them across a small fixed set of named categories to surface objectives they'd otherwise omit (~half get missed unaided); this is the single directly-evidenced mechanic. (b) MAXIMIZE / MINIMIZE / AVOID lens — ask what the system should maximize, minimize, and avoid, and separate FUNDAMENTAL objectives (what you ultimately want) from MEANS objectives (levers to get there) — Keeney's value-focused-thinking structure; the fundamental/means split maps directly onto Cairn's north-star (fundamental) vs input-levers (means), so it feeds Stage 3 rather than duplicating it. (c) 'WHAT'S THE REAL PROBLEM / WHO-OR-WHAT DOES IT SERVE' reframe as a single revisable question, not a phase — consistent with co-evolution's continuous framing. (d) OPTIONAL desired-outcome-statement grammar (direction + metric + object + context) as a formatting heuristic when phrasing levers — cheap, no evidentiary claim. Keep the whole step short and re-enterable; the failure mode to avoid (documented across ODI/OST) is inflating it into a market-research or multi-stakeholder ceremony that a solo builder has no population to feed.",
+      "sources": [
+        "https://www.scheller.gatech.edu/directory/research/marketing/bond/pdf/bond-carlson-keeney-da-2010.pdf",
+        "https://research.tue.nl/en/publications/creativity-in-the-design-process-co-evolution-of-problem-solution/",
+        "https://arxiv.org/abs/2508.07058"
+      ],
+      "vote": "synthesis of 3-0 VERIFIED findings (Keeney, co-evolution) against 3-0 THIN/REFUTED findings (JTBD/ODI, OST)",
+      "confidence_grade": "Principle VERIFIED; specific step design = grounded BET (Keeney mechanic is the evidenced core, category set and wording are engineering choices to tune)"
+    }
+  ],
+  "caveats": "Evidence-tier asymmetry is the headline caveat: the two VERIFIED sub-areas (Keeney decision science; design-cognition co-evolution) rest on peer-reviewed primary sources, while the two loud practitioner sub-areas (JTBD/ODI, continuous discovery) rest on vendor track record and blogs with no method-level empirical validation — do not let JTBD's volume of writing be mistaken for evidentiary weight. n=1 TRANSFER breaks explicitly in three places, all flagged: (1) ODI's statistically-valid-sample survey (180–3,000 respondents) is undefined at n=1; (2) Dorst's applied Frame Innovation method and all its case studies are multi-stakeholder consultancy engagements, not solo framing; (3) OST opportunities are sourced as patterns across a customer base. The Keeney evidence is the transferable exception because its experiments used real single-person personal decisions. Two sub-claims about Keeney's n=1 exclusivity were REFUTED (the studies also included org replication), so state it as 'validated on personal decisions,' not 'validated ONLY on personal decisions.' The co-evolution 'framing is continuous, not upfront' thesis carried a 2-1 vote and its base is expert/professional designers (n=9 to n=11), not solo hobbyist self-builders — directionally strong but not a perfect population match. The Bond/Keeney category effect is partly confounded with a 'second attempt' effect per the authors' own Study 2, so attribute the gain to 'structured re-prompting' rather than category-naming specifically. Time-sensitivity is low across all sub-areas (decision analysis and design-cognition findings are stable; ODI/OST frameworks unchanged since the 2010s).",
+  "openQuestions": [
+    "Does a Keeney-style category-prompted objectives pass improve OUTCOMES (not just objective completeness) specifically for a solo person building an agentic system for themselves — the Bond evidence measures objective recovery on one-shot choices, not iterative build quality?",
+    "What is the right small fixed category set for Cairn's build interview (Keeney used 5 life-domain categories for a dissertation choice) — which categories surface the objectives a solo system-builder tends to omit, and does this need per-domain calibration?",
+    "Where exactly should the framing move sit relative to domain research (2.5) and the metric contract (Stage 3), given co-evolution says it must be re-enterable — is it a distinct stage, or a revisable panel that the metric contract can loop back into?",
+    "Is the desired-outcome-statement grammar (direction+metric+object+context) actually additive over Cairn's existing P12 metric contract and P18 Goodhart resistance, or is it redundant packaging that should be dropped under YAGNI?"
+  ],
+  "confirmed": [
+    {
+      "claim": "Dorst & Cross's protocol study empirically confirms the problem-solution co-evolution model of creative design (not a case study or track-record anecdote, but observational data from nine designers analyzed against a formal model).",
+      "source": "https://research.tue.nl/en/publications/creativity-in-the-design-process-co-evolution-of-problem-solution/",
+      "quality": "primary",
+      "quote": "We also apply our observations to a model of creative design as the co-evolution of problem/solution spaces, and confirm the general validity of the model.",
+      "confidence": "high",
+      "evidence": "The primary source (TU Eindhoven research portal page for Dorst & Cross, \"Creativity in the Design Process: Co-Evolution of Problem-Solution,\" Design Studies 22 (2001): 425-437) confirms every element of the claim. Methodology: \"empirical data on design processes were obtained from a set of protocol studies of nine experienced industrial designers\" who verbalized their thinking while designing a litter-disposal system for trains over 2.5 hours — this is genuine protocol-analysis observational data, not a case study or consultant track-record anecdote. The paper's own conclusion, quoted verbatim and corroborated by independent search results (WebSearch summary of the same paper) reads: \"We also apply our observations to a model of creative design as the co-evolution of problem/solution spaces, and confirm the general validity of the model\" — matching the supporting quote exactly. The paper goes further, proposing refinements ('default'/'surprise' problem-solution spaces) beyond mere confirmation, which is consistent with, not contradictory to, the claim. Source quality matches claim strength: this is a peer-reviewed journal article (Design Studies, a top design-research journal) that is a foundational, heavily-cited text in the field (still cited in a 2024 arXiv paper and referenced in a Cambridge repository retrospective on the co-evolution model), not outdated or superseded — it remains the canonical empirical grounding for the co-evolution model in design cognition literature. One legitimate qualifier (found via Jon Kolko's critique and general awareness of the study): n=9 designers, single task domain (a train garbage bin), non-blind/standardized sketch presentation for evaluation, and self-referential validation (Dorst and Cross tested their own prior model) — these are real limits on generalizability, but they do not contradict the specific factual claim under review, which only asserts that this was an empirical protocol study (not anecdote) that confirmed the model, not that it was large-sample, generalizable, or beyond methodological critique. The claim is accurately scoped and does not overreach beyond what the source supports.",
+      "vote": "3-0"
+    },
+    {
+      "claim": "The evidence base is a protocol (think-aloud) study of nine experienced individual industrial designers performing design tasks alone — i.e., the underlying data is n=9 individuals engaged in solo design cognition, not a multi-customer market study or organizational decision sample.",
+      "source": "https://research.tue.nl/en/publications/creativity-in-the-design-process-co-evolution-of-problem-solution/",
+      "quality": "primary",
+      "quote": "The researchers conducted protocol studies with nine seasoned industrial designers to examine creative aspects of design work.",
+      "confidence": "high",
+      "evidence": "Verified directly against the primary source (Dorst & Cross, \"Creativity in the design process: co-evolution of problem-solution,\" Design Studies 22(5), 2001, pp. 425-437 — full PDF text extracted, not just the abstract). The paper states explicitly: \"The empirical basis of this research consisted of protocol studies of nine experienced industrial designers working on a small design assignment in a laboratory setting\" (p.426), with participants being \"nine industrial designers with five or more years of professional experience\" (min 5, max 20 years), \"all working in design consultancies.\" Methodology section (p.428) confirms: \"The experiments were conducted as 'think-aloud' protocol studies... The designers were requested to think aloud as they were solving the design problem... The design brief was then given to the designer. The time allotted to them was 2.5 h.\" The experimental setup (p.427) describes a single designer working with an experimenter \"sitting nearby\" handing over information sheets on request, and recording via \"two high-level video cameras... one pointing down at the designer\" (singular) — confirming each of the nine designers worked alone/individually on the task, not in teams or as part of a customer panel. This is unambiguously a solo design-cognition protocol study, not a multi-customer market study or an organizational decision sample. The claim's every element — protocol/think-aloud method, n=9, \"experienced,\" \"industrial designers,\" and solo performance — matches the primary source verbatim. No contradicting or qualifying source found; this is the standard, uncontested description of this well-known study in the design-cognition literature.",
+      "vote": "3-0"
+    },
+    {
+      "claim": "This is NOT the classic Dorst & Cross (2001) 'Creativity in the design process: co-evolution of problem-solution' paper the research brief named — it is a distinct 2024 DRS conference paper that USES the Cross & Dorst (2001) co-evolution model as an analytical lens to study how generative-AI tools (ChatGPT, Midjourney) change designers' reasoning patterns, not a study that tests whether an explicit upfront problem-framing step improves solution quality.",
+      "source": "https://dl.designresearchsociety.org/cgi/viewcontent.cgi?article=3441&context=drs-conference-papers",
+      "quality": "primary",
+      "quote": "Empirical Study of Problem-solution Co-evolution in Human-GAI Collaborative Conceptual Design ... Guo, J., Yin, Y., Sun, L., and Chen, L. (2024) ... DRS2024: Boston, 23–28 June, Boston, USA.",
+      "confidence": "high",
+      "evidence": "Fetched and read the actual primary source PDF (DRS2024 Boston paper, doi.org/10.21606/drs.2024.983, \"Empirical study on problem-solution co-evolution in human-GAI collaborative conceptual design\" by Guo, Yin, Sun, Chen, 2024). This directly confirms every element of the claim: (1) It is a distinct 2024 DRS conference paper, not the classic Dorst & Cross 2001 Design Studies paper. (2) It explicitly cites \"Dorst & Cross, 2001\" in its introduction as the source of the co-evolution model being used as a theoretical/analytical lens (\"it evolved into a metaphor for the reasoning process within human design activities... (Dorst & Cross, 2001)\"), then extends it into a new \"human-GAI co-evolution model.\" (3) The abstract and RQ1 explicitly state the study uses generative AI tools \"ChatGPT and Midjourney\" (text-to-text and text-to-image GAI models) via retrospective protocol analysis of 20 novice designers, to examine \"how does GAI influence alterations in human reasoning patterns\" — i.e., studying how GAI changes designers' reasoning, exactly as the claim states. (4) The paper is NOT testing whether an explicit upfront problem-framing step improves solution quality — its RQs concern GAI's influence on reasoning patterns, creativity levels in human-GAI collaboration, and evolution of the co-evolution model in that context; there is no experimental manipulation of \"framing-step present vs. absent\" on solution-quality outcomes. All sub-claims in the quote are verified against the primary source itself, not just the search snippet.",
+      "vote": "3-0"
+    },
+    {
+      "claim": "Individuals making decisions of real personal consequence, left to their own devices without structured elicitation, fail to identify up to half of the objectives they later acknowledge as important — this is an experimental/empirical finding, not a consultant claim.",
+      "source": "https://www.scheller.gatech.edu/directory/research/marketing/bond/pdf/bond-carlson-keeney-da-2010.pdf",
+      "quality": "primary",
+      "quote": "Even for real-world decisions with significant personal consequences, individuals left to their own devices often fail to identify up to half of the objectives that they later acknowledge to be important (Bond et al. 2008).",
+      "confidence": "high",
+      "evidence": "Verified against the primary source directly (downloaded and text-extracted the actual PDF, not just search snippets). The exact sentence appears verbatim in Bond, Carlson & Keeney, 'Improving the Generation of Decision Objectives,' Decision Analysis 7(3), 2010, pp.238-255: 'Even for real-world decisions with significant personal consequences, individuals left to their own devices often fail to identify up to half of the objectives that they later acknowledge to be important (Bond et al. 2008).' Quote is reproduced exactly -- not a misread or overreach. The cited Bond et al. 2008 study ('Generating Objectives: Can Decision Makers Articulate What They Want?', Management Science 54(1):56-70) is a genuine peer-reviewed experimental paper, not a consultant claim: pulled its text directly and confirmed the methodology -- Study 1 used n=62 participants making an actual MBA-program choice ('an important decision of personal significance'), using a self-generation-then-master-list-comparison design; results showed participants averaged 7.4 self-generated objectives, 10% missed even their own top-ranked objective, and 71% missed at least one of their top five -- i.e., roughly half of objectives later acknowledged as important were omitted from unaided generation. The paper states these results 'were replicated in a real-world case study of strategic decision making at a high-tech firm,' and the follow-on 2010 paper won the INFORMS Decision Analysis Society's Best Publication Award (2012), indicating strong field credibility rather than fringe/marketing status. No contradicting or qualifying evidence turned up in search (the only nearby limitation found concerns a *different* intervention -- giving sample objectives without the full master list was ineffective -- which does not touch the omission-rate finding itself). The finding is from 2008/2010; decision analysis is not a fast-moving field where such empirical results go stale, and it continues to be cited as foundational (e.g., a 2013 invited review of multi-objective decision methods). Source quality matches claim strength: primary source, top peer-reviewed journal, award-winning follow-up, genuine experimental design with real personally-consequential decisions -- not anecdote or practitioner track record.",
+      "vote": "3-0"
+    },
+    {
+      "claim": "A simple structured intervention (organizing candidate objectives into a small set of named categories and asking the person to review each category) produced a large, quantified increase in self-generated objectives for a real personal decision: participants generated 7.25 objectives unaided, then added 4.5 more (62% increase) after the category-based prompt, and the added objectives were rated just as personally important as the originally-listed ones.",
+      "source": "https://www.scheller.gatech.edu/directory/research/marketing/bond/pdf/bond-carlson-keeney-da-2010.pdf",
+      "quality": "primary",
+      "quote": "At the first (unaided) opportunity, participants listed an average of 7.25 objectives for their dissertation. At the second (category-aided) opportunity, participants added an average of 4.5 objectives, a number both reliably different from zero (t(19) = 4.75, p <.01) and quite large relative to the original 7.25.",
+      "confidence": "high",
+      "evidence": "Verified against the full primary-source PDF (Bond, Carlson & Keeney, \"Improving the Generation of Decision Objectives,\" Decision Analysis 7(3), 2010, pp.238-255, INFORMS, peer-reviewed). Study 1 (dissertation-topic decision, N=20 doctoral students after 3 dropouts from N=23): p.246 states verbatim \"At the first (unaided) opportunity, participants listed an average of 7.25 objectives for their dissertation. At the second (category-aided) opportunity, participants added an average of 4.5 objectives, a number both reliably different from zero (t(19) = 4.75, p <.01) and quite large relative to the original 7.25\" — this is an exact match to the supporting quote, not a paraphrase or overreach. 4.5/7.25 = 62.1%, so the \"62% increase\" figure is a correct derived calculation, not fabricated. The intervention is accurately described: p.245 confirms participants were given 5 named categories (\"academic objectives while a student,\" \"personal objectives while a student,\" \"professional objectives after graduating,\" \"personal objectives after graduating,\" \"other\") and instructed to \"consider each category, and list any additional objectives that matter to you\" — matching \"organizing candidate objectives into a small set of named categories and asking the person to review each category.\" The importance-parity claim is also verified: p.247 reports added objectives averaged 7.3 importance (9-pt scale) vs. 7.7 for originally-listed objectives, non-significant (t(15)=1.73, p>0.1), directly supporting \"added objectives were rated just as personally important as the originally-listed ones.\" Source is a peer-reviewed INFORMS journal article, appropriate quality for this claim's strength (a within-study descriptive statistic, not an extraordinary universal claim). WebSearch for replication/criticism turned up no contradicting evidence or retraction. One legitimate nuance (not a refutation of the quoted claim, but relevant context for the broader Cairn research question): the paper's own Study 2 discussion (p.249) cautions that in Study 1 \"it is unclear how much of the benefit observed was due to the categories themselves, and how much was due instead to the 'second chance' that it afforded participants\" — i.e., part of the effect may be attributable to a second attempt/review opportunity rather than category-naming alone. This qualifies the causal mechanism but does not contradict the specific quantified numbers and importance-parity finding stated in the claim, which are accurately and verbatim reproduced from the primary source.",
+      "vote": "3-0"
+    },
+    {
+      "claim": "The study empirically confirms Dorst & Cross's (2001) problem-solution co-evolution model in real-world, team-based professional design practice (not just lab studies): 63 co-evolution episodes were identified across 7 transcripts of a 5-person expert team (9 hours, 7414 segments), showing problem framing and solution generation are mutually and continuously interdependent rather than a one-time upfront step followed by search.",
+      "source": "http://analogi.dk/wp-content/uploads/2019/11/2013-Wiltschnig-Christensen-Ball.pdf",
+      "quality": "primary",
+      "quote": "co-evolution episodes occurred regularly and embodied various directional transitions between problem and solution spaces... Our findings support the view that co-evolution is the 'engine' of creativity in collaborative design.",
+      "confidence": "high",
+      "evidence": "Read the primary source (Wiltschnig, Christensen & Ball, 2013, Design Studies 34(5):515-542) directly via PDF extraction. Every specific number in the claim checks out verbatim against the Methods/Results sections: 'A total of 7 transcripts covering approximately 9 h of video were used in the present data analysis, yielding a total of 7414 segments' (p.525); team was '5 core members (1 female, 4 male)' (p.525); 'On 63 occasions, the requirements were linked to solution attempts both temporally and content-wise, thus creating a co-evolution episode' (p.527). The supporting quote in the claim ('co-evolution episodes occurred regularly and embodied various directional transitions... engine of creativity in collaborative design') is a verbatim match to the paper's own abstract. Critically, the paper itself frames its contribution exactly as the claim states: it explicitly contrasts its data with Dorst & Cross's (2001) and Maher & Tang's (2003) prior studies, which it repeatedly describes as 'laboratory-based observations over highly time-limited design sessions' with a 'potential lack of ecological validity' (p.521-522), and states its own aim was to examine co-evolution using 'real-world design data that derived from team-based product design and development meetings... in professional design practice' (p.522) — data from an actual 2-year product-development project at 'a major international company that specialised in engineering design in the domain of medical plastics' (p.524), not a lab task. The paper's results (episodes distributed across 13.6% of segments rather than concentrated at the start, 67% collaborative rather than individual, bidirectional problem<->solution transitions in both directions — 75% requirement-to-solution, 19% solution-to-requirement) directly support the claim's characterization that framing and solution generation are 'mutually and continuously interdependent rather than a one-time upfront step followed by search.' No contradicting evidence, critique, or replication failure for this specific paper turned up in search (only tangential replication-crisis results in unrelated fields). One caveat relevant to the downstream Cairn use-case, not a flaw in the claim itself: this is a single case study of one 5-person subgroup at one company over 5 months — a genuine empirical, real-world, non-lab confirmation of co-evolution, but not a large-N or cross-domain replication, and it is entirely about multi-person team dynamics (turn-taking, who proposes what to whom, 67% collaborative episodes) rather than a solo actor's individual cognition — the transfer of this evidence to a single-user/solo-founder framing step is not addressed by the study at all.",
+      "vote": "3-0"
+    },
+    {
+      "claim": "Problem-solution co-evolution/framing is not exclusively a team/market phenomenon: even in this collaborative team setting, a substantial minority of co-evolution episodes (33%) were generated by a single individual reasoning alone, and the authors note this likely undercounts true individual framing since silent individual episodes go unrecorded.",
+      "source": "http://analogi.dk/wp-content/uploads/2019/11/2013-Wiltschnig-Christensen-Ball.pdf",
+      "quality": "primary",
+      "quote": "Amongst the 63 identified episodes 42 (67%) were collaborative... Nevertheless, it is also important to note that individual co-evolution episodes do arise as well and are not that uncommon (33%). Furthermore, the methodology employed in this study... may significantly underestimate the occurrence of individual co-evolution episodes, in that any silent (i.e., unspoken) individual episodes are clearly not available for recording.",
+      "confidence": "high",
+      "evidence": "Verified directly against the primary source PDF (Wiltschnig, Christensen & Ball, 2013, \"Collaborative problem-solution co-evolution in creative design,\" Design Studies 34(5): 515-542, peer-reviewed, published by Elsevier). Page 527 states verbatim: \"Amongst the 63 identified episodes 42 (67%) were collaborative... Nevertheless, it is also important to note that individual co-evolution episodes do arise as well and are not that uncommon (33%). Furthermore, the methodology employed in this study (i.e., the analysis of verbalizations in teams) may significantly underestimate the occurrence of individual co-evolution episodes, in that any silent (i.e., unspoken) individual episodes are clearly not available for recording and subsequent identification and tallying.\" The paper's own methods section (p.527) defines \"individual\" episodes precisely as ones where \"both the requirement change and solution attempt were proposed by the same individual\" -- i.e., a single person reasoning alone -- which matches the claim's characterization exactly. The claim's supporting quote is an accurate, non-truncated, non-cherry-picked excerpt of this passage. A WebSearch found no contradicting or disputing evidence; independent summaries of the paper corroborate the 67%/33% split. Source quality (a well-cited, peer-reviewed empirical study in the field's leading journal, Design Studies, with reported inter-rater kappa reliability of .90 for the co-evolution code) matches the modest strength of the claim (a descriptive statistic plus the authors' own caveat about undercounting) -- this is not an extraordinary claim requiring extraordinary sourcing, it is a directly-reported empirical figure. Not outdated in a way that undermines it (2013 qualitative design-cognition study; the field has not since overturned this finding). Not marketing or cherry-picked -- the claim faithfully reports both the majority finding (67% collaborative) and the minority finding (33% individual) plus the authors' own limitation note, rather than suppressing context.",
+      "vote": "3-0"
+    },
+    {
+      "claim": "The paper's central thesis directly challenges the premise of treating problem-framing as a discrete step that precedes solution/metric work: framing is theorized as ongoing throughout design, not a front-loaded phase.",
+      "source": "https://arxiv.org/abs/2508.07058",
+      "quality": "primary",
+      "quote": "framing is not a preliminary step but a continuous activity embedded in design",
+      "confidence": "high",
+      "evidence": "Fetched the primary source (arxiv.org/abs/2508.07058, \"Beyond Problem Solving: Framing and Problem-Solution Co-Evolution in Data Visualization Design,\" Parsons & Shukla, accepted IEEE VIS 2025 / IEEE TVCG 2026). The abstract contains the supporting quote verbatim: \"framing is not a preliminary step but a continuous activity embedded in design,\" and the paper's stated central thesis matches the claim closely — it argues visualization design involves continuous problem reframing (co-evolution of problem and solution spaces) rather than a discrete framing phase that precedes solution work, with designers \"reshap[ing] their understanding of the problem based on solution attempts, tool feedback, and ethical or narrative concerns.\" Checklist: (1) claim is directly supported by the quote, not an overreach on what the paper argues; (2) no contradicting source found — WebSearch surfaced only this paper and unrelated results, no rebuttal located; (3) source quality is adequate for the claim's strength — this is a peer-reviewed, venue-accepted primary source (not a preprint-only or blog claim), and the claim only asserts what the paper's thesis is, which the abstract confirms word-for-word; (4) not outdated — accepted 2025, forthcoming 2026; (5) not marketing/press-release material — academic HCI research. One caveat worth flagging to the requester (not a refutation of the claim itself, since the claim is scoped to what the paper argues): the study's evidence base is n=11 expert data-visualization practitioners doing assigned design challenges — a specific professional-design-cognition population, not software/PM practice generally and not a solo end-user building a personal system. The claim accurately represents the paper's thesis; whether that thesis transfers to Cairn's single-user build-interview context is a separate question the claim does not itself overreach on.",
+      "vote": "2-1"
+    },
+    {
+      "claim": "In an empirical study of 11 expert visualization practitioners, problem understanding was repeatedly revised in response to solution attempts and feedback, evidencing bidirectional problem-solution co-evolution rather than a strict problem-first sequence.",
+      "source": "https://arxiv.org/abs/2508.07058",
+      "quality": "primary",
+      "quote": "participants often reshaped their understanding of the problem based on solution attempts, tool feedback, and ethical or narrative concerns",
+      "confidence": "high",
+      "evidence": "Verified directly against the primary source (arXiv 2508.07058, Parsons & Shukla, Purdue, \"Beyond Problem Solving: Framing and Problem-Solution Co-Evolution in Data Visualization Design,\" submitted Aug 2025). Methodology confirmed via full-text fetch: 11 participants explicitly described by the authors as \"expert data visualization practitioners\" (novices were deliberately excluded — \"prior research suggests that experts are more likely to demonstrate the reflective, judgment-based practices central to our research questions\"), studied via a mixed-methods design (90-min design challenge with two reflection checkpoints, weekly diary entries on real projects, and 87-min-average semi-structured interviews). The supporting quote in the claim — \"participants often reshaped their understanding of the problem based on solution attempts, tool feedback, and ethical or narrative concerns\" — matches the paper's abstract language verbatim in one fetch and near-verbatim in a second independent fetch, so it is not a fabricated or cherry-picked line. The claim's characterization (\"problem understanding was repeatedly revised in response to solution attempts and feedback, evidencing bidirectional problem-solution co-evolution rather than a strict problem-first sequence\") is a faithful restatement of the paper's central thesis, not an overreach: the paper's own title and discussion frame this as co-evolution, and the authors explicitly state \"framing is not a preliminary step but a continuous activity embedded in design.\" Critically, the claim does not overstate generalizability — the authors themselves flag the same limitation (\"not meant to be statistically generalizable... [11 participants] limited... serve to surface patterns, vocabulary, and mechanisms\"), and the claim under review makes no statistical-generalization assertion; it only reports what was observed in this study. A broader search of the problem-solution co-evolution literature (Dorst & Cross 2001 with 9 industrial designers, Wiltschnig/Christensen/Ball 2013) shows this qualitative-interview-with-small-N approach is the field-standard method here, not an outlier weakness. No contradicting or debunking source was found. Source quality (primary arXiv paper, direct methodology check) matches the claim's modest, appropriately-hedged strength.",
+      "vote": "3-0"
+    },
+    {
+      "claim": "ODI is founded and patented by Anthony W. Ulwick, a single practitioner-inventor (holder of twelve patents), not an outcome of independent peer-reviewed academic research — this is consultant/practitioner IP, not scientific literature.",
+      "source": "https://en.wikipedia.org/wiki/Outcome-Driven_Innovation",
+      "quality": "secondary",
+      "quote": "Anthony W. Ulwick developed ODI, receiving the first of twelve patents on the process in 1999.",
+      "confidence": "high",
+      "evidence": "The Wikipedia quote directly supports the inventor/patent-holder portion: \"Anthony W. Ulwick developed ODI, receiving the first of twelve patents on the process in 1999\" (WebFetch of en.wikipedia.org/wiki/Outcome-Driven_Innovation confirms 12 total patents, first granted 1999, and that Ulwick is the sole named developer). The broader characterization -- that ODI is practitioner/consultant IP rather than an output of independent peer-reviewed research -- is corroborated, not contradicted, by further searching: (1) Wikipedia's own reference list for ODI cites Ulwick's own books/articles, Harvard Business Review (a practitioner publication, not a peer-reviewed journal), and consulting-firm write-ups (ATKearney, Strategyn, thrv.com, myles-innovation.com) -- no independent academic journal citation appears; (2) two targeted searches for peer-reviewed empirical validation of ODI/JTBD (\"outcome-driven innovation peer-reviewed journal empirical validation\" and \"jobs to be done academic journal article empirical study effectiveness\") surfaced only practitioner blogs, Medium posts, Strategyn's own site, and one unrelated ResearchGate paper on JTBD-as-a-concept in service-dominant logic -- none evaluating ODI's own effectiveness independently; (3) the oft-cited \"86% success rate\" figure traces back to Strategyn (Ulwick's own consulting firm) self-reporting on its own client engagements, not an independent peer-reviewed study -- i.e., exactly the practitioner-track-record pattern the claim describes. Nothing found disputes Ulwick's sole-inventor/patent-holder status or asserts ODI has independent academic/scientific-literature validation. The claim is current (patent facts are static historical record), not a marketing claim (it's a skeptical characterization, if anything undercutting ODI's authority), and the source (Wikipedia, corroborated by patent facts and absence of counter-evidence) is adequate for a claim of this evidentiary weight.",
+      "vote": "3-0"
+    },
+    {
+      "claim": "The methodology is fundamentally a market-research aggregation technique requiring a customer population to survey and score (importance/satisfaction on a 1-10 scale across many respondents) — its core mechanic presumes a multi-customer sample, not a single user.",
+      "source": "https://en.wikipedia.org/wiki/Outcome-Driven_Innovation",
+      "quality": "secondary",
+      "quote": "Customers rate outcomes on a 1-to-10 scale for both importance and satisfaction levels",
+      "confidence": "high",
+      "evidence": "Quote match: Wikipedia states \"Customers use a 1-to-10 scale to quantify the importance of each desired outcome and the degree to which it is currently satisfied,\" directly supporting the supporting quote given. Independent corroboration (not just the cited secondary source) confirms the \"multi-customer, statistically-valid sample\" reading is not an overreach: multiple sources (Strategyn/Ulwick's own published PDF \"What is Outcome-Driven Innovation,\" Medium/UXR-Microsoft explainer, Ascendle, and others found via WebSearch) converge on ODI's standard practice requiring \"a statistically valid, representative sample of the target market, typically 180-600 respondents\" who each rate every outcome statement on importance and satisfaction, feeding Ulwick's Opportunity Score formula (Importance + max(Importance-Satisfaction,0)) used to segment/size market opportunities. This is described industry-wide as the defining mechanic that distinguishes ODI from generic JTBD interviewing — i.e., it is the \"core mechanic,\" not an optional add-on. I actively searched for a counter-reading (JTBD/ODI self-applied at n=1, quantified-self framing) and found none: a direct WebSearch for \"jobs to be done\"/\"outcome-driven innovation\" + n=1/self/individual returned no documented single-user adaptation; results explicitly note ODI \"appears designed for capturing data across a statistically valid population rather than individual self-tracking scenarios.\" Minor imprecision only: one primary Strategyn source describes a 1-5 rating scale rather than 1-10 (cosmetic discrepancy across sources, doesn't affect substance). Source (Wikipedia, corroborated by Strategyn/Ulwick primary material and independent secondary write-ups) is adequate for a methodological-description claim of this strength; not outdated (methodology and its respondent-count guidance are stable/decades-old and still cited as current practice); not marketing fluff — it is a critical, substantiated observation about a documented limitation.",
+      "vote": "2-1"
+    },
+    {
+      "claim": "Dorst's 'Frame Innovation' framework (2015b) is a specific nine-step method: archaeology, paradox, context, field, themes, frames, futures, transformation, integration — this is the concrete structure of 'frame creation' the sub-area needs, not a vague description.",
+      "source": "https://aijcr.thebrpi.org/journals/Vol_11_No_1_March_2021/2.pdf",
+      "quality": "secondary",
+      "quote": "Frame innovation is a framework that has been introduced by (Dorst 2015b). Frame innovation consists of nine different steps: archaeology, paradox, context, field, themes, frames, futures, transformation and integration.",
+      "confidence": "high",
+      "evidence": "The claim is accurately supported by the quote and independently corroborated. The cited quote directly states the nine steps by name. Cross-checking against independent sources (not just the cited secondary source) confirms this is the real structure of Dorst's \"Frame Creation\"/\"Frame Innovation\" method: MIT Press's own book description (via faintsignal.org, \"Frame creation resolves complex problems in nine steps\") lists the same nine named steps — Archaeology, Paradox, Context, Field, Themes, Frames, Futures, Transformation, Integration — with matching definitions (Archaeology = investigate prior attempts/organizational context; Paradox = \"what makes this problem hard to solve?\"; Context = stakeholders/drivers; Field = widen to all players; Themes = universal shared values; Frames = new frames opening solution space; Futures = \"think forward\" to generate designs; Transformation = critical evaluation; Integration = embedding new frames into the organization/field). A ResearchGate figure caption independently cites \"The frame creation process model (Dorst, 2015, p. 75)\" showing the same nine-step model from the primary source (page-cited), confirming this isn't a single source's misread. So this is a well-documented, specific, named methodology (not a vague description), matching the claim's characterization exactly. The source used for the quote (aijcr.thebrpi.org) is a low-tier/obscure secondary journal, but the claim's substance is independently verifiable via the MIT Press primary-source description and a ResearchGate page-cited figure, so source quality is adequate for this factual (non-extraordinary) claim about a book's table of contents/structure.",
+      "vote": "3-0"
+    },
+    {
+      "claim": "All three worked case studies (King Cross Street/policing, IDEO/Rockefeller food waste, IMEND phone repair) are consultancy-for-client engagements with an explicit multi-party problem context: a distinct 'problem owner' (e.g., police, hotels/restaurants, phone repair companies) plus separate 'key stakeholders' (bar owners, food suppliers, technicians) whose competing desires must be reconciled into one theme/solution — the entire evidentiary base for Dorst's framing method here is a multi-stakeholder market/organizational setting, not a single person framing a problem for themselves.",
+      "source": "https://aijcr.thebrpi.org/journals/Vol_11_No_1_March_2021/2.pdf",
+      "quality": "secondary",
+      "quote": "The problem context includes restaurants and hotels as problem owner and food suppliers as one of the main key stakeholders.",
+      "confidence": "medium",
+      "evidence": "The quote itself directly supports only the food-waste leg of the claim (\"restaurants and hotels as problem owner and food suppliers as one of the main key stakeholders\"), so on the quote alone the claim toward King's Cross and IMEND would be an extension beyond the supplied text. However, independent WebSearch verification corroborates the same multi-party/consultancy structure for all three cases: (1) King's Cross — \"designers from the Designing out Crime research centre were asked by the City of Sydney\" to address late-night violence involving multiple parties (police, bar/venue operators, revellers) — a government-commissioned consultancy engagement, not a solo framing exercise; (2) Food waste — IDEO engaged by the Rockefeller Foundation, with restaurants/hotels as problem owner and food suppliers as a distinct stakeholder group whose interests had to be reconciled (directly quoted); (3) IMEND — described in secondary sources as a Digital Surgeons project reconciling \"electronics repair businesses with their desire of getting more customers and technicians who look for job opportunities\" into a two-sided marketplace, i.e., a distinct business/problem-owner side plus a separate technician-stakeholder side. No contradicting source was found; broader search results on Dorst's Frame Innovation book (its full case-study roster: high-speed rail, Bang & Olufsen, social housing, museum storytelling, employment services, disability housing, retail security, staffing agency, etc.) show the entire corpus is consistently organizational/institutional client engagements, never a single individual framing a problem for their own personal use — reinforcing rather than undermining the claim's core point about market/transfer-to-n=1 limits. The source is a lower-tier journal (thebrpi.org) and I could not fetch it directly (403) to confirm King's Cross/IMEND framing verbatim, but the underlying facts are independently corroborable via multiple convergent secondary sources and trace to Dorst's own MIT Press book, so source quality is adequate for the claim's strength. Not outdated, not a marketing claim.",
+      "vote": "3-0"
+    },
+    {
+      "claim": "Opportunity solution trees are defined purely as a visualization/organization method for discovery work, not a validated causal technique with its own evidentiary base — the tree maps candidate paths to a chosen outcome.",
+      "source": "https://www.producttalk.org/opportunity-solution-trees/",
+      "quality": "blog",
+      "quote": "Opportunity solution trees are a simple way of visually representing the paths you might take to reach a desired outcome.",
+      "confidence": "high",
+      "evidence": "The quote fully supports the claim: producttalk.org (Teresa Torres's own primary source for the OST framework) defines OSTs explicitly as \"a simple way of visually representing the paths you might take to reach a desired outcome\" — a representational/organizational device, not a technique claimed to causally improve outcomes on its own. WebFetch of the full page confirms the surrounding content lists asserted benefits (shared understanding, resolving business/customer tension, etc.) but never claims the tree itself is empirically validated; instead the page attributes evidentiary rigor to the customer interviews and assumption tests that feed the tree, not to the tree structure. Independent WebSearch across practitioner sources (productschool.com, koji.so, chameleon.io, shortform.com) corroborates this: OST is uniformly described as a widely-adopted organizing framework/diagram (root outcome -> opportunities -> solutions -> experiments) with no peer-reviewed or empirical effectiveness studies found — only practitioner adoption claims ('used by teams from startups to Fortune 500'). This matches the claim precisely: OST is a visualization/organization method whose 'evidence' lives in the discovery activities it structures, not a validated causal technique with its own evidentiary base. Source quality is appropriate since producttalk.org is the primary/originating source for the term being defined, and the claim itself is modest (a definitional/scoping claim, not an extraordinary empirical claim), so a blog primary source suffices. No contradicting evidence found; not outdated (framework unchanged since 2016/2021); not marketing puffery — if anything the claim is more skeptical than the source's own promotional framing.",
+      "vote": "2-1"
+    },
+    {
+      "claim": "The article supplies no controlled studies, quantified before/after comparisons, or peer-reviewed data validating that opportunity solution trees improve outcomes versus alternative discovery approaches; support is limited to named-company anecdotes (BBC Maestro, TextHelp, SuperAwesome, Seera Group, Grailed, trivago) without disclosed methodology, e.g. one unsubstantiated case-study line about a metric lift with no accompanying method detail.",
+      "source": "https://www.producttalk.org/opportunity-solution-trees/",
+      "quality": "blog",
+      "quote": "Opportunity Mapping Led to a 20% Lift in LTV at Grailed",
+      "confidence": "high",
+      "evidence": "Direct fetch of the source article (producttalk.org/opportunity-solution-trees/) confirms: it presents no controlled studies, no quantified before/after comparisons, and no peer-reviewed data for OST efficacy. It cites exactly the six named companies claimed (BBC Maestro, TextHelp, SuperAwesome, Seera Group, Grailed, trivago), each as a case-study link/heading with no methodology disclosed on the page itself. The specific quote checked — \"Product in Practice: Opportunity Mapping Led to a 20% Lift in LTV at Grailed\" — appears only as a linked section heading; the article gives zero detail on sample, baseline, attribution, or measurement window for that 20% figure, matching the claim's characterization of \"one unsubstantiated case-study line about a metric lift with no accompanying method detail.\" A follow-up search for peer-reviewed evaluation of Torres's Opportunity Solution Tree method turned up only practitioner blogs (Mural, ProductPlan, Product School, Medium, etc.) and explicitly found \"no formal research papers with empirical evidence\" — corroborating rather than contradicting the claim. Nothing found disputes or qualifies the claim; it is an accurate, non-overreaching characterization of the source's evidentiary weight.",
+      "vote": "3-0"
+    },
+    {
+      "claim": "ODI's core method explicitly requires surveying a statistically valid population of customers to quantify importance/satisfaction of desired outcomes — the method is defined around a market sample, not an individual",
+      "source": "https://strategyn.com/jobs-to-be-done/",
+      "quality": "blog",
+      "quote": "Survey a statistically valid population to measure the importance and current satisfaction of each desired outcome.",
+      "confidence": "high",
+      "evidence": "The quote is directly and accurately drawn from Strategyn's own description of Step 3 of the six-phase ODI process (\"Gather quantitative data. Survey a statistically valid population to measure the importance and current satisfaction of each desired outcome\") — confirmed via direct fetch of strategyn.com/jobs-to-be-done/. This is not an overreach: the claim's inference that \"the method is defined around a market sample, not an individual\" follows necessarily from the procedural detail, independently corroborated by multiple sources: a primary-source PDF authored by Ulwick himself (\"What is Outcome-Driven Innovation®\" via innovationroundtable.com) and secondary summaries (Wikipedia's Outcome-Driven Innovation entry, myles-innovation.com) all describe the same quantitative survey step requiring roughly 180-600 respondents rated on a Likert scale, feeding Ulwick's Opportunity Algorithm (importance + max(importance-satisfaction,0)), which requires \"statistical certainty\" across many raters — a calculation that is mathematically undefined for a single respondent. This is a descriptive/methodological claim about how ODI's own creators define their process (not an efficacy claim), so a primary source (the method's own originator/company) is exactly the right evidence tier, and it is cross-validated by independent third-party descriptions rather than resting on the blog alone. Nothing found disputes or qualifies this — the \"quantitative survey against a statistically valid sample\" step is treated as core/definitional across all sources, not a contested or outdated characterization.",
+      "vote": "3-0"
+    },
+    {
+      "claim": "Strategyn frames JTBD/ODI as inherently quantitative, resting on statistically valid research across a customer population to find unmet needs — the discovery unit is 'a market' not a person",
+      "source": "https://strategyn.com/jobs-to-be-done/",
+      "quality": "blog",
+      "quote": "JTBD/ODI is quantitative. It uses statistically valid research to identify precisely which customer needs are unmet.",
+      "confidence": "high",
+      "evidence": "The claim is a descriptive/attributional claim about how Strategyn frames its own ODI methodology — not an external empirical claim about whether JTBD \"works.\" Direct fetch of strategyn.com/jobs-to-be-done/ and corroborating web search results both confirm the framing precisely: (1) \"Survey a statistically valid population to measure the importance and current satisfaction of each desired outcome\" (Phase 3 of ODI process); (2) sample sizes cited at \"120 to 1200 customers\"; (3) \"A market is not defined around a product or a customer demographic. It is defined as a group of people plus the core functional job they are trying to get done\" — explicitly a group/population unit, not an individual; (4) segmentation via \"factor and cluster analysis\" applied to \"a statistically valid market research\" sample to find \"outcome-based market segments\" containing \"50 to 150 measurable desired outcomes.\" The supporting quote in the claim (\"JTBD/ODI is quantitative. It uses statistically valid research to identify precisely which customer needs are unmet\") appears verbatim/near-verbatim in the search results as Strategyn's own self-characterization. Source quality matches claim strength: since the claim is about what Strategyn itself asserts (not about ground-truth efficacy), the primary source — Strategyn's own site — is the correct and sufficient evidentiary basis, not a weak source for a strong claim. No contradicting source was found disputing that Strategyn's stated methodology requires a statistically valid population; the only tension is with the broader research question (whether JTBD/ODI transfers to n=1, which it clearly does not as Strategyn describes it — sample sizes of 120-1200 and market-segment-level discovery presuppose a population, not a single self-building user), but that is a separate downstream question about transferability, not a defect in this claim's support. Not outdated — this is Strategyn's current, standing methodological description with no version/date conflict.",
+      "vote": "3-0"
+    },
+    {
+      "claim": "Ulwick/Strategyn claim ODI has an 86% success rate for new products/services, five times the ~10-20% industry average — but this headline statistic is asserted nowhere in the document with a cited sample, study methodology, or independent verification; it is Strategyn's own internal track-record claim.",
+      "source": "https://innovationroundtable.com/summit/wp-content/uploads/2014/05/Strategyn_what_is_Outcome_Driven_Innovation.pdf",
+      "quality": "blog",
+      "quote": "ODI is an needs-first approach to innovation that has an 86% success rate—5 times the industry average.",
+      "confidence": "high",
+      "evidence": "Directly fetched and read the full 19-page primary source PDF (bypassing the earlier WebFetch 403 via curl) — Strategyn's \"What is Outcome-Driven Innovation® (ODI)?\" whitepaper by Anthony Ulwick (2013). Confirmed the quote is verbatim (p.7: \"ODI is an needs-first approach to innovation that has an 86% success rate—5 times the industry average\"), and the 86% figure recurs on pp.1, 2, 7, and 18 — in every instance asserted as bare fact with ZERO footnote, sample size, company count, or methodology attached. This is conspicuous because the document is otherwise heavily footnoted (14 numbered citations to Cooper, Christensen, Griffin & Hauser, HBR articles, etc.) for its OTHER claims — the 86% figure alone gets no citation anywhere in the document. The claim's narrow, document-scoped assertion (\"nowhere in the document... cited sample, study methodology, or independent verification\") is verified true by direct primary-source inspection, not overreach.\n\nI also located and read Strategyn's companion document, \"Innovation Track Record Study\" (strategyn.com, referencing a 2010 study), which DOES lay out a methodology: phone interviews with 43 past Strategyn client companies, of which 21 had launched a product/service using ODI, 18 rated \"successful\" by the sponsoring company itself, industry-average 17% drawn from 12 named secondary sources (HBR, Frost & Sullivan, PwC, PDMA, Corporate Strategy Board). The study calls its researcher \"independent\" but never names them, was commissioned/engaged by Strategyn, is self-published only by Strategyn (no peer review, no third-party audit, no raw data), and its \"successes\" are self-reported by the very client companies that paid Strategyn — small n (21 launches), no control group, no blinding, clear survivorship/selection bias. This confirms rather than undercuts the claim's substantive framing: even where Strategyn does publish sample details elsewhere, the whole apparatus remains a self-commissioned, non-peer-reviewed vendor track-record claim, exactly as the claim under review characterizes it — \"5 times the industry average\" and the ~10-20%/70-90%-failure industry benchmark language in the reviewed document track this companion study consistently, so the number isn't a misread either.\n\nWebSearch found no independent academic or third-party critical validation of the 86% figure; all sources tracing it are Strategyn's own materials, ODI practitioners/consultants, or firms marketing ODI-adjacent services (dumbo.design, myles-innovation.com) — no HBR/peer-reviewed rebuttal or confirmation exists. This is squarely gray-literature/marketing material (the source document is explicitly labeled \"Whitepaper\" from a for-profit consulting firm selling the ODI methodology), which is the appropriate source tier for a claim of this modest, well-hedged strength (i.e., \"unsubstantiated in the document, self-reported track record\" — not itself an extraordinary claim needing extraordinary sourcing).",
+      "vote": "3-0"
+    },
+    {
+      "claim": "Ulwick claims JTBD/ODI theory, when applied via his prescribed process, makes innovation five times more predictable, with the sole evidence being a 25-year practitioner track record rather than peer-reviewed or controlled-study data.",
+      "source": "https://www.marketingjournal.org/how-to-fail-at-jobs-to-be-done-anthony-ulwick/",
+      "quality": "blog",
+      "quote": "Jobs-to-be-Done Theory, when applied effectively, makes innovation five times more predictable.",
+      "confidence": "medium",
+      "evidence": "Checklist verification:\n\n1. Quote support: Verified accurate. WebSearch confirms marketingjournal.org's \"How to Fail at Jobs-to-be-Done\" by Ulwick contains the claim \"Jobs-to-be-Done Theory, when applied effectively, makes innovation five times more predictable\" — matches the supporting quote verbatim.\n\n2. Contradicting evidence search: None found. Search results consistently describe the \"5x\" figure as derived from Strategyn's own client engagement history — \"over 400 companies,\" \"86% success rate\" vs. an implied industry baseline (~17-20%), attributed across multiple Ulwick publications (jobs-to-be-done.com, strategyn.com, marketingjournal.org) to \"25-year track record applying the theory.\" No independent, peer-reviewed, or controlled-study source surfaced corroborating the specific 5x/86% figures. (Note: a second round of searches to hunt harder for independent academic validation or critique was blocked — session WebSearch budget exhausted at 200/200 — so absence of contradicting evidence here is based on the initial pass, not an exhaustive search.)\n\n3. Source quality vs. claim strength: The claim under review is a meta-claim about what Ulwick asserts and what kind of evidence backs it — not an assertion that the 5x figure is independently validated. For that narrower meta-claim, a marketingjournal.org piece authored in Ulwick's own voice is actually a strong (primary) source: it's the originator directly stating the claim and its evidentiary basis. The claim under review does not overreach beyond the source; if anything it accurately flags the evidence as consultant-track-record rather than dressing it up as more rigorous.\n\n4. Outdated: No — JTBD/ODI's \"5x more predictable\" framing is still actively repeated in Ulwick's current materials (jobs-to-be-done.com, strategyn.com), not a stale or superseded claim.\n\n5. Marketing/fluff framing: Yes, the underlying figure IS a marketing/practitioner claim (consultancy self-reported success rate across client engagements) — but the claim under review explicitly names it as such (\"sole evidence being a 25-year practitioner track record rather than peer-reviewed or controlled-study data\"). That is a correct, appropriately skeptical characterization, not an overreach in the other direction.\n\nNet: the claim under review accurately and non-overreachingly describes both what Ulwick asserts and the (thin, non-academic) nature of the evidence behind it. This actually supports treating JTBD/ODI's \"predictability\" claims as THIN/practitioner-grade evidence in the Round 11 doctrine decision — consistent with, not contradicting, the research question's framing.",
+      "vote": "3-0"
+    },
+    {
+      "claim": "Ulwick states the correct ODI method requires prioritizing desired-outcome statements using a 'statistically valid customer sample' to identify underserved segments -- a step that presumes a population/market of many customers and has no defined analog for a single self-building user.",
+      "source": "https://www.marketingjournal.org/how-to-fail-at-jobs-to-be-done-anthony-ulwick/",
+      "quality": "blog",
+      "quote": "Prioritize outcomes using statistically valid customer samples",
+      "confidence": "high",
+      "evidence": "Fetched the primary source directly (marketingjournal.org/how-to-fail-at-jobs-to-be-done-anthony-ulwick/). Confirmed: (1) this is Ulwick's own first-person writing, not a third-party blogger's paraphrase — so it is a primary source for what Ulwick himself prescribes as the \"correct\" ODI method, not a secondhand claim about him. (2) The exact sentence reads: \"Each desired outcome statement is then prioritized by a statistically valid sample of representative customers so we can determine which outcomes are underserved and if segments of customers exist with different unmet needs.\" This maps precisely onto the claim under review — prioritization step, statistically valid sample, purpose = identifying underserved segments. No overreach in that portion of the claim. (3) The claim's second clause (\"presumes a population/market of many customers and has no defined analog for a single self-building user\") is explicitly framed as the researcher's own inference from the quote, not misattributed to Ulwick — and it is a reasonable, defensible inference: a \"statistically valid sample of representative customers\" definitionally requires a population of multiple customers to sample from and compare segments across; there is no step in the quoted method that degrades gracefully to n=1. (4) Source-quality caveat: marketingjournal.org is a trade/opinion outlet rather than a peer-reviewed venue, but for a claim about \"what Ulwick states his method requires,\" the outlet is irrelevant — Ulwick authored it, making it as authoritative as any of his other primary ODI writings (Strategyn materials, \"What Customers Want\"). This is consistent with his broader published ODI methodology, which consistently specifies segmentation via customer surveys. (5) Not outdated in a way that matters: this describes a stable, longstanding tenet of ODI methodology (quantitative outcome-prioritization surveys), not a fast-moving technical claim. I could not run additional corroborating WebSearch queries (session search budget exhausted) but the primary-source fetch itself is sufficient support for the specific, narrowly-scoped claim being checked.",
+      "vote": "3-0"
+    },
+    {
+      "claim": "Ulwick's ODI method requires administering the outcome survey to a statistically valid sample of the target population, typically 180-600 people, to rate desired outcomes on importance/satisfaction scales — a sampling requirement that is structurally about a market of many customers, not a single user framing a problem for themselves.",
+      "source": "https://medium.com/@AlexJupiter/outcome-driven-innovation-3377252aec15",
+      "quality": "blog",
+      "quote": "Administer the survey to a statistically valid representation of the target population, often between 180–600 people (Ulwick's words not mine).",
+      "confidence": "high",
+      "evidence": "The blog quote is accurately transcribed and directly supports the claim: \"Administer the survey to a statistically valid representation of the target population, often between 180–600 people\" maps onto Step 3 of ODI (rate desired outcomes on importance/satisfaction scales, then compute the opportunity algorithm = importance − satisfaction). Checked against a primary source (Strategyn, Ulwick's own company, strategyn.com/outcome-driven-innovation-process/), which independently confirms the same mechanism with an even wider stated range: \"A survey is administered to a statistically valid sample of customers, typically 180 to 3,000 respondents.\" The two sources disagree on the upper bound (600 vs. 3,000) but agree on every structural element the claim rests on: (a) a survey instrument, (b) administered to a \"statistically valid sample,\" (c) drawn from a target population/market of customers, (d) rating desired outcomes on importance/satisfaction. If anything the primary source shows the market-scale requirement is understated by the blog, not overstated — reinforcing rather than undermining the claim's core structural point that this step presupposes a population of many customers to sample from, which has no analogue for a single person framing their own problem (there is no \"statistically valid sample\" of n=1). The method is current (ODI/Strategyn still actively describes this on their site) and not a marketing claim — it's a factual methodology description corroborated by the originating company itself, which exceeds the bar needed for this claim's strength.",
+      "vote": "2-1"
+    },
+    {
+      "claim": "Ulwick's Outcome-Driven Innovation methodology relies on quantitative survey research producing a 'statistically valid dataset' to rank and prioritize customer outcomes — a market-research design built for segmenting a population of many customers, not for a single self-building user.",
+      "source": "https://gopractice.io/product/jobs-to-be-done-the-theory-and-the-frameworks/",
+      "quality": "blog",
+      "quote": "quantitative research (surveys)\" with \"statistically valid dataset",
+      "confidence": "high",
+      "evidence": "The claim is well-supported and actually understated relative to the primary source. Strategyn's own methodology page (strategyn.com/outcome-driven-innovation-process) states explicitly: \"A survey is administered to a statistically valid sample of customers, typically 180 to 3,000 respondents,\" after which \"The Opportunity Algorithm then calculates which outcomes represent the greatest opportunities for growth,\" with the stated goal of knowing \"with statistical certainty which needs should be the focus.\" This independently corroborates the blog's quote (\"quantitative research (surveys)\" producing a \"statistically valid dataset\") from an authoritative primary source (Strategyn is Ulwick's own firm), not merely a secondary blog paraphrase. The 180-3,000 respondent figure makes explicit that ODI's ranking/prioritization mechanism (importance x satisfaction gap scoring via the Opportunity Algorithm) is structurally a population-sampling technique for segmenting a market of many customers -- statistical validity is meaningless at n=1, so the claim's framing (\"not for a single self-building user\") follows directly from the methodology's own stated sample-size requirements, not from overreach or misreading of the blog quote. WebSearch for contradicting evidence was unavailable (session search budget exhausted), but the primary-source WebFetch independently confirms the claim rather than merely failing to contradict it, which satisfies the \"extraordinary claims need primary sources\" bar. The claim is not outdated (methodology description is current on Strategyn's live site) and is not itself a marketing claim (it's a critical/analytical claim about market-research design, sourced from a practitioner blog but verified against the vendor's own primary documentation).",
+      "vote": "3-0"
+    },
+    {
+      "claim": "The article's sole evidence that JTBD/ODI improves product outcomes is one practitioner case study (a Strategyn circular-saw project finding ~30% of tradesmen had 14 unmet outcomes leading to a 'winning' product), not a peer-reviewed or controlled empirical study.",
+      "source": "https://gopractice.io/product/jobs-to-be-done-the-theory-and-the-frameworks/",
+      "quality": "blog",
+      "quote": "about 30% of tradesmen using circular saws had 14 unmet outcomes",
+      "confidence": "high",
+      "evidence": "Direct WebFetch of the source article (gopractice.io/product/jobs-to-be-done-the-theory-and-the-frameworks/) confirms the claim precisely. The fetch tool was asked to enumerate every piece of evidence the article cites for JTBD/ODI improving product outcomes, and it found exactly one: the Strategyn circular-saw case (\"about 30% of tradesmen who use circular saws to 'cut wood in a straight line' had 14 unmet outcomes, while the remaining population of users didn't have any unmet outcomes... Strategyn's client created a winning circular saw using this set of inputs\"). This matches the claim's supporting quote verbatim. The fetch explicitly reports \"no statistics, controlled experiments, peer-reviewed research citations, or additional case studies\" appear anywhere else in the article — confirming this is the article's sole evidentiary basis, not merely one example among several. The claim is narrowly scoped to what THIS ARTICLE cites (not to the broader JTBD evidence base), and the correct verification method — fetching the primary source itself — was used and it supports the claim exactly. Checklist: (1) claim matches quote, not an overreach; (2) no contradicting evidence found — this is a factual claim about one document's contents, directly confirmed by reading that document; (3) source-quality point in the claim is itself accurate framing (a practitioner blog citing one uncontrolled case study is indeed weaker evidence than a peer-reviewed/controlled study, which is exactly what the claim says); (4) not a dated/outdated issue — the article's evidentiary content doesn't change with time; (5) the claim is not itself a marketing claim — it's a critical/skeptical characterization of the article's evidentiary weakness, which the fetch corroborates.",
+      "vote": "3-0"
+    },
+    {
+      "claim": "Torres frames the core discipline of the Opportunity Solution Tree as distinguishing 'outcome' (value realized) from 'output' (things produced/counted), explicitly warning that teams default to counting outputs and mistaking them for outcomes.",
+      "source": "https://www.chameleon.io/blog/opportunity-solution-tree",
+      "quality": "blog",
+      "quote": "Teams will think about their outcome as an increase in the number of integrations. But that's actually just counting output instead.",
+      "confidence": "medium",
+      "evidence": "WebFetch of the source (https://www.chameleon.io/blog/opportunity-solution-tree) confirms the quote sits inside a section titled 'Start with the outcome – what you want to achieve,' explicitly attributed to Teresa Torres, contrasting 'increase in the number of integrations' (output/counting) against 'increased integration usage' (outcome/value). This matches the claim's characterization closely: Torres treats outcome-vs-output as the starting discipline of the Opportunity Solution Tree, with an explicit warning against teams defaulting to counting outputs. This is also consistent with Torres' well-documented public writing (Continuous Discovery Habits, producttalk.org), where 'outcomes over outputs' and 'product outcomes = measurable behavior change' are repeated foundational themes — this is the standard characterization of her framework found across independent sources, not an idiosyncratic reading unique to one blog. The claim is not extraordinary (a standard methodology description, not a statistical/causal claim), so a secondary blog corroborated by widely-known primary material is adequate sourcing. Caveat: WebSearch was blocked mid-task by session budget exhaustion before a dedicated search for disputes/qualifications could run, so no independent search for contradicting evidence was completed — this rests on the single WebFetch plus prior knowledge of Torres' published work. Nothing in the claim is time-sensitive/outdated, and the content is explanatory rather than promotional/marketing fluff about Chameleon's own product.",
+      "vote": "3-0"
+    },
+    {
+      "claim": "Doc Norton frames Opportunity Solution Trees as connecting ongoing experiments to a desired outcome, explicitly built on Teresa Torres' Continuous Discovery Habits as the foundational source rather than independent empirical validation.",
+      "source": "https://docondev.substack.com/p/opportunity-solution-trees",
+      "quality": "blog",
+      "quote": "connect the experiments we are running to the desired outcome we are pursuing",
+      "confidence": "high",
+      "evidence": "Fetched the source (docondev.substack.com/p/opportunity-solution-trees) directly. It confirms all parts of the claim: (1) Norton explicitly names Torres as foundational — \"how I think about them slightly differently (but only slightly) than folks like Teresa Torres who really introduced them broadly to the Product community\" — and directly quotes her definition of \"Opportunity.\" (2) The supporting quote is accurate and in context: Norton frames OST as \"a means of connecting the experiments we are running to the desired outcome we are pursuing.\" (3) The piece is purely explanatory/practitioner content — no independent empirical studies, data, or external validation are cited anywhere in the article; it relies solely on Norton's own experience and illustrative (non-validated) examples. So the claim's characterization — built on Torres as foundational source, not on independent empirical validation — matches the primary source on all counts. This is a low-stakes attribution/framing claim (not an empirical-effectiveness claim), and a Substack blog is adequate sourcing for describing what that blog itself says. No contradicting evidence needed/found since the claim is a direct, verifiable characterization of the source's own content, not a disputed factual or effectiveness claim.",
+      "vote": "3-0"
+    },
+    {
+      "claim": "The article argues outcomes must be impact measures of actual behavior/value change (e.g., reader engagement) rather than output/activity measures (e.g., volume of articles published), reinforcing the outcome-vs-output distinction central to the continuous-discovery literature.",
+      "source": "https://docondev.substack.com/p/opportunity-solution-trees",
+      "quality": "blog",
+      "quote": "20% increase in published articles per month",
+      "confidence": "high",
+      "evidence": "Fetched the source (docondev.substack.com/p/opportunity-solution-trees) directly to check the quote in context. The full passage reads: \"It would be an easy mistake for me to determine that an increase in engagement would come from an increase in content and set an 'outcome' of 20% increase in published articles per month. But more articles does not ensure engagement. Rather than measuring the number of articles, I need to be looking at engagement with the articles... Pay attention here. Make sure you are really looking at outcomes and not outputs. Remember the desired impact.\" The supplied quote is explicitly framed by the article's author as a *mistaken* output/activity measure (volume of articles), used as a cautionary contrast to the correct outcome measure (reader engagement/impact). This exactly matches the claim's parenthetical characterization \"(e.g., volume of articles published)\" as the output example being rejected in favor of impact measures like engagement. The claim does not misread or overreach the quote — it correctly identifies the quote as the article's illustration of what an outcome is NOT, and the article's own explicit statements (\"Make sure you are really looking at outcomes and not outputs\") directly support the outcome-vs-output distinction claimed. The article is discussing opportunity solution trees, which is Teresa Torres' continuous-discovery framework, so tying this to \"the continuous-discovery literature\" is an accurate, non-overreaching connection rather than a strained one. Source is a practitioner blog post (not peer-reviewed), but the claim is only about what that specific article argues — for a claim about a primary source's own content, the source itself is the appropriate and sufficient evidence; the claim is not an extraordinary empirical claim requiring stronger sourcing. No date-sensitivity issue (conceptual argument, not fast-moving empirical fact). Not a marketing claim or cherry-picked benchmark — it's a straightforward paraphrase of the author's stated framework.",
+      "vote": "3-0"
+    },
+    {
+      "claim": "The Opportunity Solution Tree is a four-level hierarchical structure that moves from a defined outcome down through opportunities and solutions to assumption tests, explicitly distinguishing outcomes (value created for customers) from outputs (features shipped)",
+      "source": "https://www.shortform.com/blog/teresa-torres-opportunity-solution-tree/",
+      "quality": "blog",
+      "quote": "Outputs help get you to your outcome, but they're not the end goal.",
+      "confidence": "high",
+      "evidence": "Verified directly against Teresa Torres's primary source (producttalk.org, \"opportunity-solution-tree\" post) via WebFetch. It confirms the exact four-level structure: (1) root = desired outcome, (2) opportunity space = customer needs/pain points/desires, (3) solution space = candidate solutions, (4) assumption tests = experiments evaluating solutions. This matches the claim's description precisely — not an overreach. The cited blog source (shortform.com) is secondary but accurately restates the primary-source structure; the claim is purely descriptive/structural (not an efficacy or evidence claim), so blog-level sourcing is adequate for this claim's strength. The supporting quote given (\"Outputs help get you to your outcome, but they're not the end goal\") only substantiates the outcome-vs-output distinction clause, not the four-level hierarchy clause, but the hierarchy clause is independently verified against Torres's own writing. No contradicting evidence found; the framework is stable and still current in Torres's ongoing work (Continuous Discovery Habits, 2021, and subsequent producttalk.org posts) — not outdated. Not a marketing/cherry-picked claim, just a factual description of a named methodology's structure.",
+      "vote": "3-0"
+    },
+    {
+      "claim": "The article/framework as presented cites no empirical or peer-reviewed evidence that using an Opportunity Solution Tree improves product or discovery outcomes; the only supporting research invoked is general goal-setting theory (specific, challenging goals improve performance), not a study of the OST method itself",
+      "source": "https://www.shortform.com/blog/teresa-torres-opportunity-solution-tree/",
+      "quality": "blog",
+      "quote": "goal-setting theory research showing specific, challenging goals enhance performance",
+      "confidence": "high",
+      "evidence": "Direct re-fetch of the primary source (shortform.com/blog/teresa-torres-opportunity-solution-tree) confirms the claim precisely. Two independent WebFetch queries against the article found: (1) the ONLY external research/theory citations in the piece are goal-setting theory (\"goal-setting theory, developed by Edwin Locke and Gary Latham... Research shows that setting goals can enhance your team's performance and motivation. This is especially true when you set goals that are specific, challenging, and attainable\") plus unrelated marketing statistics (Atlassian's \"65% of people are visual learners,\" a Creately blog on visual communication, and a productschool.com OKR explainer); (2) there is no citation, footnote, or reference anywhere in the article to any study, evaluation, or empirical measurement of the Opportunity Solution Tree method itself — no before/after data, no controlled comparison, no cited research on OST adoption and discovery/product outcomes. The claim is narrowly scoped to 'the article/framework as presented' (this specific source), not to the universe of all OST-related literature, so it does not overreach into asserting no evidence exists anywhere for OST — only that this source doesn't supply any and substitutes general goal-setting theory. That scoping matches what the source actually contains almost verbatim (the supporting quote 'specific, challenging goals enhance performance' mirrors the fetched text's 'specific, challenging, and attainable' almost exactly). Source quality (a secondary blog) is adequate for this claim's strength because the claim is merely a citation-audit of that same blog, verified by re-reading the primary text — no extraordinary claim about the world is being made beyond what the article itself contains. Not date-sensitive, not a marketing claim, and no misread found.",
+      "vote": "2-1"
+    },
+    {
+      "claim": "The framework as described is oriented around a customer base/market rather than a single individual: opportunities are framed as needs discovered across 'your customers' collectively, not an individual user's own stated problem",
+      "source": "https://www.shortform.com/blog/teresa-torres-opportunity-solution-tree/",
+      "quality": "blog",
+      "quote": "the value you want to create for your customers",
+      "confidence": "medium",
+      "evidence": "The specific shortform.com quote (\"the value you want to create for your customers\") is by itself thin support — it only describes the outcome definition, not the \"discovered across customers collectively vs. individual\" distinction the claim makes. That said, the underlying claim checks out against a better source: Teresa Torres' own producttalk.org content on opportunity solution trees. Per that primary-source fetch: opportunities must be \"discovered patterns across a customer base,\" built from \"three to four story-based customer interviews\" (plural, multiple people) synthesized into \"recurring themes across interviews, not singular complaints\" — Torres explicitly warns against generating opportunities \"off the top of our heads\" from one's own assumptions. The tool is stated to be \"designed to help a product trio chart the best path to their desired outcome,\" i.e., built for a company/team serving a market of many customers, not for capturing one person's own stated problem. The one qualifier found — \"anyone can create an opportunity solution tree individually to get some practice\" — refers to a single practitioner doing the exercise, not to the opportunity space being sourced from a single end-user's problem, so it doesn't contradict the claim. No contradicting evidence was found (WebSearch budget was exhausted mid-check, so this rests on the producttalk.org fetch plus prior knowledge of Continuous Discovery Habits, which consistently centers \"customers\" plural and a product trio). The claim is not outdated and isn't a marketing/cherry-picked claim — it's a fair, moderate-strength characterization, just weakly cited. Net: claim survives on better evidence than the one quote offered, so it should not be killed, though the citation itself should be upgraded to a primary Torres source (producttalk.org or Continuous Discovery Habits) rather than the shortform summary blog.",
+      "vote": "3-0"
+    },
+    {
+      "claim": "The Opportunity Solution Tree was created by Teresa Torres (a product discovery coach/consultant, not an academic researcher) in 2016 — a practitioner-origin method, not one derived from peer-reviewed research.",
+      "source": "https://www.productplan.com/glossary/opportunity-solution-tree",
+      "quality": "blog",
+      "quote": "Teresa Torres, a product discovery coach, developed the OST framework in 2016.",
+      "confidence": "medium",
+      "evidence": "The cited source (productplan.com/glossary/opportunity-solution-tree) directly states: \"Teresa Torres, a product discovery coach, created a type of map called the Opportunity Solution Tree, or OST, in 2016...\" — this matches the claim's core facts (creator=Torres, year=2016, role=product discovery coach) almost verbatim, not a paraphrase overreach. Cross-checked producttalk.org (Torres's own site) and her book \"Continuous Discovery Habits\" (2021) bio content via WebFetch: no evidence of any academic/research appointment, PhD, or peer-reviewed publication record for the product-discovery Teresa Torres — she is consistently described only as a coach/consultant running Product Talk Academy, teaching practitioner courses. (A Wikipedia hit for \"Teresa Torres\" returned a different, unrelated person — a Chilean paleobotanist — confirming there is no academic-researcher conflation to worry about, just a namesake collision that doesn't touch the actual claim.) The \"not derived from peer-reviewed research\" clause is a reasonable, unforced inference from the source (no journal citation or academic derivation is claimed anywhere for the OST; it originated as a blog post/practitioner framework on producttalk.org), not an extraordinary claim requiring primary-source-grade sourcing. No contradicting evidence surfaced in the fetches performed (WebSearch was unavailable — session search budget exhausted — so this rests on WebFetch corroboration only, not an independent search pass). Claim is not time-sensitive/outdated (2016 origin, stable fact) and the source, while a vendor glossary rather than a scholarly citation, is proportionate to the modest attribution claim being made — this is uncontroversial, well-established practitioner-community knowledge, not a case requiring primary-source validation.",
+      "vote": "3-0"
+    }
+  ],
+  "refuted": [
+    {
+      "claim": "This failure was studied specifically in single-individual personal decisions (choosing a dissertation topic, an MBA program, a summer internship) — not group/organizational objective-setting or market-research samples — making the finding directly about n=1-style personal decision framing, not aggregated customer preference.",
+      "vote": "1-2",
+      "source": "https://www.scheller.gatech.edu/directory/research/marketing/bond/pdf/bond-carlson-keeney-da-2010.pdf"
+    },
+    {
+      "claim": "Strategyn states that customers typically require between 50 and 150 distinct outcome statements to fully describe the successful execution of a single job, implying the ODI methodology is built around eliciting a large, saturated set of outcome statements from a customer population rather than a single individual's account.",
+      "vote": "0-3",
+      "source": "https://strategyn.com/jobs-to-be-done/jobs-to-be-done-theory/"
+    },
+    {
+      "claim": "The framework's core distinction relevant to Cairn's metric-contract question is 'product outcome' (a measurable customer/user behavior or sentiment change) versus 'business outcome' (business health metric) — i.e. it reframes what the north-star metric should track, not whether a prior framing step is needed.",
+      "vote": "1-2",
+      "source": "https://www.producttalk.org/opportunity-solution-trees/"
+    },
+    {
+      "claim": "Strategyn claims its Outcome-Driven Innovation process has an 86% success rate, five times an industry average of ~17%, and describes this as \"independently verified\"",
+      "vote": "0-3",
+      "source": "https://strategyn.com/jobs-to-be-done/"
+    },
+    {
+      "claim": "JTBD practitioners themselves dispute Ulwick's Outcome-Driven Innovation framework's status as a validated 'theory,' characterizing it instead as an unfalsifiable ideology/typology rather than empirically-grounded science.",
+      "vote": "0-3",
+      "source": "https://jtbd.info/know-the-two-very-different-interpretations-of-jobs-to-be-done-5a18b748bd89"
+    },
+    {
+      "claim": "The article explicitly names popularity/adoption (rather than empirical evidence) as the justification offered for JTBD approaches, and labels this reasoning a textbook logical fallacy.",
+      "vote": "1-2",
+      "source": "https://jtbd.info/know-the-two-very-different-interpretations-of-jobs-to-be-done-5a18b748bd89"
+    },
+    {
+      "claim": "There exist two mutually incompatible interpretations within the JTBD community itself (Ulwick's 'jobs-as-activities' vs. Christensen/Moesta/Klement's 'jobs-as-progress'), meaning 'JTBD' is not a single settled method but a contested label spanning divergent, non-reconcilable theories of customer motivation.",
+      "vote": "0-3",
+      "source": "https://jtbd.info/know-the-two-very-different-interpretations-of-jobs-to-be-done-5a18b748bd89"
+    },
+    {
+      "claim": "Strategyn's evidentiary support for ODI's effectiveness is anecdotal/case-based (named products like Nest and Keurig framed as market winners because they served underserved segments willing to pay more) rather than quantified success-rate statistics or peer-reviewed studies.",
+      "vote": "0-3",
+      "source": "https://strategyn.com/jobs-to-be-done/jobs-to-be-done-theory/"
+    },
+    {
+      "claim": "The desired-outcome-statement method requires a fixed five-part sentence structure, which is presented as a firm 'stringent rule' rather than an optional heuristic, on the grounds that structural variability distorts importance/satisfaction ratings.",
+      "vote": "0-3",
+      "source": "https://innovationroundtable.com/summit/wp-content/uploads/2014/05/Strategyn_what_is_Outcome_Driven_Innovation.pdf"
+    },
+    {
+      "claim": "The core prioritization mechanism (the opportunity algorithm) is explicitly a population-level tool — it is described as useful for uncovering 'segments of a population' with different unmet needs, meaning the method as designed assumes a market of many customers being surveyed and statistically compared, which does not transfer to a single self-building user with no comparison population.",
+      "vote": "1-2",
+      "source": "https://innovationroundtable.com/summit/wp-content/uploads/2014/05/Strategyn_what_is_Outcome_Driven_Innovation.pdf"
+    },
+    {
+      "claim": "This secondary/opinion piece on ODI cites no empirical studies, controlled comparisons, or outcome data showing ODI produces better products or decisions than alternative methods — the critique is methodological/logical, not evidence-based, reinforcing that ODI's support base is practitioner track record rather than peer-reviewed validation.",
+      "vote": "0-3",
+      "source": "https://medium.com/@AlexJupiter/outcome-driven-innovation-3377252aec15"
+    },
+    {
+      "claim": "The single most-cited failure mode in applying the method is that practitioners systematically underestimate 'opportunity mapping' and collapse genuine customer needs into pre-formed solutions rather than surfacing real opportunities first.",
+      "vote": "0-3",
+      "source": "https://www.chameleon.io/blog/opportunity-solution-tree"
+    },
+    {
+      "claim": "The framework's worked examples and underlying logic (business model inputs -> product metrics -> outcomes) are built around aggregate business/market constructs like customer lifetime value and retention/subscription metrics, i.e., a multi-customer market context, with no discussion of adapting the tree to a single self-building user with no customer base.",
+      "vote": "0-3",
+      "source": "https://www.chameleon.io/blog/opportunity-solution-tree"
+    },
+    {
+      "claim": "The OST is defined purely as a visual/organizational aid for discovery work (ideation, experimentation, gap-spotting) — the vendor's own definition contains no outcome or decision-quality metric, i.e. no claim that using it causes better products, only that it organizes thinking.",
+      "vote": "1-2",
+      "source": "https://www.productplan.com/glossary/opportunity-solution-tree"
+    },
+    {
+      "claim": "The OST's prescribed first step is to fix a single metric-based desired outcome before any opportunity or solution is named, operationalizing the outcome-before-output sequencing central to Torres's continuous-discovery framing.",
+      "vote": "1-2",
+      "source": "https://www.productplan.com/glossary/opportunity-solution-tree"
+    }
+  ],
+  "sources": [
+    {
+      "url": "https://en.wikipedia.org/wiki/Outcome-Driven_Innovation",
+      "quality": "secondary",
+      "angle": "JTBD / Outcome-Driven Innovation — method + evidence + n=1 applicability",
+      "claimCount": 5
+    },
+    {
+      "url": "https://strategyn.com/jobs-to-be-done/jobs-to-be-done-theory/",
+      "quality": "blog",
+      "angle": "JTBD / Outcome-Driven Innovation — method + evidence + n=1 applicability",
+      "claimCount": 4
+    },
+    {
+      "url": "https://innovationroundtable.com/summit/wp-content/uploads/2014/05/Strategyn_what_is_Outcome_Driven_Innovation.pdf",
+      "quality": "blog",
+      "angle": "JTBD / Outcome-Driven Innovation — method + evidence + n=1 applicability",
+      "claimCount": 5
+    },
+    {
+      "url": "https://www.marketingjournal.org/how-to-fail-at-jobs-to-be-done-anthony-ulwick/",
+      "quality": "blog",
+      "angle": "JTBD / Outcome-Driven Innovation — method + evidence + n=1 applicability",
+      "claimCount": 5
+    },
+    {
+      "url": "https://medium.com/@AlexJupiter/outcome-driven-innovation-3377252aec15",
+      "quality": "blog",
+      "angle": "JTBD / Outcome-Driven Innovation — method + evidence + n=1 applicability",
+      "claimCount": 3
+    },
+    {
+      "url": "https://gopractice.io/product/jobs-to-be-done-the-theory-and-the-frameworks/",
+      "quality": "blog",
+      "angle": "JTBD / Outcome-Driven Innovation — method + evidence + n=1 applicability",
+      "claimCount": 5
+    },
+    {
+      "url": "https://research.tue.nl/en/publications/creativity-in-the-design-process-co-evolution-of-problem-solution/",
+      "quality": "primary",
+      "angle": "Design-cognition problem-framing — evidence framing determines solution quality",
+      "claimCount": 4
+    },
+    {
+      "url": "https://dl.designresearchsociety.org/cgi/viewcontent.cgi?article=3441&context=drs-conference-papers",
+      "quality": "primary",
+      "angle": "Design-cognition problem-framing — evidence framing determines solution quality",
+      "claimCount": 5
+    },
+    {
+      "url": "http://analogi.dk/wp-content/uploads/2019/11/2013-Wiltschnig-Christensen-Ball.pdf",
+      "quality": "primary",
+      "angle": "Design-cognition problem-framing — evidence framing determines solution quality",
+      "claimCount": 5
+    },
+    {
+      "url": "https://arxiv.org/abs/2508.07058",
+      "quality": "primary",
+      "angle": "Design-cognition problem-framing — evidence framing determines solution quality",
+      "claimCount": 5
+    },
+    {
+      "url": "https://link.springer.com/book/10.1007/1-84628-301-9",
+      "quality": "unreliable",
+      "angle": "Design-cognition problem-framing — evidence framing determines solution quality",
+      "claimCount": 0
+    },
+    {
+      "url": "https://aijcr.thebrpi.org/journals/Vol_11_No_1_March_2021/2.pdf",
+      "quality": "secondary",
+      "angle": "Design-cognition problem-framing — evidence framing determines solution quality",
+      "claimCount": 4
+    },
+    {
+      "url": "https://www.scheller.gatech.edu/directory/research/marketing/bond/pdf/bond-carlson-keeney-da-2010.pdf",
+      "quality": "primary",
+      "angle": "Keeney value-focused thinking — objectives hierarchies decision-quality evidence",
+      "claimCount": 5
+    },
+    {
+      "url": "https://www.semanticscholar.org/paper/Improving-the-Generation-of-Decision-Objectives-Bond-Carlson/d9a62bd25802e9116269a831b08af1f9b9e3d2e6",
+      "quality": "unreliable",
+      "angle": "Keeney value-focused thinking — objectives hierarchies decision-quality evidence",
+      "claimCount": 0
+    },
+    {
+      "url": "https://www.academia.edu/32905866/Value_focused_thinking_Identifying_decision_opportunities_and_creating_alternatives",
+      "quality": "unreliable",
+      "angle": "Keeney value-focused thinking — objectives hierarchies decision-quality evidence",
+      "claimCount": 0
+    },
+    {
+      "url": "https://www.producttalk.org/opportunity-solution-trees/",
+      "quality": "blog",
+      "angle": "Continuous discovery — outcome-over-output evidence and marginal value over a metric contract",
+      "claimCount": 4
+    },
+    {
+      "url": "https://www.chameleon.io/blog/opportunity-solution-tree",
+      "quality": "blog",
+      "angle": "Continuous discovery — outcome-over-output evidence and marginal value over a metric contract",
+      "claimCount": 4
+    },
+    {
+      "url": "https://docondev.substack.com/p/opportunity-solution-trees",
+      "quality": "blog",
+      "angle": "Continuous discovery — outcome-over-output evidence and marginal value over a metric contract",
+      "claimCount": 4
+    },
+    {
+      "url": "https://www.shortform.com/blog/teresa-torres-opportunity-solution-tree/",
+      "quality": "blog",
+      "angle": "Continuous discovery — outcome-over-output evidence and marginal value over a metric contract",
+      "claimCount": 4
+    },
+    {
+      "url": "https://www.productplan.com/glossary/opportunity-solution-tree",
+      "quality": "blog",
+      "angle": "Continuous discovery — outcome-over-output evidence and marginal value over a metric contract",
+      "claimCount": 4
+    },
+    {
+      "url": "https://productschool.com/blog/product-fundamentals/opportunity-solution-tree",
+      "quality": "blog",
+      "angle": "Continuous discovery — outcome-over-output evidence and marginal value over a metric contract",
+      "claimCount": 4
+    },
+    {
+      "url": "https://strategyn.com/jobs-to-be-done/",
+      "quality": "blog",
+      "angle": "n=1 transfer — does market-discovery framing survive a solo self-builder",
+      "claimCount": 5
+    },
+    {
+      "url": "https://www.lesswrong.com/posts/CQHZZWZt99An8fmpT/value-focused-thinking-a-chapter-by-chapter-summary",
+      "quality": "blog",
+      "angle": "n=1 transfer — does market-discovery framing survive a solo self-builder",
+      "claimCount": 5
+    },
+    {
+      "url": "https://www.hup.harvard.edu/books/9780674931985",
+      "quality": "unreliable",
+      "angle": "n=1 transfer — does market-discovery framing survive a solo self-builder",
+      "claimCount": 0
+    },
+    {
+      "url": "https://mitpress.mit.edu/books/frame-innovation",
+      "quality": "unreliable",
+      "angle": "n=1 transfer — does market-discovery framing survive a solo self-builder",
+      "claimCount": 0
+    },
+    {
+      "url": "https://jtbd.info/know-the-two-very-different-interpretations-of-jobs-to-be-done-5a18b748bd89",
+      "quality": "blog",
+      "angle": "Skeptical / evidence-quality — what refutes or weakens problem-framing-first claims",
+      "claimCount": 5
+    },
+    {
+      "url": "https://jobs-to-be-done.com/alan-klements-war-on-jobs-to-be-done-dad8eaed567c",
+      "quality": "blog",
+      "angle": "Skeptical / evidence-quality — what refutes or weakens problem-framing-first claims",
+      "claimCount": 5
+    },
+    {
+      "url": "https://www.toptal.com/designers/product-design/design-thinking-criticism",
+      "quality": "blog",
+      "angle": "Skeptical / evidence-quality — what refutes or weakens problem-framing-first claims",
+      "claimCount": 5
+    }
+  ],
+  "stats": {
+    "angles": 6,
+    "sourcesFetched": 28,
+    "claimsExtracted": 104,
+    "claimsVerified": 45,
+    "confirmed": 30,
+    "killed": 15,
+    "urlDupes": 1,
+    "budgetDropped": 7,
+    "agentCalls": 171,
+    "afterSynthesis": 7
+  }
+}

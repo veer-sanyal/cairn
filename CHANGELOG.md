@@ -1,5 +1,14 @@
 # Changelog
 
+## 0.9.0 — R11: the objectives pass (P25) — PM framing, grounded in decision science
+
+The build interview gains an explicit problem-framing step, and the doctrine gains its 25th principle — both settled by a dedicated research round (R11 — 171 agents, 6 angles, 45 claims verified, 3-vote adversarial). This is the "does Cairn look at the problem like a PM?" question, answered with evidence instead of framing prose.
+
+- **New P25 — "Objectives before metrics."** People omit ~half their own objectives unaided; a structured re-prompt recovers ~62% more, rated just as important (Bond-Carlson-Keeney, *Decision Analysis* 2010, peer-reviewed, and the only R11 sub-area that transfers cleanly to a solo builder — its experiments used real personal decisions). Framing determines solution quality but is *continuous*, not a one-time gate (Dorst & Cross problem-solution co-evolution) — so the step is short and re-enterable.
+- **New build Stage 2.4 — objectives pass.** After you author the goal and before the metric contract: prompt across a small named-category set for what to **maximize / minimize / avoid**, split **fundamental** objectives (→ north-star candidate) from **means** objectives (→ input-lever candidates), and ask once "what's the real problem, and who/what does it serve." Feeds Stage 3; Stage 3 can loop back into it. You still author — the builder prompts, never writes your objectives.
+- **Refuted, and deliberately not imported:** JTBD / Outcome-Driven Innovation (the "86% success / 5x" figures are unsubstantiated vendor self-report; its survey machinery needs 180–3,000 respondents and is undefined at n=1) and Torres's opportunity-solution-tree (practitioner aid, no method validation; its outcome-vs-output idea is already in P12). The framing *principle* is VERIFIED; the specific category set for the interview is a design BET to tune from telemetry.
+- Evidence: `docs/research/research-round11-pm-problem-framing.json`. Doctrine now P1–P25; provenance updated to 11 rounds / ~1,620 agents. Tests +1 (P25 tokens), principle-count range extended; 180 pass.
+
 ## 0.8.6 — vendored `/research`: directing-research framing fires before any research
 
 Every instance now ships its own `/research` command, so the **framing front door is embedded, not plugin-only** — it survives uninstall and can't be bypassed.

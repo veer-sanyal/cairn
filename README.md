@@ -31,7 +31,7 @@ just burns tokens, where deterministic enforcement beats prose, how objectives c
 optimization — and it designs *within* those constraints. Three things let it do that for a
 domain it's never seen:
 
-- a bundled **level-zero doctrine** — 24 evidence-graded principles about how agentic systems
+- a bundled **level-zero doctrine** — 25 evidence-graded principles about how agentic systems
   fail, how objectives corrupt, where the human boundary sits, and when knowledge expires;
 - a **vendored research engine** that manufactures the domain-specific knowledge each instance
   needs *at build time* — so it reasons about your domain from verified findings, not bluff;
@@ -231,7 +231,7 @@ census diffs, and an unconditional annual ceiling that the governor sweeps deter
 
 ## The doctrine, in brief
 
-Cairn's behavior is downstream of 24 research-derived principles
+Cairn's behavior is downstream of 25 research-derived principles
 ([**docs/PRINCIPLES.md**](docs/PRINCIPLES.md) has each one graded, sourced, and dated). The
 short version, grouped:
 
@@ -305,8 +305,8 @@ The first question you should ask of any plugin that installs hooks:
 
 ## The evidence base
 
-Cairn's design was derived from — not decorated with — research. Ten adversarially verified
-deep-research rounds (~1,450 subagents across R1–R10; every claim faced a 3-vote refutation panel)
+Cairn's design was derived from — not decorated with — research. Eleven adversarially verified
+deep-research rounds (~1,620 subagents across R1–R11; every claim faced a 3-vote refutation panel)
 plus a docs-verified platform reference produced [**docs/PRINCIPLES.md**](docs/PRINCIPLES.md): 24
 principles, each graded **VERIFIED / PREPRINT / BET / REFUTED** and annotated with a
 perishability class and verified date, each traceable to primary sources — context-rot studies,
@@ -339,7 +339,7 @@ Implementation plan: [docs/superpowers/plans/](docs/superpowers/plans/)
 
 `v0.8.2` — the level-zero umbrella is complete on top of the 0.1.0 kernel (176 tests; every
 component built TDD with two-stage adversarial review): **SP1** vendored research engine (0.3.0)
-→ **SP2** level-zero doctrine, P1–P24 (0.4.0) → **SP3** builder/governor wiring — census,
+→ **SP2** level-zero doctrine, P1–P25 (0.4.0→0.9.0) → **SP3** builder/governor wiring — census,
 data-access ladder, pass^k probes, failure-mode telemetry, four deterministic sweeps, boundary
 contract (0.5.0) → **SP4** `/cairn:audit` + traceability gap closure (0.6.0) → **SP5**
 `SYSTEM-MAP.md` source-of-truth flows (0.7.0), hardened over two adversarial passes (0.7.1) →

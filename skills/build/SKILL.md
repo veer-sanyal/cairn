@@ -37,6 +37,24 @@ You may refine wording for clarity and split compound statements — you MUST NO
 for them or upgrade their phrasing into your own. If they ask you to write it, decline once,
 briefly, citing the follow-through evidence (46.6% vs 72.8%), then accept whatever they give.
 
+## Stage 2.4 — Objectives pass (P25): surface the full objective set before metrics
+Right after the user authors the goal, run ONE short structured pass — people omit about HALF
+their own objectives unaided, and a structured re-prompt recovers them (P25, Bond/Keeney,
+VERIFIED n=1). The user still authors: you prompt across categories, they answer, you never
+write objectives for them (P14 holds).
+- **Maximize / minimize / avoid.** Ask, across a small fixed set of named categories, what this
+  system should maximize, minimize, and avoid. The categories are a starting scaffold, not a
+  script — adapt to the domain; the specific set is a [BET], tune it from what users actually add.
+- **Fundamental vs. means.** Separate what they ultimately want (fundamental objectives) from the
+  levers that get there (means objectives). This FEEDS Stage 3 directly — fundamental → north-star
+  candidate, means → input-lever candidates — so surface the raw set cleanly here; don't re-derive
+  the contract yet.
+- **The real problem, once.** Ask a single question — "what's the actual problem behind this, and
+  who or what does it serve?" — as a revisable prompt, not a phase. Framing is continuous (P25):
+  this pass is re-enterable, and Stage 3 can loop back into it as the contract takes shape.
+Keep it under a few minutes. Do NOT inflate it into market research, personas, or a JTBD-style
+survey — a solo builder has no population to sample, and R11 refuted that machinery for n=1.
+
 ## Stage 2.5 — Domain research (unprompted; research serves the design, not curiosity)
 The instance's parameters must be grounded in domain evidence the way its kernel is grounded
 in agent-systems evidence — WITHOUT the user having to ask for research.
@@ -113,7 +131,9 @@ Record the selection as a decisions[] entry when it deviates from these defaults
 ## Stage 3 — Metric contract (P12)
 Findings from Stage 2.5 inform the metric DEFAULTS you propose (e.g., evidence-backed cadence
 values) — but the user still authors the goals (Stage 2 is untouched by research).
-From their statement derive together:
+From their statement AND Stage 2.4's objective set (fundamental → north-star candidate, means →
+input-lever candidates; P25) derive together — and loop back into 2.4 if the contract surfaces
+an objective they hadn't named:
 - north_star: leading, value-representing, NOT directly targetable (if daily work can move it
   directly, it's an input, not the north star). Both the leading-indicator requirement AND the
   construction method are VERIFIED (P12/P18, R10). Construct it as a **predictive-power-weighted
