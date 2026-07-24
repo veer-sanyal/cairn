@@ -78,6 +78,16 @@ Present findings as BUILD / PARK / REJECT proposals, blast-ordered largest-first
 ask-order), each with 2-3 options and a recommended default (advise, don't menu). The user
 is the gate — nothing is applied unasked.
 
+**Research-backed fixes.** A finding whose right fix depends on contested domain evidence
+becomes a proposal whose FIRST step is a research run, not a guessed parameter — apply the
+build skill's four-clause research bar (load-bearing ∧ contested ∧ generalizable evidence
+plausibly exists ∧ narrow enough for one run); most findings won't clear it and shouldn't.
+When it clears: run /cairn:research using the PLUGIN's copies (this repo has no installed
+engine — Workflow scriptPath ${CLAUDE_PLUGIN_ROOT}/skills/research/deep-research.js, persist
+via ${CLAUDE_PLUGIN_ROOT}/templates/hooks/doctrine_write.py into THIS repo's
+docs/RESEARCH.md), then parametrize the fix citing the finding — a refuted or unverified
+claim never becomes a parameter, same rule as the builder.
+
 Then offer three dispositions:
 1. **Apply agreed fixes in place.** Boundary contract applies even though this repo has
    none: git commit checkpoint FIRST — refuse to edit a dirty tree without the user's
@@ -85,6 +95,9 @@ Then offer three dispositions:
    first; never delete user content — demote or move only.
 2. **Write `AUDIT.md`** into the repo: every finding with evidence, principle ref, and the
    user's decision — the trail survives for the next run's anti-re-litigation rule.
+   Note in AUDIT.md that any docs/RESEARCH.md Refresh-by dates created here are swept only
+   inside a cairn instance — without migration (disposition 3), re-research happens at the
+   next audit, not automatically.
 3. **Migrate to a cairn instance:** hand off to /cairn:build with a pre-filled draft —
    north star from Stage 1, census and data_paths from Stage 2, existing files mapped to a
    proposed owner plan — so the interview starts from evidence, not zero. Migration copies;

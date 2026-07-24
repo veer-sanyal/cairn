@@ -16,7 +16,7 @@ def test_skills_have_frontmatter_and_load_bearing_content():
                      "degraded", "Refuted", "decision", "perishability"],
         "audit": ["manifest.json", "/cairn:review", "north star", "ladder", "file:line",
                   "BUILD", "PARK", "REJECT", "AUDIT.md", "blast", "dirty tree",
-                  "SYSTEM-MAP", "drift"],
+                  "SYSTEM-MAP", "drift", "research bar", "Refresh-by"],
     }.items():
         p = REPO / "skills" / name / "SKILL.md"
         text = p.read_text()
