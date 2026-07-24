@@ -18,8 +18,9 @@ Run:
 
 Render one table from the JSON: **name · purpose · status · last session · last reconciled**.
 Rules:
-- Status is computed by the script (concluded ← manifest flag; suspended ← deliberate
-  suspend lapse with no session start after it; else active). Do not re-derive it.
+- Status is computed by the script (concluded ← manifest flag; suspended ← a
+  `lapse cause=suspended deliberate=true` event — the shape /suspend always logs — with
+  no session start after it; else active). Do not re-derive it.
 - Names may collide — when two entries share a name, show the path to disambiguate.
 - **Never guilt (P13):** report status plainly. No "neglected for N days", no streaks,
   no nudges to return. A suspended or concluded system is an honorable state.

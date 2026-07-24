@@ -126,7 +126,9 @@ reverse (the revert mints its own superseding entry pointing back).
 A proposal skips the per-item ask and applies immediately ONLY when ALL hold:
 - `[blast: low]` AND `[door: two-way]`;
 - its backing is graded VERIFIED (a PRINCIPLES.md P-ref or a docs/RESEARCH.md finding that
-  survived refutation) — BET / THIN / PREPRINT never auto-adopts;
+  survived refutation) — of the canonical enum (VERIFIED / VERIFIED-probed / PREPRINT /
+  THIN / BET, build Stage 5), only plain VERIFIED qualifies; VERIFIED-probed never
+  auto-adopts (probes are perishable), and BET / THIN / PREPRINT never auto-adopt;
 - it touches none of: the metric contract (north_star / inputs / guardrails), privacy,
   caps, cadence minimums, anything involving money, or text the user authored in their
   own words.

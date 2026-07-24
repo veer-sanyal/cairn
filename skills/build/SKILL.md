@@ -159,15 +159,18 @@ size (never ask a question whose right answer depends on an unanswered upstream 
 contract-level choices before trigger minutiae, and among equals, irreversible (one-way)
 choices first. Answering a small question before the big one that governs it wastes the
 answer. Map each accepted rule onto the CLOSED trigger-template menu
-(spec §2.1): gap_nudge, review_due, staleness_escalation, friction_accumulator,
-suspend_suggestion, guardrail regression flag, metric-observation prompts, intent enum.
-Parametrize; never invent new
+(spec §2.1) — exactly these five: gap_nudge, review_due, staleness_escalation,
+friction_accumulator, suspend_suggestion.
+(Guardrail regressions are a manifest.metrics.guardrails behavior surfaced at review, and
+intents are a manifest field — neither is a trigger.) Parametrize; never invent new
 trigger mechanics — menu growth is a kernel-release matter.
 
 ## Stage 5 — Scaffold
 Assemble the build-config JSON (exact shape documented at the top of skills/build/scaffold.py),
 including a decisions[] entry for every design choice with its principle tag, grade
-(VERIFIED / PREPRINT / BET), `blast` (low|med|high: what else changes if it flips) and
+(canonical enum: VERIFIED / VERIFIED-probed / PREPRINT / THIN / BET — the same vocabulary
+the governor reads; VERIFIED-probed never auto-adopts, probes are perishable),
+`blast` (low|med|high: what else changes if it flips) and
 `one_way` (bool) tags — the governor's ask-order and auto-adopt lane run on these tags.
 Write it to a temp file and run:
     python3 "${CLAUDE_PLUGIN_ROOT}/skills/build/scaffold.py" <config.json> <target-dir>
