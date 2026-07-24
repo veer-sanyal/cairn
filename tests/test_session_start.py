@@ -104,3 +104,14 @@ def test_auto_adopt_silent_after_revert(instance):
     seed_event(instance, days_ago=1, type="session", phase="start", session_id="s1")
     out = boot(instance)
     assert "auto-adopted" not in ctx(out)
+
+
+def test_malformed_ts_does_not_blank_banner(instance):
+    # a valid-JSON event with a garbage ts must not suppress the whole banner (0.7.1 harden)
+    with open(instance / "telemetry" / "events.jsonl", "a") as f:
+        f.write(json.dumps({"ts": "not-a-timestamp", "type": "session",
+                            "phase": "start", "session_id": "s0"}) + "\n")
+    seed_event(instance, days_ago=9, type="session", phase="start", session_id="s1")
+    out = boot(instance)
+    assert ctx(out)                       # banner present, not blanked by the bad row
+    assert "gap" in ctx(out).lower()      # the good event's nudge still computed

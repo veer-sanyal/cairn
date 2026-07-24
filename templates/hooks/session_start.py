@@ -10,11 +10,22 @@ def load_events(root):
         return []
     out = []
     for line in p.read_text().splitlines():
-        if line.strip():
-            try:
-                out.append(json.loads(line))
-            except json.JSONDecodeError:
-                pass
+        if not line.strip():
+            continue
+        try:
+            e = json.loads(line)
+        except json.JSONDecodeError:
+            continue
+        # Keep only well-formed events — a dict with a type and a parseable ts — so every
+        # downstream parse_ts / e["type"] / days_since is safe. One malformed row must not
+        # blow up the banner: fail-soft is exit-0, but a lost banner loses all boot guidance.
+        if not isinstance(e, dict) or "type" not in e:
+            continue
+        try:
+            datetime.datetime.fromisoformat(e.get("ts"))
+        except (ValueError, TypeError):
+            continue
+        out.append(e)
     return out
 
 def parse_ts(ts):

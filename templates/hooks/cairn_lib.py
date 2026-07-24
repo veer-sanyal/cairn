@@ -9,7 +9,10 @@ def find_root(start):
         m = d / "manifest.json"
         if m.is_file():
             try:
-                if "cairn_version" in json.loads(m.read_text()):
+                data = json.loads(m.read_text())
+                # isinstance guard, not `in` on the raw value: a scalar manifest (5, true)
+                # would raise TypeError and abort the walk, masking a valid outer root.
+                if isinstance(data, dict) and "cairn_version" in data:
                     return d
             except (json.JSONDecodeError, OSError):
                 pass
@@ -17,7 +20,8 @@ def find_root(start):
 
 def manifest(root):
     try:
-        return json.loads((Path(root) / "manifest.json").read_text())
+        data = json.loads((Path(root) / "manifest.json").read_text())
+        return data if isinstance(data, dict) else {}   # scalars/lists → {} protects callers
     except (json.JSONDecodeError, OSError):
         return {}
 

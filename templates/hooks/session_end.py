@@ -18,9 +18,16 @@ def main():
                 e = json.loads(line)
             except (json.JSONDecodeError, ValueError):
                 continue
-            if e.get("type") == "session" and e.get("phase") == "start" and e.get("session_id") == sid:
-                start = datetime.datetime.fromisoformat(e["ts"])
-                dur = int((datetime.datetime.now(datetime.timezone.utc) - start).total_seconds())
+            if isinstance(e, dict) and e.get("type") == "session" and e.get("phase") == "start" and e.get("session_id") == sid:
+                # normalize a naive ts to UTC (else tz-aware minus tz-naive → TypeError,
+                # which would drop the end record entirely); a bad ts just leaves dur=0.
+                try:
+                    start = datetime.datetime.fromisoformat(e["ts"])
+                    if start.tzinfo is None:
+                        start = start.replace(tzinfo=datetime.timezone.utc)
+                    dur = int((datetime.datetime.now(datetime.timezone.utc) - start).total_seconds())
+                except (KeyError, ValueError, TypeError):
+                    pass
     append_event(root, "session", phase="end", session_id=sid,
                  duration_s=max(dur, 0), reason=h.get("reason", ""))
 
