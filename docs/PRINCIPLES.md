@@ -7,7 +7,7 @@ Research-derived design principles. Every principle carries an evidence grade:
 - **[BET]** — no surviving evidence either way; a reasoned design decision, labeled as such.
 - **[REFUTED]** — claims that FAILED verification and must not be cited or built on.
 
-Every principle carries an annotation line: `Perishability: durable|semi-durable|perishable · Verified: YYYY-MM · Round: R<n>` — durable refreshes on contradiction only, semi-durable within ~2 releases, perishable is probe-not-recall (short windows). The governor's expiry sweep (SP3) reads these fields.
+Every principle carries an annotation line: `Perishability: durable|semi-durable|perishable · Verified: YYYY-MM · Round: R<n>` — durable refreshes on contradiction only, semi-durable within ~2 releases, perishable is probe-not-recall (short windows). The governor's expiry sweep (SP3) reads the equivalent `Refresh-by`/`researched` dates in each instance's docs/RESEARCH.md; the annotations in THIS file are enforced by the repo's own test suite (age checks in tests/test_principles.py: any principle >12 months old fails, perishable >6 months fails).
 
 Sources are listed per principle. Rounds: R1 = context/memory, R2 = enforcement/self-improvement, R3 = telemetry/abandonment, R4 = elicitation/prior art, R5 = failure/capability, R6 = verification/epistemics, R7 = objective design/Goodhart, R8 = human-agent boundary, R9 = orchestration/tiering. Full per-round provenance is in "## Research provenance" at the end of this file.
 
@@ -369,7 +369,7 @@ Perishability: durable · Verified: 2026-07 · Round: R6
 
 **Design implications:**
 - Expiry triggers must be structural — dated claims, dependency graphs, census diffs — never model self-assessment; staleness probes ask explicitly ("is X still true?"), because prompts that presuppose a stale fact are exactly where models comply with it.
-- The perishability annotations in THIS file and doctrine_write's Refresh-by dates are the structural triggers: the governor's expiry sweep (SP3) reads them as the cheap surveillance pass, escalating to full re-research only when new evidence changes conclusions — with an unconditional annual-ceiling audit of every entry.
+- doctrine_write's Refresh-by dates in each instance's docs/RESEARCH.md are the structural triggers the governor's expiry sweep (SP3) reads as the cheap surveillance pass, escalating to full re-research only when new evidence changes conclusions — with an unconditional annual-ceiling audit of every entry. The annotations in THIS file are swept by a different mechanism: the repo's test suite fails on any principle Verified >12 months ago (the same annual ceiling) or any perishable principle >6 months old.
 - Refresh loops are rationed by the entry/exit criteria: decision priority × low certainty × likely new evidence; anything failing them goes static.
 - By this principle's own logic, R6's judge magnitudes carry their own re-verification triggers — hence P21's semi-durable magnitudes.
 
