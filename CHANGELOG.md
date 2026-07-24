@@ -4,6 +4,7 @@
 
 - **`/cairn:audit`** — point Cairn's diagnosis stack at any existing Claude Code agentic setup: mechanism mapping with measured boot cost (P23/P1), north-star elicitation (P14), environment census + data-access-ladder upgrades (P23), and a doctrine walk (memory, verification, orchestration, Goodhart, boundary, staleness) where every finding carries a principle ref AND file:line evidence. Output: blast-ordered BUILD/PARK/REJECT proposals; dispositions are fix-in-place (git checkpoint first, never destructive), a persistent `AUDIT.md` with anti-re-litigation, or migration to a full instance via a pre-filled /cairn:build hand-off.
 - Detects Cairn instances and redirects to `/cairn:review` — the governor outranks the audit where telemetry exists.
+- **Traceability audit + gap closure** — a P1–P24 commitments audit (all ~60 traced) surfaced and closed four silent wiring gaps (P16 checkpoint-after-error, P18 builder Goodhart interview, P20 orchestration selector, P22 unconditional annual ceiling) and restored two dropped R5/R8 findings to doctrine (over-constraint + transparency-futility; HORIZON convergence).
 
 Umbrella complete: SP1 research engine (0.3.0) · SP2 doctrine P1–P24 (0.4.0) · SP3 wiring (0.5.0) · SP4 audit (0.6.0).
 

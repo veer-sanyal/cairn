@@ -196,3 +196,4 @@ Each sub-project: own spec → plan → implementation → review, per the exist
 - Cheap-swarm enthusiasm is *capped* by R9: heterogeneous swarms lost to best-of-n from a strong model; the tiering selector must encode this, not the folk version.
 - Judge calibration against human labels requires *the user* to label a small set for any instance that builds its own judge — this is an ask-budget expense SP3 must price in.
 - Workflow availability requires Pro+/API and can be disabled (`disableWorkflows`) — SP1 needs a degraded-mode path (subagent-based research fallback).
+- P11 session-stamping is approximated: runtime work events carry no session_id — association is by timestamp window (session_start.py). A recorded kernel deviation; revisit if telemetry mis-association ever surfaces in review.

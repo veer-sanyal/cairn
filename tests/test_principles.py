@@ -24,7 +24,7 @@ def test_every_principle_annotated():
 
 def test_p16_p17_tokens():
     b = blocks()
-    for tok in ["MAST", "self-correct", "design", "compound"]:
+    for tok in ["MAST", "self-correct", "design", "compound", "HORIZON"]:
         assert tok in b[16], f"P16 missing '{tok}'"
     for tok in ["pass^k", "coin-flip", "pilot", "probe"]:
         assert tok in b[17], f"P17 missing '{tok}'"
@@ -36,7 +36,7 @@ def test_p18_tokens():
 
 def test_p19_tokens():
     b = blocks()
-    for tok in ["rubber-stamp", "ask-budget", "act/ask", "blast", "override", "inhibitive"]:
+    for tok in ["rubber-stamp", "ask-budget", "act/ask", "blast", "override", "inhibitive", "over-constrain"]:
         assert tok in b[19], f"P19 missing '{tok}'"
 
 def test_p20_tokens():
