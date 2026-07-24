@@ -1,5 +1,25 @@
 # Changelog
 
+## 0.8.0 — SP6: cross-instance registry
+
+Multiple instances are now discoverable: a rebuildable global index at
+`~/.cairn/registry.json` (pointers only — names, paths, timestamps; never state) that
+instances maintain themselves at scaffold and every boot.
+
+- **`/cairn:list`** — portfolio view (name · purpose · status · last session), name→path
+  routing ("open my job system"), and read-only cross-instance peeks via condensed-return
+  subagents (P3). Peeks never write; single-writer discipline is untouched.
+- **`manifest.instance.purpose`** — new field (the interview's one-line purpose), so the
+  registry and list can show what each system is for. Pre-0.8.0 manifests fall back to "".
+- **Self-healing by design** — the registry is a cache: corrupt files are coerced fresh,
+  moved instances re-register on next boot, deleting the file loses nothing. Existing
+  instances join after `/cairn:upgrade` (hooks are copied wholesale) or via an explicit
+  register offer in `/cairn:list`. No filesystem scanning, ever.
+- **Privacy** — one new global metadata file, documented in the README; metadata only,
+  local only, `cat`-able. Zero global hooks, unchanged.
+- **Test isolation** — the suite exports `CAIRN_HOME` per-test; no test can touch a real
+  registry.
+
 ## 0.7.1 — edge-case hardening (two adversarial hunts over the deterministic runtime)
 
 Robustness pass on the python that runs on users' machines. Theme: **one malformed field must never suppress unrelated findings, blank a banner, or silently corrupt a file.** Every fix is TDD'd; no behavior change on well-formed input.

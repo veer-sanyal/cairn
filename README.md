@@ -187,6 +187,7 @@ measurably get *worse*.
 | `/cairn:audit` | Diagnose an existing (non-Cairn) agentic setup against the doctrine: measured boot cost, missing metric contract, census + ladder upgrades, verification gaps — blast-ordered BUILD/PARK/REJECT fixes, or migrate via a pre-filled `/cairn:build`. |
 | `/cairn:review` | The governor: re-validates invariants, consolidates memory (probe → verify → repair), reports your metrics, and proposes changes as **BUILD / PARK / REJECT** — you are the gate. |
 | `/cairn:upgrade` | Migrates an instance to a new kernel version. Never overwrites a file you've modified — new versions land alongside as `.cairn-new`. |
+| `/cairn:list` | Portfolio view of every instance on this machine — status (active/suspended/concluded), routing by name ("open my job system"), and read-only peeks into another instance's state. |
 | `/log` `/suspend` `/conclude` | Instance-local. Log intent/outcome/metrics; pause honorably; or conclude — **concluding is a success state**, not churn. |
 
 ## The four ideas
@@ -283,6 +284,9 @@ The first question you should ask of any plugin that installs hooks:
   hooks** — nothing runs in your other projects.
 - **Network: never.** No script makes a network call. Telemetry is local JSONL you can `cat`, and
   it records metadata only (no prompt content) unless you opt in per instance.
+- **One global metadata file:** `~/.cairn/registry.json` — instance names, paths, and
+  timestamps only, so `/cairn:list` can show you all your systems. `cat` it any time;
+  delete it and instances re-register on their next boot. Still zero global hooks.
 - **Leaving:** uninstall the plugin and your instances keep their full runtime (it's
   instance-local). Delete an instance directory and Cairn retains nothing about it.
 
