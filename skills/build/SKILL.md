@@ -114,7 +114,9 @@ Findings from Stage 2.5 inform the metric DEFAULTS you propose (e.g., evidence-b
 values) — but the user still authors the goals (Stage 2 is untouched by research).
 From their statement derive together:
 - north_star: leading, value-representing, NOT directly targetable (if daily work can move it
-  directly, it's an input, not the north star)
+  directly, it's an input, not the north star). The leading-indicator requirement is
+  VERIFIED (P12) but the construction method is BET-grade (P18): propose candidate
+  indicators and verify them causally — never present the derivation as settled.
 - inputs: 1-3 levers daily use actually moves
 - guardrails: keep the standing ones — boot_context_bytes + upkeep burden (measured via
   lapse cause=upkeep events) — + at most one domain guardrail; each must be
@@ -151,6 +153,10 @@ Set, with the user, blast-ordered largest first (build-config `boundary` field):
 - **ask_budget_per_session** — default 1. Asks are a rationed budget: ask FREQUENCY, not
   per-ask depth, drives abandonment (P19). Every prompt the instance adds must name which
   budget slot it spends.
+- **Over-constraint check (P19):** if the drafted autonomy table has NOTHING in `act`,
+  push back once — an all-ask/never table collapses the agent into rule-following
+  automation with nothing real to oversee, and spends the ask budget on noise. The user
+  may still keep it; record the pushback and their call.
 Enforcement in v1 is instructional + telemetry-audited (overreach events), not hook-gated —
 record this as a decisions[] entry graded BET so the governor can revisit it if overreach
 tags appear.

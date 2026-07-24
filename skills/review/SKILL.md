@@ -67,7 +67,10 @@ For each friction cluster or guardrail regression, draft a proposal. HARD RULES:
   evidence, not a re-argument. Otherwise don't surface it; the reject event IS the memory.
 - **Sweep findings become proposals, not chores.** Stage 1's validator now emits doctrine
   sweeps (P22 structural triggers): `research_expired` → propose a re-research run via the
-  /cairn:research skill for that section (cite the Refresh-by date); `census_stale` → re-run
+  /cairn:research skill for that section (cite the Refresh-by date). Also list every
+  RESEARCH.md entry classed `durable` for one-line manual confirmation ("still can't
+  rot? y/n") — durable means refresh-on-contradiction, not silently trusted forever
+  (P22's exit criteria); `census_stale` → re-run
   the census (session tools + `claude mcp list`), diff against manifest.census, and where a
   recorded data_paths rung can improve ("rung 1 appeared for X; instance is on rung 4"),
   propose the upgrade; `proxy_revalidation_due` → walk each input lever's causal link to the

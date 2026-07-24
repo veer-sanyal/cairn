@@ -149,6 +149,7 @@ Caveat: playbook is marketing-adjacent — fine for framework definitions, not e
 **Design implications:**
 - The builder's metric contract has three layers: north star (leading, value-representing, NOT directly targetable) → input metrics (what the system actually moves day to day) → guardrails (OEC-style: measurable-in-period, sensitive, timely).
 - Reviews act on inputs and guardrails; the north star is watched, not chased.
+- The leading-indicator REQUIREMENT is VERIFIED, but the construction METHOD — how to derive a valid leading proxy — is BET-grade (P18): propose candidates and verify each causally; never present the derivation as settled.
 
 ## 13. Abandonment is the dominant failure mode — and it is typed, often temporary, and not always failure
 Perishability: durable · Verified: 2026-07 · Round: R3
@@ -390,6 +391,8 @@ Perishability: perishable · Verified: 2026-07 · Round: docs-verified (claude-c
 **[VERIFIED — first-party docs]** Census enumerability is asymmetric: MCP servers are enumerable (`claude mcp list` / `system-init` array), but tool schemas are not programmatically queryable and no registry-search API exists — so the builder census infers capability from server identity, and rung 2 of the data-access ladder ("a connector exists but isn't installed") is a manual-assisted web-lookup + user-approval flow, never automatic.
 
 Detail file: `docs/research/research-mechanisms-claude-code-2026-07.md` (full selection matrix, hook-event surface, plugin packaging limits) — refresh-by next release or any Claude Code minor-version jump; this principle expires with it.
+
+Recorded deviation: the tree says skills subsume legacy slash commands, yet scaffolded instances ship `commands/*.md`. Deliberate — instance commands are parameter-rendered per instance at scaffold time, and per-instance rendering is what the command path supports; migrating them to skills is a kernel-release matter, not an instance fix.
 
 ## 24. Cold start: doctrine governs until instance data earns authority
 Perishability: durable · Verified: n/a · Round: none — explicit BET
