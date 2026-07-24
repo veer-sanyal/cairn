@@ -94,6 +94,19 @@ autonomy line, or drop the feature. A $0.05 probe now beats a dead instance at r
 Skip probes only for capabilities the kernel itself already exercises (file edits, event
 logging).
 
+## Stage 2.7 — Orchestration selection (P20)
+If the instance's design includes any agentic execution (research runs, subagent lookups,
+scheduled jobs), select the execution shape from doctrine, not habit:
+- Default single-threaded — the lowest complexity rung that reliably works (direct call →
+  single agent with tools → multi-agent). Fan-out is bought with tokens (~15x), justified
+  only for research-shaped breadth.
+- Single writer: any file the instance owns has exactly one writing path; subagents read
+  and advise (P3, P20).
+- Cascade, not swarm: where model choice exists, cheap-first with escalation on low
+  confidence; prefer best-of-n from one strong model over heterogeneous model mixtures
+  (the folk version is refuted — P20's ledger).
+Record the selection as a decisions[] entry when it deviates from these defaults.
+
 ## Stage 3 — Metric contract (P12)
 Findings from Stage 2.5 inform the metric DEFAULTS you propose (e.g., evidence-backed cadence
 values) — but the user still authors the goals (Stage 2 is untouched by research).
@@ -103,6 +116,16 @@ From their statement derive together:
 - inputs: 1-3 levers daily use actually moves
 - guardrails: keep the standing ones (boot_context_bytes, upkeep lapse rate) + at most one
   domain guardrail; each must be measurable-within-period, sensitive, timely
+
+Then stress the draft contract against P18's mechanisms before it hardens:
+- **Causal validity** per input lever: would moving this lever move the north star, or do
+  they merely correlate? (Practicing basketball doesn't make you taller.) Cut or reframe
+  levers that fail.
+- **Extreme-range question** per metric: what does this metric reward at 10x the intended
+  range? If the answer is absurd, add the missing guardrail now.
+- **Concealment prompt**: what would gaming this contract look like, and would anything in
+  the telemetry show it? Reviews audit for concealment, not just drift (P18).
+
 Before asking for confirmation, run ONE fresh-context second opinion — the contract is
 the highest-blast decision the instance will ever contain, and a same-context self-review
 re-blesses its own reasoning. Spawn a subagent given ONLY the user's goal statement

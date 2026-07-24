@@ -5,7 +5,8 @@ def test_skills_have_frontmatter_and_load_bearing_content():
     for name, must_contain in {
         "build": ["scaffold.py", "own words", "pairwise", "north star",
                   "RESEARCH.md", "REFUTE", "deep-research",
-                  "census", "rung", "pass^k", "boundary", "ask_budget"],
+                  "census", "rung", "pass^k", "boundary", "ask_budget",
+                  "single-threaded", "Causal validity", "concealment"],
         "review": ["review-in-progress", "SKIP", "MERGE", "INSERT", "BUILD", "PARK", "REJECT",
                    "RESEARCH.md",
                    "research_expired", "census_stale", "proxy_revalidation", "failure_mode",

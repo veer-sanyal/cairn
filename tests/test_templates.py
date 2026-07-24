@@ -15,6 +15,11 @@ def test_templates_exist_and_are_wired():
     assert "{{instance_name}}" in (T / "CLAUDE.md.tmpl").read_text()
     assert "Last reconciled:" in (T / "HOT.md.tmpl").read_text()
 
+def test_claude_tmpl_has_checkpoint_after_error_rule():
+    text = (T / "CLAUDE.md.tmpl").read_text()
+    assert "failure_mode" in text
+    assert "P16" in text
+
 def test_command_templates_carry_managed_header():
     for cmd in ["log.md", "suspend.md", "conclude.md"]:
         assert "managed-by-cairn" in (T / "commands" / cmd).read_text()
