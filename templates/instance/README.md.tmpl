@@ -1,0 +1,36 @@
+<!-- managed-by-cairn: {{cairn_version}} -->
+<!-- generated from manifest.json — edit the manifest (via /cairn:review), not this file; it is regenerated on change. -->
+# {{instance_name}}
+
+{{one_line_purpose}}
+
+This is a **cairn instance** — a long-lived personal system that remembers across months, stays honest about what it knows, and never loses the thread when you step away. New here, or not sure how to use it? Run **`/help`** inside this directory, or read the **[full manual](docs/MANUAL.md)**.
+
+## What it's tracking — your metric contract
+
+**North star** — watched, never chased: **{{north_star_name}}**
+> {{north_star_statement}}
+
+**Input levers** — what your daily use moves:
+{{inputs_block}}
+
+**Guardrails** — hard limits, flagged if crossed:
+{{guardrails_block}}
+
+The north star is the *outcome* you're moving toward — not a number to optimize directly (that's how metrics get gamed). The input levers are the real dials; the periodic review acts on those, never on the north star.
+
+## Using it, day to day
+
+| When | Do this |
+|------|---------|
+| Starting real work | `/log` intent ({{intents}}) |
+| Finished something | `/log` outcome — done / partial / friction |
+| Something felt off | `/log` friction |
+| Life got in the way | `/suspend` — honorable, no broken-streak shame |
+| Goal reached / habit stuck | `/conclude` — this is a success state |
+| Periodic check-in | `/cairn:review` — proposes changes from YOUR telemetry; you decide |
+| Confused, or a question | `/help` |
+
+Full reference: **[docs/MANUAL.md](docs/MANUAL.md)**. How it's wired, every flow: **[docs/SYSTEM-MAP.md](docs/SYSTEM-MAP.md)**.
+
+<sub>Managed by cairn {{cairn_version}}. Your state lives in plain files — `state/HOT.md` (now), `state/working/` (topics), `telemetry/events.jsonl` (history, local to this machine). Remove the plugin and this directory still reads as a plain git repo.</sub>

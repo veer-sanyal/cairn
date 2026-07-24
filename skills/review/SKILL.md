@@ -125,6 +125,14 @@ For each friction cluster or guardrail regression, draft a proposal. HARD RULES:
   validator flagged `system_map` staleness, reconcile the map against reality during Stage 2.
   If the map is absent entirely (pre-0.7.0 instance), propose creating it ONCE (kernel flows
   + observed instance flows); a REJECT is remembered like any other.
+- **The docs move with the contract.** An applied BUILD that changes the metric contract
+  (north star / inputs / guardrails), the boundary/ask-budget, cadence, or intents must also
+  regenerate the human-facing docs in the same step — they are generated from the manifest,
+  never hand-maintained:
+  `python3 ${CLAUDE_PLUGIN_ROOT}/skills/build/render_docs.py manifest.json .`
+  (idempotent; it skips any doc the user has made their own by dropping the managed header).
+  A metric-contract change with stale README/MANUAL is an incomplete BUILD. If the instance
+  predates this feature (no `docs/MANUAL.md`), that same command creates them.
 - **Research is a valid proposal.** If a friction cluster traces to a design decision the
   manifest grades BET or THIN, propose a research run via the /cairn:research skill (frame
   the decision, GROUNDING block, launch the instance's own .claude/workflows/deep-research.js,

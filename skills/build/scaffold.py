@@ -141,6 +141,11 @@ def main():
         if opt in cfg:
             manifest[opt] = cfg[opt]
     (target / "manifest.json").write_text(json.dumps(manifest, indent=2) + "\n")
+    # human-facing docs (README.md + docs/MANUAL.md) are generated from the manifest by the
+    # shared renderer — same code /cairn:review and /cairn:upgrade re-run, so the docs never
+    # drift from what the system actually does.
+    import render_docs
+    render_docs.write_docs(manifest, target)
     # the one deliberate exception to this script's hard-failure contract: the
     # instance is fine and will self-register on first boot
     if not cairn_lib.registry_upsert(target):

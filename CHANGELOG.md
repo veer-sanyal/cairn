@@ -1,5 +1,16 @@
 # Changelog
 
+## 0.8.3 — instance onboarding: `/help`, README, and a manual that stay current
+
+Every scaffolded instance now ships a human-facing onboarding layer, closing the "I built it and don't know how to use it" gap. All of it loads on demand — zero boot-context regression.
+
+- **`/help` (new instance command)** — reads the instance's *live* `manifest.json` (+ README/MANUAL/HOT) and explains, in the user's own domain terms, what the system is, the metric tree in plain words (north star watched-not-chased, input levers, guardrails), how to use it day to day, and how it helps — or answers a specific question. Manifest-backed, so its answer never goes stale.
+- **`README.md` (new, generated)** — a one-screen front door: purpose, the metric contract as one-liners, the command table, pointers to `/help` and the manual.
+- **`docs/MANUAL.md` (new, generated)** — the reference: each metric tier explained, the daily loop, the review, the autonomy boundary, where every file lives. Links to `SYSTEM-MAP.md` for the wiring rather than duplicating it.
+- **Stays current as the system evolves.** README and MANUAL are *generated artifacts*, deterministically re-rendered from the manifest by one shared renderer (`skills/build/render_docs.py`) that the scaffolder, `/cairn:review` (on any metric-contract change), and `/cairn:upgrade` (on every version bump) all call. Idempotent, and it never clobbers a doc a user has made their own (managed-header guard).
+- **Existing instances** get all three on their next `/cairn:upgrade` (`/help` via the command-render step; README/MANUAL via the new render step).
+- Tests: +2 (generated-docs content, regenerate-but-spare-override); 178 pass.
+
 ## 0.8.2 — R10: gaps-ledger closeout (the five ranked research candidates, settled)
 
 One deep-research round (R10 — 175 agents, 7 angles, 45 claims verified, 3-vote adversarial) settled the five ranked candidates the 0.8.1 umbrella spec had recorded but not executed. Doctrine + wiring only; no new capability, no new resident context. Evidence: `docs/research/research-round10-gaps-ledger-closeout.json`; decision spec: `docs/superpowers/specs/2026-07-24-r10-gaps-ledger-closeout-design.md`.

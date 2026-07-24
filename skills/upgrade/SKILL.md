@@ -35,5 +35,12 @@ Run from inside a cairn instance. Never silent, never destructive (P10: versione
    user-owned living documents; their managed-by-cairn header records provenance only.
 4. List any *.cairn-new files created and walk the user through each diff — they decide
    adopt/merge/ignore per file.
-5. Update manifest cairn_version. Run `python3 .claude/hooks/validate.py`. Commit:
-   "cairn upgrade <old> -> <new>".
+5. Update manifest cairn_version (do this before regenerating docs, next step, so they stamp
+   the new version).
+6. Regenerate the human-facing docs from the now-current manifest — they are generated
+   artifacts, not user-authored, so this refreshes README.md + docs/MANUAL.md to the new
+   version's templates and the instance's live metric contract:
+   `python3 ${CLAUDE_PLUGIN_ROOT}/skills/build/render_docs.py manifest.json .`
+   The renderer skips either doc the user has made their own (managed header removed) and
+   reports it; a pre-this-feature instance simply gets them created.
+7. Run `python3 .claude/hooks/validate.py`. Commit: "cairn upgrade <old> -> <new>".

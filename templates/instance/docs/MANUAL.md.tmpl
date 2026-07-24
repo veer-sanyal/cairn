@@ -1,0 +1,75 @@
+<!-- managed-by-cairn: {{cairn_version}} -->
+<!-- generated from manifest.json — edit the manifest (via /cairn:review), not this file; it is regenerated on change. -->
+# {{instance_name}} — Manual
+
+{{one_line_purpose}}
+
+This is the how-to reference for your cairn instance. For a 20-second overview see **[README.md](../README.md)**; to see how every flow is wired as diagrams, see **[SYSTEM-MAP.md](SYSTEM-MAP.md)**; for anything live or specific, run **`/help`** (it reads this instance's current state and answers questions).
+
+## What this system is
+
+A cairn instance is a long-lived personal system built around one honest goal. It is not a chatbot you re-explain yourself to each session — it externalizes its memory into plain files so it survives session boundaries and months of gaps. Three things define it:
+
+- a **metric contract** (below) — the goal, made measurable and gaming-resistant;
+- **local telemetry** — what you did, kept in plain files on your machine, never uploaded;
+- a **governor** (`/cairn:review`) — proposes changes *only* from that telemetry, with you as the final gate.
+
+## Your metric contract, tier by tier
+
+The system is organized as a metric tree. Each tier has a different job.
+
+### North star — {{north_star_name}}
+> {{north_star_statement}}
+
+This is the outcome the system exists to move toward. It is **watched, never chased** (cairn P12): you don't optimize it directly, because a number you can move directly is a number you can game (P18 — objectives corrupt under optimization pressure). Think of it as the evidence that the system is really working, not a dial you turn.
+
+### Input levers — what your daily use actually moves
+{{inputs_block}}
+
+These are the real dials. Everyday use moves the inputs; the inputs move the north star. When `/cairn:review` proposes changes, it acts on **these** — never on the north star directly. If a lever turns out not to actually move the outcome, a review can retire or replace it.
+
+### Guardrails — hard limits
+{{guardrails_block}}
+
+Guardrails are the lines the system must not cross while chasing the inputs. If telemetry shows one crossed, the review surfaces it — always, never averaged away.
+
+## Using it, day to day
+
+- **Log intent when you start real work:** `/log` → intent ({{intents}}). One event per real thing; don't ceremonially log.
+- **Log the outcome when you finish:** `/log` → outcome (done / partial / friction). Friction needs a one-line note on what rubbed.
+- **Log friction when something goes wrong:** `/log` → friction with a failure-mode tag. This is how the system learns what to fix.
+- **Suspend when life gets in the way:** `/suspend`. A pause is honorable and recoverable — cairn types lapses (forgot / upkeep / skipped / suspended) and never shows you a broken-streak shame screen (P13). If the *system* is too much upkeep, that's a kernel bug, not your failing — say so, and the next review proposes removing the demanding step.
+- **Conclude when you're done:** `/conclude`. Reaching the goal or internalizing the habit is a **success**, not abandonment.
+- **Ask anytime:** `/help` — what's my north star, why did the review flag this, how do I record that.
+
+## The check-in — `/cairn:review`
+
+Run this periodically (default cadence: every {{review_days}} days, once there are enough sessions to say anything meaningful). It:
+
+- shows your north-star trend, each input, each guardrail, and your lapses by type;
+- proposes changes **only** where your own telemetry justifies them — every proposal cites specific events, never vibes;
+- presents each as **BUILD / PARK / REJECT** for **you** to decide. It never changes your metric contract, privacy, or caps on its own.
+
+As the system evolves through reviews, this manual and the README are **regenerated from the manifest** so they never drift from what the system actually does.
+
+## How it boots
+
+Every session opens with a banner: where things stand (`state/HOT.md`), what's stale, and any validator findings. Reconcile that before working. Facts live in files, never in chat history — the system writes through to the owning file in-session, so nothing is lost when the conversation ends.
+
+## The autonomy boundary
+
+The system asks before hard-to-reverse or outward-facing actions, and never does irreversible + external things on its own. Asks are a **rationed budget** (default {{ask_budget}} per session) — frequency, not depth, is what burns people out (P19), so it spends asks only where they're load-bearing.
+
+## Where everything lives
+
+| File | What |
+|------|------|
+| `README.md` | The overview / front door |
+| `docs/MANUAL.md` | This reference |
+| `docs/SYSTEM-MAP.md` | Every flow, as diagrams |
+| `manifest.json` | The metric contract + design decisions (the live source of truth) |
+| `state/HOT.md` | Where things stand right now |
+| `state/working/` | Topic files |
+| `telemetry/events.jsonl` | Your history (local to this machine) |
+
+Still stuck? Run **`/help`** — it reads this instance's live state and answers questions.

@@ -133,9 +133,11 @@ Claude Code — the plugin is a dependency, not a cage:
 
 ```
 your-instance/
+  README.md              # generated front door: what this is, your metric contract, the commands
   CLAUDE.md              # thin router: what this system is, where each fact lives
   manifest.json          # metric contract, boundary contract, census, every decision with its grade
   docs/
+    MANUAL.md            # generated how-to: each metric tier explained, the daily loop, the review
     SYSTEM-MAP.md        # every flow as a mermaid diagram — the system's source of truth
     RESEARCH.md          # graded domain findings with refresh-by dates, from the research engine
   state/
@@ -147,9 +149,14 @@ your-instance/
   .cairn/                # review sentinel
   .claude/
     hooks/               # the kernel runtime, copied INTO your instance
-    commands/            # /log, /suspend, /conclude — yours even if you uninstall Cairn
+    commands/            # /help, /log, /suspend, /conclude — yours even if you uninstall Cairn
     workflows/           # your own copy of the deep-research engine (/deep-research)
 ```
+
+`README.md` and `docs/MANUAL.md` are **generated from the manifest** and re-rendered whenever
+the metric contract changes (build, review, upgrade), so they never drift; `/help` answers
+questions live from the manifest itself. Not sure how to use an instance you built? Run `/help`
+inside it.
 
 ### 3. `SYSTEM-MAP.md` — the source of truth for what your system *does*
 

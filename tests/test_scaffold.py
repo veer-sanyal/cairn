@@ -28,11 +28,38 @@ def test_scaffold_layout(tmp_path):
                 "telemetry/events.jsonl", ".claude/settings.json",
                 ".claude/hooks/session_start.py", ".claude/hooks/cairn_lib.py",
                 ".claude/commands/log.md", ".claude/commands/suspend.md",
-                ".claude/commands/conclude.md", ".cairn",
+                ".claude/commands/conclude.md", ".claude/commands/help.md",
+                "README.md", "docs/MANUAL.md", ".cairn",
                 ".cairn/.gitkeep", "state/working/.gitkeep",
                 ".claude/hooks/doctrine_write.py",
                 ".claude/workflows/deep-research.js"]:
         assert (t / rel).exists(), rel
+
+def test_generated_docs_show_metric_tree(tmp_path):
+    t = scaffold(tmp_path)
+    for doc in ("README.md", "docs/MANUAL.md"):
+        text = (t / doc).read_text()
+        assert "{{" not in text, f"unrendered placeholder in {doc}"
+        assert "planned_sessions_done" in text       # north star name
+        assert "weekly_plan_written" in text          # input lever
+        assert "boot_context_bytes" in text           # guardrail
+        assert "managed-by-cairn" in text             # regeneration provenance
+
+def test_docs_regenerate_but_spare_user_override(tmp_path):
+    t = scaffold(tmp_path)
+    render = REPO / "skills" / "build" / "render_docs.py"
+    manifest = t / "manifest.json"
+    # idempotent re-render (the path /cairn:review and /cairn:upgrade use)
+    r = subprocess.run([sys.executable, str(render), str(manifest), str(t)],
+                       capture_output=True, text=True)
+    assert r.returncode == 0, r.stderr
+    assert (t / "README.md").read_text().count("planned_sessions_done") >= 1
+    # a doc the user made their own (managed header dropped) is never clobbered
+    manual = t / "docs" / "MANUAL.md"
+    manual.write_text("# my own notes\n")
+    subprocess.run([sys.executable, str(render), str(manifest), str(t)],
+                   capture_output=True, text=True)
+    assert manual.read_text() == "# my own notes\n"
 
 def test_substitution_and_no_leftover_placeholders(tmp_path):
     t = scaffold(tmp_path)
