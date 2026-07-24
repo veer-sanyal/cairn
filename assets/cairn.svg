@@ -1,0 +1,31 @@
+<svg width="200" height="240" viewBox="0 0 200 240" fill="none" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="A cairn — a balanced stack of trail-marker stones">
+  <defs>
+    <linearGradient id="s1" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#c4beb8"/><stop offset="1" stop-color="#8f8880"/>
+    </linearGradient>
+    <linearGradient id="s2" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#e7e5e2"/><stop offset="1" stop-color="#c3bfba"/>
+    </linearGradient>
+    <linearGradient id="s3" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#bdb7b0"/><stop offset="1" stop-color="#8a837b"/>
+    </linearGradient>
+    <linearGradient id="s4" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#e7e5e2"/><stop offset="1" stop-color="#c3bfba"/>
+    </linearGradient>
+    <linearGradient id="s5" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#94897f"/><stop offset="1" stop-color="#655d55"/>
+    </linearGradient>
+  </defs>
+
+  <!-- soft ground shadow -->
+  <ellipse cx="100" cy="223" rx="58" ry="9" fill="#000000" opacity="0.10"/>
+
+  <!-- hand-stacked trail marker: five balanced stones, largest at the base -->
+  <g stroke="#57534e" stroke-width="2.5" stroke-linejoin="round">
+    <ellipse cx="100" cy="200" rx="62" ry="22" fill="url(#s1)" transform="rotate(-2 100 200)"/>
+    <ellipse cx="96"  cy="162" rx="50" ry="20" fill="url(#s2)" transform="rotate(3 96 162)"/>
+    <ellipse cx="104" cy="127" rx="40" ry="18" fill="url(#s3)" transform="rotate(-3 104 127)"/>
+    <ellipse cx="98"  cy="96"  rx="29" ry="15" fill="url(#s4)" transform="rotate(4 98 96)"/>
+    <ellipse cx="102" cy="70"  rx="19" ry="12" fill="url(#s5)" transform="rotate(-4 102 70)"/>
+  </g>
+</svg>
