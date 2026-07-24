@@ -1,5 +1,16 @@
 # Changelog
 
+## 0.8.1 — production-readiness pass (six-dimension deep audit)
+
+Six parallel auditors (docs↔code consistency, runtime edge cases, skill-instruction integrity, open loops, research gaps, live e2e lifecycle) produced 45 findings pre-dedup; every one is closed here. Fixes only, no new capability.
+
+- **Two CRITICAL runtime fixes** — a single non-UTF-8 byte in events.jsonl, HOT.md, RESEARCH.md, or SYSTEM-MAP.md no longer suppresses the validator's unrelated findings (all reads go through a shared `read_text_safe`); a malformed manifest scalar (string trigger days, list-typed `metrics`, non-dict guardrail entries, string `guardrail.max`) no longer costs the entire boot banner.
+- **One true archive path** — every doc and deny message names the same sanctioned append: Bash `printf '%s\n' '<json>' >> state/archive.jsonl`. `/log` and `cairn_event.py` write telemetry, not the archive. guard_bash also gained overwrite-verb parity (`cp`, `tee`, `dd of=`, `sort -o`, `install`, `sed -i` against protected paths deny like `>` already did).
+- **`cairn_event.py` cwd trap closed** — invoked from outside the instance it falls back to locating the instance from its own path, so events land in the right `events.jsonl`.
+- **`/suspend` status fixed** — always logs `lapse cause=suspended deliberate=true` carrying the user's answer as `reason=<skipped|upkeep|other>`, so `/cairn:list` status derivation can't miss a suspension; a suspend-only session no longer draws the "cause unknown" nag.
+- **Doctrine expiry is repo-enforced, honestly described** — `tests/test_principles.py` fails on any principle Verified >12 months ago (>6 for perishable); P23 and `capabilities/snapshot.md` re-verified against current platform docs and re-dated 2026-07-24.
+- **Docs truth pass** — registry privacy lines now include the one-line purpose (user-authored text; never metrics, events, or state); SYSTEM-MAP template flows match the kernel (registry upsert at boot, manifest.json on conclude); the upgrade never-overwrite claim is scoped to command files (hooks and the research engine are plugin-owned, always replaced); the single-machine limitation is documented; all seven shipped plans are stamped with their release.
+
 ## 0.8.0 — SP6: cross-instance registry
 
 Multiple instances are now discoverable: a rebuildable global index at
