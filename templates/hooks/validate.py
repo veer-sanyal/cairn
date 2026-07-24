@@ -80,6 +80,11 @@ def sweeps(root, m, today):
 def run(root):
     m = manifest(root)
     out = []
+    # a top-level "concluded" (misplaced conclude.md edit) is silently ignored by every
+    # reader — the user thinks the instance is concluded; the system keeps nagging
+    if "concluded" in m:
+        out.append({"check": "misplaced_concluded", "level": "soft", "file": "manifest.json",
+                    "detail": "top-level 'concluded' is ignored — it belongs at instance.concluded"})
     caps = m.get("caps", {})
     for rel in ["CLAUDE.md", "state/HOT.md",
                 *[f"state/working/{p.name}" for p in (root / "state" / "working").glob("*") if p.is_file()]]:

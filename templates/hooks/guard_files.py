@@ -35,6 +35,8 @@ def main():
             and not (root / ".cairn" / "review-in-progress").exists():
         deny("Wholesale overwrite of a working/ file is reserved for /cairn:review "
              "(SKIP/MERGE/INSERT consolidation). Use Edit for targeted fact updates.")
+    # ponytail: Edit growth past a cap is not estimated here (old_string/new_string delta
+    # is unreliable) — validate.py catches the oversize file at the next boot instead
     if tool == "Write":
         for pat, cap in manifest(root).get("caps", {}).items():
             if (rel == pat or fnmatch.fnmatch(rel, pat)) and \

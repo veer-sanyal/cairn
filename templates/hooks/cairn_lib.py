@@ -116,7 +116,9 @@ def _write_registry(reg):
 
 def registry_upsert(root):
     """Upsert this instance into the global registry. Fail-soft: returns bool, never raises.
-    Read-modify-write is not locked; a lost race costs one stale field until the next boot."""
+    Read-modify-write is not locked; a lost race costs one stale field until the next boot.
+    ponytail: on case-insensitive filesystems the same instance reached via two casings
+    keys two entries — known ceiling; prune + boot-time self-heal cover it, no normalization."""
     try:
         m = manifest(root)
         inst = m.get("instance") if isinstance(m.get("instance"), dict) else {}
