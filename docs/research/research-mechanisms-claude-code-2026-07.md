@@ -17,7 +17,7 @@ raw verified reference feeding the level-zero mechanism-selection doctrine; grad
 |---|---|---|---|---|
 | Hooks (`settings.json`, plugin `hooks/hooks.json`) | Lifecycle events | Negligible (command hooks); prompt/agent hooks cost tokens | Yes (exit code / JSON) | Guaranteed, non-negotiable enforcement; never judgment calls |
 | Skills (`skills/<name>/SKILL.md`) | `/name` or model-invoked (unless `disable-model-invocation: true`) | On-demand only | No | Reusable procedures needing judgment; large/optional content |
-| Slash commands (built-in) | Message start | Negligible | Yes | Don't create custom ones — skills subsume legacy `commands/` |
+| Slash commands (built-in) | Message start | Negligible | Yes | Don't create custom ones — skills subsume legacy `commands/`. Recorded deviation: Cairn instances ship parameter-rendered commands/*.md — see docs/PRINCIPLES.md P23. |
 | Subagents (`agents/<name>.md`) | Model-matched to description, or user-invoked | Full isolated window each | No | Side tasks that would bloat main context; tool-restricted work |
 | Saved workflows (`.claude/workflows/*.js`) | `/name` or Workflow tool; background | Script vars hold state outside model context | Orchestration yes, agents no | >handful of agents, multi-stage verification, repeatable runs |
 | MCP servers (`.mcp.json`) | Tool list at session start; tools on demand | ~100–120 resident tokens/server¹ | Tool behavior external | External system is source of truth |

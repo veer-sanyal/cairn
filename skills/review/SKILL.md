@@ -67,16 +67,16 @@ For each friction cluster or guardrail regression, draft a proposal. HARD RULES:
   evidence, not a re-argument. Otherwise don't surface it; the reject event IS the memory.
 - **Sweep findings become proposals, not chores.** Stage 1's validator now emits doctrine
   sweeps (P22 structural triggers): `research_expired` → propose a re-research run via the
-  /cairn:research skill for that section (cite the Refresh-by date). Also list every
-  RESEARCH.md entry classed `durable` for one-line manual confirmation ("still can't
-  rot? y/n") — durable means refresh-on-contradiction, not silently trusted forever
-  (P22's exit criteria); `census_stale` → re-run
+  /cairn:research skill for that section (cite the Refresh-by date); `census_stale` → re-run
   the census (session tools + `claude mcp list`), diff against manifest.census, and where a
   recorded data_paths rung can improve ("rung 1 appeared for X; instance is on rung 4"),
   propose the upgrade; `proxy_revalidation_due` → walk each input lever's causal link to the
   north star against P18's four Goodhart mechanisms (regressional noise, extremal breakdown,
   causal validity, adversarial gaming), then stamp manifest.metrics.last_revalidated with
-  today's date whatever the outcome — the check is the event, not the change.
+  today's date whatever the outcome — the check is the event, not the change. Also list
+  every RESEARCH.md entry classed `durable` for one-line manual confirmation ("still
+  can't rot? y/n") — durable means refresh-on-contradiction, not silently trusted
+  forever (P22's exit criteria).
 - **De-automation rule (P16/P17).** If the same task class carries the same failure_mode tag
   ≥3 times since the last review, propose de-automating that task — move it below the
   autonomy line (act → ask, or ask → never) or add a checked verifier — citing the events.
@@ -159,7 +159,7 @@ A proposal skips the per-item ask and applies immediately ONLY when ALL hold:
 Anything else — including everything when `armed` is false — goes through the normal
 BUILD / PARK / REJECT ask. Mechanics (all binding):
 - Apply, record the decision change via the lifecycle above, then log:
-  `python3 .claude/hooks/cairn_event.py proposal id=<n> status=auto_adopted cites="<event refs>" blast=low door=two-way grade=VERIFIED revert_until=<today+7d>`
+  `python3 .claude/hooks/cairn_event.py proposal id=<n> status=auto_adopted cites="<event refs>" blast=low door=two-way grade=<VERIFIED|telemetry> revert_until=<today+7d>`
 - The boot banner names every in-window adoption every session (kernel rule). "revert #n"
   is a plain undo, no ceremony — log it as `status=reverted_merits` (right lane, wrong
   call) or `status=reverted_misgrade` (should never have been eligible).
