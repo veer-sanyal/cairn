@@ -98,3 +98,31 @@ def test_trailing_flag_exits_with_usage_not_traceback(instance):
         assert r.returncode != 0
         assert "Traceback" not in r.stderr
         assert "usage" in r.stderr
+
+
+# --- edge-case hardening (0.7.1): malformed engine output must not silently corrupt or traceback ---
+
+def test_sources_as_string_not_split_into_chars(instance):
+    r = write(instance, {"question": "Q", "synthesisDegraded": False,
+                         "findings": [{"claim": "c", "confidence": "high",
+                                       "sources": "https://x.example/p"}]})
+    assert r.returncode == 0, r.stderr
+    text = (instance / "docs" / "RESEARCH.md").read_text()
+    assert "https://x.example/p" in text          # whole url, not "h, t, t, p, ..."
+    assert "h, t, t, p" not in text
+
+def test_result_not_an_object_exits_clean(instance):
+    rj = instance / "result.json"
+    rj.write_text(json.dumps(["not", "an", "object"]))
+    r = run_script("doctrine_write.py", argv=[str(rj), str(instance), "--domain", "x"])
+    assert r.returncode != 0 and "Traceback" not in r.stderr
+
+def test_findings_as_string_no_traceback(instance):
+    r = write(instance, {"findings": "some text", "confirmed": [], "refuted": []})
+    # nothing usable → clean refusal, never an AttributeError traceback
+    assert r.returncode != 0 and "Traceback" not in r.stderr
+
+def test_docs_is_a_file_exits_clean(instance):
+    (instance / "docs").write_text("i am a file, not a dir")
+    r = write(instance, RESULT)
+    assert r.returncode != 0 and "Traceback" not in r.stderr

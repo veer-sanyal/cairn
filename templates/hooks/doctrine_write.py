@@ -22,6 +22,11 @@ REFRESH_DAYS = {"durable": None, "semi-durable": 180, "perishable": 60}
 def flat(s):
     return " ".join(str(s).split())
 
+def aslist(x):
+    # coerce a possibly-wrong-typed field to a list: a bare string sources value must
+    # become one source, NOT be iterated character-by-character into RESEARCH.md.
+    return x if isinstance(x, list) else ([] if x is None else [x])
+
 USAGE = ("usage: doctrine_write.py <result.json> <instance-root> --domain <name>"
          " [--perishability durable|semi-durable|perishable]")
 
@@ -42,6 +47,8 @@ def main():
     if perish not in REFRESH_DAYS:
         sys.exit(f"unknown perishability class: {perish} (want durable|semi-durable|perishable)")
     result = json.loads(Path(args[0]).read_text())
+    if not isinstance(result, dict):
+        sys.exit("result JSON is not an object — nothing to persist")
     root = Path(args[1])
     today = datetime.date.today()
     days = REFRESH_DAYS[perish]
@@ -50,8 +57,10 @@ def main():
     lines = [f"## {domain} — researched {today.isoformat()}",
              f"Perishability: {perish} · Refresh-by: {refresh} · Engine: deep-research (3-vote adversarial)",
              ""]
-    findings = result.get("findings") or []
-    confirmed = result.get("confirmed") or []
+    # keep only dict entries: a stray string in findings/confirmed/refuted must be
+    # skipped, never char-iterated into an AttributeError traceback.
+    findings = [f for f in aslist(result.get("findings")) if isinstance(f, dict)]
+    confirmed = [c for c in aslist(result.get("confirmed")) if isinstance(c, dict)]
     if not findings and not confirmed:
         sys.exit("no findings and no confirmed claims — refusing to write an empty doctrine section")
     if result.get("synthesisDegraded") or not findings:
@@ -59,24 +68,26 @@ def main():
         lines.append("_Synthesis degraded — raw verified claims below._")
         for c in confirmed:
             g = GRADE.get(c.get("confidence") or "low", "THIN")
-            lines.append(f"- **{g}** {flat(c['claim'])} (vote {flat(c.get('vote', '?'))}) — {flat(c.get('source', ''))}")
+            lines.append(f"- **{g}** {flat(c.get('claim', ''))} (vote {flat(c.get('vote', '?'))}) — {flat(c.get('source', ''))}")
     else:
         for f in findings:
             g = GRADE.get(f.get("confidence") or "low", "THIN")
-            lines.append(f"- **{g}** {flat(f['claim'])}")
+            lines.append(f"- **{g}** {flat(f.get('claim', ''))}")
             if f.get("evidence"):
                 lines.append(f"  - evidence: {flat(f['evidence'])} (vote {flat(f.get('vote', '?'))})")
-            lines.append(f"  - sources: {', '.join(flat(s) for s in f.get('sources') or [])}")
-    refuted = result.get("refuted") or []
+            lines.append(f"  - sources: {', '.join(flat(s) for s in aslist(f.get('sources')))}")
+    refuted = [r for r in aslist(result.get("refuted")) if isinstance(r, dict)]
     if refuted:
         lines += ["", "### Refuted — do not build on"]
         for r in refuted:
-            lines.append(f"- {flat(r['claim'])} (vote {flat(r.get('vote', '?'))}, {flat(r.get('source', ''))})")
+            lines.append(f"- {flat(r.get('claim', ''))} (vote {flat(r.get('vote', '?'))}, {flat(r.get('source', ''))})")
     if result.get("caveats"):
         lines += ["", "### Caveats", flat(result["caveats"])]
     lines.append("")
 
     out = root / "docs" / "RESEARCH.md"
+    if out.parent.exists() and not out.parent.is_dir():
+        sys.exit(f"{out.parent} exists but is not a directory — cannot write RESEARCH.md")
     out.parent.mkdir(parents=True, exist_ok=True)
     prev = out.read_text() if out.exists() else "# Research findings (instance doctrine)\n\n"
     out.write_text(prev + "\n".join(lines) + "\n")
