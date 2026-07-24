@@ -9,11 +9,12 @@ Metadata line per flow: Trigger · Writes · Verification · Boundary (act|ask|n
 Telemetry may cite flows: `flow=<id>` on any /log event.
 
 ## Flow: session-start — boot
-Trigger: SessionStart hook (every session) · Writes: telemetry/events.jsonl · Verification: validate.py at review · Boundary: act
+Trigger: SessionStart hook (every session) · Writes: telemetry/events.jsonl, ~/.cairn/registry.json · Verification: validate.py at review · Boundary: act
 
 ```mermaid
 flowchart TD
   A[SessionStart hook] --> B[session_start.py]
+  B --> R[registry upsert: refresh global index entry, fail-soft]
   B --> C[append session event + boot-bytes estimate]
   B --> D{gap since last session?}
   D -- yes --> E[append look-back lapse event, typed]
@@ -66,7 +67,7 @@ flowchart TD
 ```
 
 ## Flow: suspend-conclude — honorable exits
-Trigger: /suspend or /conclude · Writes: telemetry/events.jsonl, state/HOT.md · Verification: none · Boundary: ask
+Trigger: /suspend or /conclude · Writes: telemetry/events.jsonl, state/HOT.md, manifest.json (conclude sets instance.concluded) · Verification: none · Boundary: ask
 
 ```mermaid
 flowchart TD
