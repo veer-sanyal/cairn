@@ -27,7 +27,8 @@ A lightweight global index at `~/.cairn/registry.json` that instances maintain t
 }
 ```
 
-   Pointers and timestamps only — no metrics, no state, no content. `last_session` uses `cairn_lib.now_iso()` (isoformat, `+00:00` offset) — one timestamp format across the codebase, same as every event. Everything durable already lives in each instance's `manifest.json`; the registry indexes it. Consequences: losing or deleting the registry loses nothing (instances re-register on next boot); a corrupt or non-object registry is overwritten with a fresh `{"version": 1, "instances": {}}` plus one warning line — the same coerce-don't-crash behavior `manifest()` already models. No quarantine file: if the registry's loss costs nothing, preserving its corpse buys nothing. (P4 index-first: hold identifiers, load content just-in-time.)
+   Pointers only — names, paths, timestamps, and the one-line purpose (user-authored text);
+   never metrics, events, or state. `last_session` uses `cairn_lib.now_iso()` (isoformat, `+00:00` offset) — one timestamp format across the codebase, same as every event. Everything durable already lives in each instance's `manifest.json`; the registry indexes it. Consequences: losing or deleting the registry loses nothing (instances re-register on next boot); a corrupt or non-object registry is overwritten with a fresh `{"version": 1, "instances": {}}` plus one warning line — the same coerce-don't-crash behavior `manifest()` already models. No quarantine file: if the registry's loss costs nothing, preserving its corpse buys nothing. (P4 index-first: hold identifiers, load content just-in-time.)
 
 2. **Manifest gains `purpose`.** `one_line_purpose` currently lands only in the rendered `CLAUDE.md`, not in `manifest.json` — so the registry could not read it. scaffold.py adds `"purpose"` to the manifest's `instance` object. The upsert helper falls back to `""` when the field is absent (pre-SP6 manifests). `tests/conftest.py`'s MANIFEST fixture gains the field.
 
@@ -54,7 +55,7 @@ A lightweight global index at `~/.cairn/registry.json` that instances maintain t
 
 8. **Peeks are P3 condensed-return fan-out across a directory boundary.** From inside instance A, a question about instance B resolves B via the registry and spawns a read-only subagent that reads B's `state/HOT.md` + `manifest.json` (nothing else by default) and returns a condensed summary (~1–2K tokens) to A's session. B's files never enter A's main context; nothing ever writes into B (single-writer, P20). v1 enforcement is instructional + telemetry-audited — an `overreach` failure-mode tag on violation — recorded as a BET-grade decision (same precedent as the boundary contract) so the governor revisits if overreach events appear.
 
-9. **README privacy amendment.** "What Cairn executes on your machine" gains one line: one global metadata file, `~/.cairn/registry.json` — names, paths, timestamps only; `cat` it any time; delete it and instances re-register on next boot. The zero-global-hooks claim is unchanged and stays true.
+9. **README privacy amendment.** "What Cairn executes on your machine" gains one line: one global metadata file, `~/.cairn/registry.json` — names, paths, timestamps, and your one-line purpose (user-authored text); never metrics, events, or state; `cat` it any time; delete it and instances re-register on next boot. The zero-global-hooks claim is unchanged and stays true.
 
 ## Out of scope (recorded, not rejected)
 

@@ -3,8 +3,9 @@
 ## 0.8.0 — SP6: cross-instance registry
 
 Multiple instances are now discoverable: a rebuildable global index at
-`~/.cairn/registry.json` (pointers only — names, paths, timestamps; never state) that
-instances maintain themselves at scaffold and every boot.
+`~/.cairn/registry.json` (pointers only — names, paths, timestamps, and your one-line
+purpose (user-authored text); never metrics, events, or state) that instances maintain
+themselves at scaffold and every boot.
 
 - **`/cairn:list`** — portfolio view (name · purpose · status · last session), name→path
   routing ("open my job system"), and read-only cross-instance peeks via condensed-return

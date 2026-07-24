@@ -6,7 +6,8 @@ description: Portfolio view of every cairn instance on this machine — status, 
 # /cairn:list — the registry
 
 The global registry (`~/.cairn/registry.json`, or `$CAIRN_HOME/registry.json`) is a
-rebuildable cache of instance pointers — names, paths, timestamps, never state. Instances
+rebuildable cache of instance pointers — names, paths, timestamps, and your one-line
+purpose (user-authored text); never metrics, events, or state. Instances
 maintain it themselves at scaffold and every boot. Everything durable lives in each
 instance's own files; this skill only ever READS instances.
 
