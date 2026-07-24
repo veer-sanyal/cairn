@@ -91,6 +91,12 @@ For each friction cluster or guardrail regression, draft a proposal. HARD RULES:
 - Log every proposal + decision: `python3 .claude/hooks/cairn_event.py proposal id=<n> status=<proposed|build|park|reject> cites="<event refs>" blast=<low|med|high> door=<one-way|two-way>`
 - For BUILD decisions: apply, then validate empirically (validator clean + the cited friction
   should be re-checked at next review; note the check in the proposal event).
+- **The map moves with the system.** An applied BUILD that changes any flow updates the
+  matching `docs/SYSTEM-MAP.md` section and its `Last reconciled:` stamp in the same
+  application step — a design change without a map update is an incomplete BUILD. If the
+  validator flagged `system_map` staleness, reconcile the map against reality during Stage 2.
+  If the map is absent entirely (pre-0.7.0 instance), propose creating it ONCE (kernel flows
+  + observed instance flows); a REJECT is remembered like any other.
 - **Research is a valid proposal.** If a friction cluster traces to a design decision the
   manifest grades BET or THIN, propose a research run via the /cairn:research skill (frame
   the decision, GROUNDING block, launch the instance's own .claude/workflows/deep-research.js,

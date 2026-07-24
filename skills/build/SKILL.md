@@ -171,6 +171,15 @@ including a decisions[] entry for every design choice with its principle tag, gr
 `one_way` (bool) tags — the governor's ask-order and auto-adopt lane run on these tags.
 Write it to a temp file and run:
     python3 "${CLAUDE_PLUGIN_ROOT}/skills/build/scaffold.py" <config.json> <target-dir>
+
+Before the initial commit, complete `docs/SYSTEM-MAP.md`: the scaffolder rendered the seven
+kernel flows; append one section per instance-specific workflow you designed (each
+configured trigger, each working-file update path, any agentic runs) — same shape: stable
+id, metadata line (Trigger · Writes · Verification · Boundary), mermaid block. A flow whose
+Verification field is "none" but whose Writes is not — say so out loud; that gap is a
+finding waiting to happen (P16). This file is the system's source of truth: hidden-in-prompts
+behavior is exactly what it exists to prevent.
+
 Then: write `docs/RESEARCH.md` (from Stage 2.5) into the instance, `git init`, commit
 "cairn scaffold", run one boot (open a session or invoke session_start manually) to show the
 user their banner, and hand over with the three habits that matter: /log real work, trust

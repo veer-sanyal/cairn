@@ -6,16 +6,17 @@ def test_skills_have_frontmatter_and_load_bearing_content():
         "build": ["scaffold.py", "own words", "pairwise", "north star",
                   "RESEARCH.md", "REFUTE", "deep-research",
                   "census", "rung", "pass^k", "boundary", "ask_budget",
-                  "single-threaded", "Causal validity", "concealment"],
+                  "single-threaded", "Causal validity", "concealment", "SYSTEM-MAP"],
         "review": ["review-in-progress", "SKIP", "MERGE", "INSERT", "BUILD", "PARK", "REJECT",
                    "RESEARCH.md",
                    "research_expired", "census_stale", "proxy_revalidation", "failure_mode",
-                   "de-automat"],
+                   "de-automat", "SYSTEM-MAP"],
         "upgrade": ["merge.py", "managed-by-cairn", ".cairn-new"],
         "research": ["GROUNDING", "scriptPath", "deep-research.js", "doctrine_write.py",
                      "degraded", "Refuted", "decision", "perishability"],
         "audit": ["manifest.json", "/cairn:review", "north star", "ladder", "file:line",
-                  "BUILD", "PARK", "REJECT", "AUDIT.md", "blast", "dirty tree"],
+                  "BUILD", "PARK", "REJECT", "AUDIT.md", "blast", "dirty tree",
+                  "SYSTEM-MAP", "drift"],
     }.items():
         p = REPO / "skills" / name / "SKILL.md"
         text = p.read_text()

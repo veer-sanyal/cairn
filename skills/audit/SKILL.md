@@ -22,6 +22,15 @@ skills). If `AUDIT.md` exists from a prior run, read it FIRST — a finding the 
 previously REJECTed only resurfaces citing evidence newer than the rejection (same
 anti-re-litigation rule as the governor).
 
+**Map first.** If `docs/SYSTEM-MAP.md` exists, read it and drift-check it against reality:
+flows referencing removed skills/hooks, mechanisms present in the repo but missing from the
+map — drift is a finding (the map lied). If it does not exist, reconstructing it IS the
+audit's first deliverable: walk every entry point (hooks, commands, skills, scheduled jobs)
+and write one flow section per workflow (stable id, Trigger · Writes · Verification ·
+Boundary metadata line, mermaid block, `Last reconciled:` stamp) BEFORE the doctrine walk —
+then the walk cites flow ids, and the map stays with the repo as the source of truth either
+way.
+
 ## Stage 1 — Elicit the north star (P14, P12)
 
 Interview, artifact-driven: show what you found in Stage 0 and ask what this system is FOR —
