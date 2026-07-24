@@ -79,3 +79,12 @@ def test_revalidation_stamps_always_present(tmp_path):
     m = json.loads((scaffold(tmp_path) / "manifest.json").read_text())
     assert m["metrics"]["last_revalidated"] == m["instance"]["created"]
     assert m["cadence"]["proxy_revalidation_days"] == 365
+
+def test_system_map_rendered(tmp_path):
+    t = scaffold(tmp_path)
+    text = (t / "docs" / "SYSTEM-MAP.md").read_text()
+    assert "{{" not in text
+    assert "study-coach" in text
+    assert "Last reconciled:" in text
+    for fid in ["session-start", "log-event", "guard-write", "review-cycle"]:
+        assert f"## Flow: {fid}" in text, fid

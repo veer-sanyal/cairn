@@ -1,0 +1,92 @@
+<!-- managed-by-cairn: {{cairn_version}} — instance-authored after scaffold; upgrade never overwrites -->
+# System map — {{instance_name}}
+
+Last reconciled: {{today}}
+
+One flow per section. This file is the source of truth for what this system DOES — when a
+flow changes, this file changes in the same commit (the governor enforces it at review).
+Metadata line per flow: Trigger · Writes · Verification · Boundary (act|ask|never).
+Telemetry may cite flows: `flow=<id>` on any /log event.
+
+## Flow: session-start — boot
+Trigger: SessionStart hook (every session) · Writes: telemetry/events.jsonl · Verification: validate.py at review · Boundary: act
+
+```mermaid
+flowchart TD
+  A[SessionStart hook] --> B[session_start.py]
+  B --> C[append session event + boot-bytes estimate]
+  B --> D{gap since last session?}
+  D -- yes --> E[append look-back lapse event, typed]
+  B --> F[banner: where things stand]
+  F --> G[session reads CLAUDE.md router + state/HOT.md]
+```
+
+## Flow: session-end — close
+Trigger: SessionEnd hook · Writes: telemetry/events.jsonl · Verification: none (append-only log) · Boundary: act
+
+```mermaid
+flowchart TD
+  A[SessionEnd hook] --> B[session_end.py] --> C[append session-end event]
+```
+
+## Flow: log-event — telemetry
+Trigger: /log (user or model) · Writes: telemetry/events.jsonl · Verification: jsonl_integrity check at review · Boundary: act
+
+```mermaid
+flowchart TD
+  A[/log] --> B{intent / outcome / metric / friction?}
+  B --> C[cairn_event.py TYPE key=val]
+  C --> D[append to telemetry/events.jsonl]
+  B -- friction --> E[failure_mode tag: spec verify context overreach tooling upkeep]
+```
+
+## Flow: guard-write — file discipline
+Trigger: PreToolUse hook on Write/Edit (and Bash via guard_bash.py) · Writes: none (gate only) · Verification: deterministic (P9) · Boundary: act
+
+```mermaid
+flowchart TD
+  A[Write or Edit attempted] --> B[guard_files.py]
+  B --> C{cap exceeded / archive rewrite / working-file rewrite without review sentinel?}
+  C -- yes --> D[deny JSON with reason]
+  C -- no --> E[allow]
+```
+
+## Flow: review-cycle — the governor
+Trigger: /cairn:review (cadence: review_days) · Writes: state/*, manifest.json, telemetry, this file · Verification: validate.py + user gate on every proposal · Boundary: ask
+
+```mermaid
+flowchart TD
+  A[/cairn:review] --> B[touch .cairn/review-in-progress]
+  B --> C[validate.py: caps, staleness, sweeps]
+  C --> D[memory lane: probe -> verify -> repair -> consolidate]
+  D --> E[metrics report: north star watched, inputs, guardrails, lapses, failure tags]
+  E --> F[proposals: BUILD / PARK / REJECT - user is the gate]
+  F --> G[applied BUILDs update files AND this map + stamp]
+  G --> H[delete sentinel]
+```
+
+## Flow: suspend-conclude — honorable exits
+Trigger: /suspend or /conclude · Writes: telemetry/events.jsonl, state/HOT.md · Verification: none · Boundary: ask
+
+```mermaid
+flowchart TD
+  A{/suspend or /conclude} -- suspend --> B[suspend event: pause honorably, no streaks broken]
+  A -- conclude --> C[conclude event: SUCCESS state - system outgrown or done]
+```
+
+## Flow: upgrade — kernel refresh
+Trigger: /cairn:upgrade · Writes: .claude/hooks/*, .claude/commands/*, .claude/workflows/*, manifest version · Verification: merge.py never overwrites user-modified files; validate.py after · Boundary: ask
+
+```mermaid
+flowchart TD
+  A[/cairn:upgrade] --> B[copy hooks + deep-research.js wholesale]
+  B --> C[render + merge commands via merge.py]
+  C --> D{user-modified?}
+  D -- yes --> E[land as .cairn-new, user decides]
+  D -- no --> F[replace in place]
+  F --> G[bump manifest cairn_version + validate.py]
+```
+
+<!-- Instance-specific flows below: the builder appends one section per workflow it designed
+     (triggers configured, working-file update paths, agentic runs). Same shape: stable id,
+     metadata line, mermaid. -->

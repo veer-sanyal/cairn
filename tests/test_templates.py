@@ -29,3 +29,11 @@ def test_log_template_documents_failure_mode_tags():
     assert "failure_mode" in text
     for tag in ["spec", "verify", "overreach"]:
         assert tag in text
+
+def test_system_map_template_has_kernel_flows():
+    text = (REPO / "templates" / "instance" / "SYSTEM-MAP.md.tmpl").read_text()
+    assert "Last reconciled: {{today}}" in text
+    for fid in ["session-start", "session-end", "log-event", "guard-write",
+                "review-cycle", "suspend-conclude", "upgrade"]:
+        assert f"## Flow: {fid}" in text, fid
+    assert "```mermaid" in text and "Boundary:" in text and "Verification:" in text

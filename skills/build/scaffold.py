@@ -67,6 +67,7 @@ def main():
     (target / ".cairn").mkdir()
     (target / ".claude" / "hooks").mkdir(parents=True)
     (target / ".claude" / "commands").mkdir(parents=True)
+    (target / "docs").mkdir()
     # empty dirs don't survive git clone; review's sentinel touch needs .cairn/ to exist
     (target / ".cairn" / ".gitkeep").write_text("")
     (target / "state" / "working" / ".gitkeep").write_text("")
@@ -76,6 +77,8 @@ def main():
     (target / "state" / "HOT.md").write_text(render((T / "instance" / "HOT.md.tmpl").read_text(), subs))
     (target / ".claude" / "settings.json").write_text(
         render((T / "instance" / "settings.json.tmpl").read_text(), subs))
+    (target / "docs" / "SYSTEM-MAP.md").write_text(
+        render((T / "instance" / "SYSTEM-MAP.md.tmpl").read_text(), subs))
     for cmd in (T / "instance" / "commands").glob("*.md"):
         (target / ".claude" / "commands" / cmd.name).write_text(render(cmd.read_text(), subs))
     for hook in (T / "hooks").glob("*.py"):
