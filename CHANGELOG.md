@@ -1,5 +1,9 @@
 # Changelog
 
+## 0.8.5 — clearer upstream-behind guidance
+
+- When `/cairn:upgrade` finds the installed plugin is behind upstream, it now spells out the exact three-step sequence — **update the plugin → restart Claude Code → re-run `/cairn:upgrade`** — and says why it's necessarily manual (plugin code loads at session start, so the plugin can't update itself mid-run). Proceeding to the currently-installed version stays available as a deliberate, non-default choice.
+
 ## 0.8.4 — upgrade checks upstream; optional GitHub backup (private by default)
 
 - **`/cairn:upgrade` checks the source GitHub first.** Before touching an instance it fetches the latest manifest version from the plugin's `homepage` repo (`.claude-plugin/plugin.json` gained a `homepage` field) and, if the installed plugin is behind, tells you to update the plugin first — so you never upgrade an instance to a stale local copy. Degrades gracefully offline (one-line note, continues with the local comparison).

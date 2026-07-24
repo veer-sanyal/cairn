@@ -16,13 +16,20 @@ Run from inside a cairn instance. Never silent, never destructive (P10: versione
    ${CLAUDE_PLUGIN_ROOT}/.claude-plugin/plugin.json (e.g. `https://github.com/veer-sanyal/cairn`),
    derive `<owner>/<repo>`, and fetch the latest manifest version:
    `curl -fsSL https://raw.githubusercontent.com/<owner>/<repo>/main/.claude-plugin/plugin.json`
-   (parse `version`). If GitHub's version is NEWER than the installed plugin version, say so
-   BEFORE touching the instance and recommend updating the plugin first
-   (`claude plugin update cairn@<marketplace>`, or `git pull` in a local clone) so the instance
-   upgrades to the latest — then re-run `/cairn:upgrade`. The user may still proceed to the
-   installed version if they choose. If the fetch fails (offline, rate-limited, no `curl`),
-   note it in one line and continue with the local comparison — never block the upgrade on the
-   network.
+   (parse `version`). If GitHub's version is NEWER than the installed plugin version, STOP
+   before touching the instance and give the user the exact three-step sequence — the plugin
+   cannot update itself mid-run, because plugin code loads at session start, so this is
+   necessarily manual and in this order:
+     1. Update the plugin: `claude plugin update cairn@<marketplace>` (marketplace install),
+        or `git pull` in the plugin's repo (local clone / local-path marketplace).
+     2. **Restart Claude Code** — the newly-pulled code is inert until the next session start;
+        upgrading now would still migrate the instance to the OLD installed version.
+     3. Re-run `/cairn:upgrade` in this instance — it will then target the latest version.
+   Say which install kind you detect if you can (marketplace vs clone); if unsure, show both
+   commands. The user MAY still proceed to the currently-installed version instead — offer that
+   as a deliberate choice, not the default. If the fetch fails (offline, rate-limited, no
+   `curl`), note it in one line and continue with the local comparison — never block the
+   upgrade on the network.
 2. Show the user the changelog between the two versions
    (${CLAUDE_PLUGIN_ROOT}/CHANGELOG.md) BEFORE touching anything. Get a go-ahead.
 3. Hook scripts are plugin-owned and never user-edited: copy every *.py file from
