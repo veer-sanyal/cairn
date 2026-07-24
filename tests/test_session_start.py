@@ -117,6 +117,32 @@ def test_malformed_ts_does_not_blank_banner(instance):
     assert "gap" in ctx(out).lower()      # the good event's nudge still computed
 
 
+def test_boot_upserts_registry(instance, _cairn_home):
+    run_script("session_start.py", {"cwd": str(instance), "session_id": "s-reg"})
+    reg = json.loads((_cairn_home / "registry.json").read_text())
+    entry = reg["instances"][str(instance.resolve())]
+    assert entry["name"] == "test-instance"
+    assert entry["last_session"].endswith("+00:00")
+
+
+def test_concluded_instance_still_upserts_but_stays_silent(instance, _cairn_home):
+    m = json.loads((instance / "manifest.json").read_text())
+    m["instance"]["concluded"] = True
+    (instance / "manifest.json").write_text(json.dumps(m))
+    r = run_script("session_start.py", {"cwd": str(instance), "session_id": "s-conc"})
+    assert r.stdout.strip() == ""  # silent, as today
+    reg = json.loads((_cairn_home / "registry.json").read_text())
+    assert str(instance.resolve()) in reg["instances"]  # but still self-heals
+
+
+def test_unwritable_registry_never_costs_the_banner(instance, _cairn_home):
+    _cairn_home.parent.mkdir(parents=True, exist_ok=True)
+    _cairn_home.write_text("file blocking the dir")
+    r = run_script("session_start.py", {"cwd": str(instance), "session_id": "s-bad"})
+    out = json.loads(r.stdout)
+    assert "cairn boot:" in out["systemMessage"]  # banner intact
+
+
 def test_malformed_triggers_type_does_not_blank_banner(instance):
     # triggers as a dict (hand-edited manifest) must not AttributeError away the banner
     m = json.loads((instance / "manifest.json").read_text())

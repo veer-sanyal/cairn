@@ -2,7 +2,7 @@
 """SessionStart: session event + gap look-back + banner from manifest trigger rules."""
 import json, sys, os, datetime, subprocess
 from pathlib import Path
-from cairn_lib import find_root, manifest, append_event, parse_ts
+from cairn_lib import find_root, manifest, append_event, parse_ts, registry_upsert
 
 def load_events(root):
     p = Path(root) / "telemetry" / "events.jsonl"
@@ -40,6 +40,7 @@ def main():
     if not root:
         return
     m = manifest(root)
+    registry_upsert(root)   # global index refresh — fail-soft inside, never costs the banner
     if m.get("instance", {}).get("concluded"):
         return  # concluded instances stay silent: readable, never nagging
     evs = load_events(root)
