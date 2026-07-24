@@ -1,5 +1,7 @@
 # Production-Readiness Pass Implementation Plan (0.8.1)
 
+**Executed — shipped as 0.8.1**
+
 > **For agentic workers:** REQUIRED SUB-SKILL: Use superpowers:subagent-driven-development or superpowers:executing-plans. Executed as four workstreams (A–D), each one implementer + review.
 
 **Goal:** Close every finding from the six-dimension deep audit of 2026-07-24 (docs↔code consistency, runtime edge cases, skill-instruction integrity, open loops, research gaps, live e2e lifecycle) so v0.8.x is production-ready, not a prototype.
