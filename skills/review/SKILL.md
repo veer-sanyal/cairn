@@ -29,7 +29,12 @@ bypasses and out-of-band edits surface here — this is the real backstop.
    entry → Edit that entry) / INSERT (novel → add to the owner file). Wholesale rewrites of a
    working/ file are permitted ONLY in this stage (the sentinel unlocks the guard).
 5. Demote: content unreferenced by recent sessions moves working/ → archive (recency-only in
-   v1 — a BET, see manifest decisions). Refresh HOT.md and its `Last reconciled:` stamp.
+   v1 — a BET, see manifest decisions). The archive append is Bash — one JSON object per
+   demoted item:
+   `printf '%s\n' '{"ts":"<iso>","type":"demoted","from":"<working file>","content":"<summary>"}' >> state/archive.jsonl`
+   (the file is append-only; /log and cairn_event.py write telemetry, not the archive).
+   Then Edit the working/ file to remove the demoted content. Refresh HOT.md and its
+   `Last reconciled:` stamp.
 
 ## Stage 3 — Metrics report (P12)
 From telemetry/events.jsonl compute and show: north star trend (watched, not chased), each

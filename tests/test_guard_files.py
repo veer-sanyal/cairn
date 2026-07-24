@@ -12,7 +12,12 @@ def denied(r):
     return json.loads(r.stdout)["hookSpecificOutput"]["permissionDecision"] == "deny"
 
 def test_archive_write_denied(instance):
-    assert denied(hook(instance, "Write", "state/archive.jsonl"))
+    r = hook(instance, "Write", "state/archive.jsonl")
+    assert denied(r)
+    # B1: the sanctioned append path is Bash >>; /log and cairn_event.py are telemetry
+    reason = json.loads(r.stdout)["hookSpecificOutput"]["permissionDecisionReason"]
+    assert "printf" in reason and ">>" in reason
+    assert "telemetry, not the archive" in reason
 
 def test_archive_edit_denied(instance):
     assert denied(hook(instance, "Edit", "state/archive.jsonl"))

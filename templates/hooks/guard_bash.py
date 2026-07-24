@@ -33,7 +33,8 @@ def main():
                 "permissionDecision": "deny",
                 "permissionDecisionReason":
                     "This command targets a cairn-protected file (archive/working are guarded; "
-                    "archive is append-only — use >> or cairn_event.py; working/ changes go "
+                    "archive is append-only — append via >> only, e.g. "
+                    "printf '%s\\n' '<json>' >> state/archive.jsonl; working/ changes go "
                     "through Edit or /cairn:review)."}}))
             return
 

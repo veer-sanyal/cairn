@@ -17,7 +17,11 @@ def test_rm_archive_denied(instance):
     assert denied(hook(instance, "rm -f state/archive.jsonl"))
 
 def test_truncate_archive_denied(instance):
-    assert denied(hook(instance, "echo hi > state/archive.jsonl"))
+    r = hook(instance, "echo hi > state/archive.jsonl")
+    assert denied(r)
+    # B1: deny text names the sanctioned Bash >> append, not cairn_event.py
+    reason = json.loads(r.stdout)["hookSpecificOutput"]["permissionDecisionReason"]
+    assert ">>" in reason and "cairn_event" not in reason
 
 def test_append_archive_allowed(instance):
     assert not denied(hook(instance, 'echo "{}" >> state/archive.jsonl'))

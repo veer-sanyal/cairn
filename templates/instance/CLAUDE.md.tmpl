@@ -5,7 +5,7 @@
 
 ## How this instance works (cairn kernel)
 - **Boot:** the session banner shows staleness/gaps/validator state. Reconcile before working.
-- **State ownership (one fact, one owner):** current snapshot → `state/HOT.md` (keep lean; update `Last reconciled:` when you sync it). Topic files → `state/working/` (Edit for targeted updates; wholesale rewrites happen only in /cairn:review). History → `state/archive.jsonl` (append-only, via `python3 .claude/hooks/cairn_event.py` or /log).
+- **State ownership (one fact, one owner):** current snapshot → `state/HOT.md` (keep lean; update `Last reconciled:` when you sync it). Topic files → `state/working/` (Edit for targeted updates; wholesale rewrites happen only in /cairn:review). History → `state/archive.jsonl` (append-only; append via Bash `printf '%s\n' '<json>' >> state/archive.jsonl` — /log and cairn_event.py write telemetry, not the archive).
 - **Never** rely on conversation history for facts — write through to the owner file in-session (P2).
 - **Noisy reads** (archive scans, big searches): spawn a subagent; return a condensed summary (P3).
 - **Telemetry:** log intent when starting real work and outcome when done → `/log`. Lapses are typed and recoverable; `/suspend` and `/conclude` are honorable.

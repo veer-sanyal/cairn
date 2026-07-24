@@ -30,7 +30,9 @@ def main():
     except ValueError:
         return
     if rel == "state/archive.jsonl":
-        deny("archive.jsonl is append-only (cairn invariant). Append via the /log command or cairn_event.py.")
+        deny("archive.jsonl is append-only (cairn invariant). Append via Bash >> "
+             "(e.g. printf '%s\\n' '<json>' >> state/archive.jsonl); "
+             "/log and cairn_event.py write telemetry, not the archive.")
     if rel.startswith("state/working/") and tool == "Write" and p.exists() \
             and not (root / ".cairn" / "review-in-progress").exists():
         deny("Wholesale overwrite of a working/ file is reserved for /cairn:review "
