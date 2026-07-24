@@ -2,7 +2,7 @@
 """SessionEnd: close the session record. SessionEnd cannot feed context; file-write only."""
 import json, sys, os, datetime
 from pathlib import Path
-from cairn_lib import find_root, append_event, parse_ts
+from cairn_lib import find_root, append_event, parse_ts, read_text_safe
 
 def main():
     h = json.load(sys.stdin)
@@ -13,7 +13,7 @@ def main():
     dur = 0
     p = Path(root) / "telemetry" / "events.jsonl"
     if p.is_file():
-        for line in p.read_text().splitlines():
+        for line in read_text_safe(p).splitlines():
             try:
                 e = json.loads(line)
             except (json.JSONDecodeError, ValueError):

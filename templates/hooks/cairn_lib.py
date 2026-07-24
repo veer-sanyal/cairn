@@ -41,6 +41,15 @@ def parse_ts(ts):
         return None
     return t.replace(tzinfo=datetime.timezone.utc) if t.tzinfo is None else t
 
+def read_text_safe(p):
+    """File text with undecodable bytes replaced, "" on any OS error. The single home for
+    the 'a 0x80 byte must not UnicodeDecodeError away a banner/finding/event' rule — a
+    replaced-garbage JSONL line then fails json.loads legitimately and surfaces there."""
+    try:
+        return Path(p).read_text(errors="replace")
+    except OSError:
+        return ""
+
 def pos_int(x):
     """x if a positive int, else None. Excludes bool (a subclass of int in Python)."""
     return x if isinstance(x, int) and not isinstance(x, bool) and x > 0 else None
@@ -50,7 +59,7 @@ def load_events(root):
     if not p.is_file():
         return []
     out = []
-    for line in p.read_text().splitlines():
+    for line in read_text_safe(p).splitlines():
         if not line.strip():
             continue
         try:

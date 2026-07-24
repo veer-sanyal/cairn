@@ -117,6 +117,13 @@ def test_malformed_ts_does_not_blank_banner(instance):
     assert "gap" in ctx(out).lower()      # the good event's nudge still computed
 
 
+def test_binary_byte_in_events_does_not_blank_banner(instance):
+    # a 0x80 byte in events.jsonl must not UnicodeDecodeError away the banner (A1)
+    (instance / "telemetry" / "events.jsonl").write_bytes(b"\x80garbage\n")
+    out = boot(instance)
+    assert "cairn boot:" in ctx(out)
+
+
 def test_boot_upserts_registry(instance, _cairn_home):
     run_script("session_start.py", {"cwd": str(instance), "session_id": "s-reg"})
     reg = json.loads((_cairn_home / "registry.json").read_text())

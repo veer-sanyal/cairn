@@ -13,7 +13,8 @@ import json, re, sys
 from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[2] / "templates" / "hooks"))
-from cairn_lib import load_events, load_registry, manifest, parse_ts, registry_remove, registry_upsert
+from cairn_lib import (load_events, load_registry, manifest, parse_ts, read_text_safe,
+                       registry_remove, registry_upsert)
 
 
 def status_of(root):
@@ -37,7 +38,7 @@ def last_reconciled(root):
     hot = Path(root) / "state" / "HOT.md"
     if not hot.is_file():
         return ""
-    mo = re.search(r"^Last reconciled:\s*(\S+)", hot.read_text(), re.MULTILINE)
+    mo = re.search(r"^Last reconciled:\s*(\S+)", read_text_safe(hot), re.MULTILINE)
     return mo.group(1) if mo else ""
 
 

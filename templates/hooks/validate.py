@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """Cairn validator ('lint'). Report-only: always exit 0. --json for machine output."""
 import json, re, sys, os, time, fnmatch, datetime
-from cairn_lib import find_root, manifest, parse_date, pos_int
+from cairn_lib import find_root, manifest, parse_date, pos_int, read_text_safe
 
 SENTINEL_TTL_H = 24
 STAMP = re.compile(r"Last reconciled: (\d{4}-\d{2}-\d{2})")
@@ -92,7 +92,7 @@ def run(root):
             elif size > cap.get("soft", 1 << 30):
                 out.append({"check": "size_cap", "level": "soft", "file": rel, "size": size, "cap": cap["soft"]})
     hot = root / "state" / "HOT.md"
-    stamp = STAMP.search(hot.read_text()) if hot.is_file() else None
+    stamp = STAMP.search(read_text_safe(hot)) if hot.is_file() else None
     if not stamp:
         out.append({"check": "staleness", "level": "hard", "file": "state/HOT.md", "detail": "no 'Last reconciled:' stamp"})
     else:
@@ -114,7 +114,7 @@ def run(root):
     for rel in ["state/archive.jsonl", "telemetry/events.jsonl"]:
         p = root / rel
         if p.is_file():
-            for i, line in enumerate(p.read_text().splitlines(), 1):
+            for i, line in enumerate(read_text_safe(p).splitlines(), 1):
                 if line.strip():
                     try:
                         json.loads(line)

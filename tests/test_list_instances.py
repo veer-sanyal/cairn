@@ -104,6 +104,20 @@ def test_register_flag(tmp_path, _cairn_home):
     assert str(inst.resolve()) in reg["instances"]
 
 
+def test_binary_instance_does_not_kill_portfolio(tmp_path, _cairn_home):
+    # 0x80 bytes in HOT.md and events.jsonl must not UnicodeDecodeError the whole list (A1)
+    healthy = make_instance(tmp_path, "healthy")
+    binary = make_instance(tmp_path, "binary")
+    (binary / "state" / "HOT.md").write_bytes(b"\x80garbage\n")
+    (binary / "telemetry" / "events.jsonl").write_bytes(b"\x80garbage\n")
+    seed_registry(_cairn_home, healthy, binary)
+    r = run_list("--json")
+    out = json.loads(r.stdout)
+    by_name = {e["name"]: e for e in out}
+    assert by_name["healthy"]["status"] == "active"
+    assert by_name["binary"]["last_reconciled"] == ""   # garbage → no stamp, not a crash
+
+
 def test_last_reconciled_surfaced(tmp_path, _cairn_home):
     inst = make_instance(tmp_path, "stampy")
     seed_registry(_cairn_home, inst)
