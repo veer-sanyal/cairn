@@ -5,9 +5,18 @@ import pytest
 REPO = Path(__file__).resolve().parents[1]
 HOOKS = REPO / "templates" / "hooks"
 
+@pytest.fixture(autouse=True)
+def _cairn_home(tmp_path, monkeypatch):
+    """Every test (and every subprocess it spawns) gets an isolated global registry.
+    Guards the developer's real ~/.cairn/ from the whole suite (SP6 spec §4)."""
+    home = tmp_path / "cairn-home"
+    monkeypatch.setenv("CAIRN_HOME", str(home))
+    return home
+
 MANIFEST = {
     "cairn_version": "0.1.0",
-    "instance": {"name": "test-instance", "created": "2026-07-19"},
+    "instance": {"name": "test-instance", "created": "2026-07-19",
+                 "purpose": "Test things end to end"},
     "caps": {
         "CLAUDE.md": {"soft": 4096, "hard": 8192},
         "state/HOT.md": {"soft": 6144, "hard": 12288},

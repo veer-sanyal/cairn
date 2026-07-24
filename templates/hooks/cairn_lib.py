@@ -45,6 +45,26 @@ def pos_int(x):
     """x if a positive int, else None. Excludes bool (a subclass of int in Python)."""
     return x if isinstance(x, int) and not isinstance(x, bool) and x > 0 else None
 
+def load_events(root):
+    p = Path(root) / "telemetry" / "events.jsonl"
+    if not p.is_file():
+        return []
+    out = []
+    for line in p.read_text().splitlines():
+        if not line.strip():
+            continue
+        try:
+            e = json.loads(line)
+        except json.JSONDecodeError:
+            continue
+        # Keep only well-formed events — a dict with a type and a parseable ts — so every
+        # downstream parse_ts / e["type"] / days_since is safe. One malformed row must not
+        # blow up the banner: fail-soft is exit-0, but a lost banner loses all boot guidance.
+        if not isinstance(e, dict) or "type" not in e or parse_ts(e.get("ts")) is None:
+            continue
+        out.append(e)
+    return out
+
 def now_iso():
     return datetime.datetime.now(datetime.timezone.utc).isoformat(timespec="seconds")
 
@@ -55,3 +75,59 @@ def append_event(root, etype, **fields):
     with open(p, "a", encoding="utf-8") as f:
         f.write(json.dumps(ev) + "\n")
     return ev
+
+# --- global registry (SP6): a rebuildable cache of instance pointers, never state ---
+
+def registry_path():
+    # `or`, not a default: empty CAIRN_HOME would resolve to cwd-relative ./registry.json
+    return Path(os.environ.get("CAIRN_HOME") or str(Path.home() / ".cairn")) / "registry.json"
+
+def load_registry():
+    """Well-formed registry dict, or a fresh empty one. Corrupt/non-object files are
+    coerced — the registry is a cache; instances re-register on their next boot."""
+    try:
+        data = json.loads(registry_path().read_text())
+        if isinstance(data, dict) and isinstance(data.get("instances"), dict):
+            return data
+    # ValueError covers JSONDecodeError and UnicodeDecodeError — binary corruption heals too
+    except (ValueError, OSError):
+        pass
+    return {"version": 1, "instances": {}}
+
+def _write_registry(reg):
+    p = registry_path()
+    p.parent.mkdir(parents=True, exist_ok=True)
+    tmp = p.with_name(f".registry-{os.getpid()}.tmp")  # pid-unique: concurrent boots can't collide
+    tmp.write_text(json.dumps(reg, indent=2) + "\n")
+    os.replace(tmp, p)
+
+def registry_upsert(root):
+    """Upsert this instance into the global registry. Fail-soft: returns bool, never raises.
+    Read-modify-write is not locked; a lost race costs one stale field until the next boot."""
+    try:
+        m = manifest(root)
+        inst = m.get("instance") if isinstance(m.get("instance"), dict) else {}
+        reg = load_registry()
+        reg["instances"][str(Path(root).resolve())] = {
+            "name": inst.get("name", ""),
+            "purpose": inst.get("purpose", ""),
+            "created": inst.get("created", ""),
+            "last_session": now_iso(),
+            "cairn_version": m.get("cairn_version", ""),
+        }
+        _write_registry(reg)
+        return True
+    except Exception:
+        return False
+
+def registry_remove(path):
+    """Drop one entry (user-confirmed prune). Fail-soft: returns bool, never raises.
+    path must be the exact registry key — no resolution; stale keys may not resolve at all."""
+    try:
+        reg = load_registry()
+        if reg["instances"].pop(path, None) is None:
+            return False
+        _write_registry(reg)
+        return True
+    except Exception:
+        return False

@@ -33,6 +33,8 @@ import json, sys, shutil, datetime, re
 from pathlib import Path
 
 REPO = Path(__file__).resolve().parents[2]
+sys.path.insert(0, str(REPO / "templates" / "hooks"))
+import cairn_lib
 PLACEHOLDER = re.compile(r"\{\{(\w+)\}\}")
 REQUIRED = ("instance_name", "one_line_purpose", "north_star", "intents", "triggers")
 T = REPO / "templates"
@@ -122,7 +124,8 @@ def main():
                 target / ".claude" / "workflows" / "deep-research.js")
     manifest = {
         "cairn_version": CAIRN_VERSION,
-        "instance": {"name": cfg["instance_name"], "created": today},
+        "instance": {"name": cfg["instance_name"], "created": today,
+                     "purpose": cfg["one_line_purpose"]},
         "caps": CAPS,
         "cadence": {"review_days": 30, "min_sessions": 10, "min_days": 28,
                     "proxy_revalidation_days": 365},
@@ -138,6 +141,11 @@ def main():
         if opt in cfg:
             manifest[opt] = cfg[opt]
     (target / "manifest.json").write_text(json.dumps(manifest, indent=2) + "\n")
+    # the one deliberate exception to this script's hard-failure contract: the
+    # instance is fine and will self-register on first boot
+    if not cairn_lib.registry_upsert(target):
+        print("warning: could not update global registry — instance will "
+              "self-register on first boot", file=sys.stderr)
     print(f"scaffolded {cfg['instance_name']} at {target}")
 
 if __name__ == "__main__":
