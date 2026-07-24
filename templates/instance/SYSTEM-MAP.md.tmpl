@@ -34,7 +34,7 @@ Trigger: /log (user or model) · Writes: telemetry/events.jsonl · Verification:
 
 ```mermaid
 flowchart TD
-  A[/log] --> B{intent / outcome / metric / friction?}
+  A["/log"] --> B{intent / outcome / metric / friction?}
   B --> C[cairn_event.py TYPE key=val]
   C --> D[append to telemetry/events.jsonl]
   B -- friction --> E[failure_mode tag: spec verify context overreach tooling upkeep]
@@ -56,7 +56,7 @@ Trigger: /cairn:review (cadence: review_days) · Writes: state/*, manifest.json,
 
 ```mermaid
 flowchart TD
-  A[/cairn:review] --> B[touch .cairn/review-in-progress]
+  A["/cairn:review"] --> B[touch .cairn/review-in-progress]
   B --> C[validate.py: caps, staleness, sweeps]
   C --> D[memory lane: probe -> verify -> repair -> consolidate]
   D --> E[metrics report: north star watched, inputs, guardrails, lapses, failure tags]
@@ -79,7 +79,7 @@ Trigger: /cairn:upgrade · Writes: .claude/hooks/*, .claude/commands/*, .claude/
 
 ```mermaid
 flowchart TD
-  A[/cairn:upgrade] --> B[copy hooks + deep-research.js wholesale]
+  A["/cairn:upgrade"] --> B[copy hooks + deep-research.js wholesale]
   B --> C[render + merge commands via merge.py]
   C --> D{user-modified?}
   D -- yes --> E[land as .cairn-new, user decides]

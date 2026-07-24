@@ -44,3 +44,16 @@ def test_unmanaged_file_untouched(tmp_path):
     r = run_merge(tmp_path / "new.md", tmp_path / "inst.md")
     assert "user's own file" in (tmp_path / "inst.md").read_text()
     assert not (tmp_path / "inst.md.cairn-new").exists()
+
+
+def test_missing_original_lands_cairn_new_not_overwrite(tmp_path):
+    # a missing --original means we can't prove the installed file is unmodified → never
+    # overwrite; land .cairn-new (0.7.1 harden; previously FileNotFoundError aborted the file)
+    (tmp_path / "new.md").write_text(managed("0.2.0", "new content"))
+    (tmp_path / "inst.md").write_text(managed("0.1.0", "user-edited content"))
+    r = subprocess.run([sys.executable, str(MERGE), str(tmp_path / "new.md"),
+                        str(tmp_path / "inst.md"), "--original", str(tmp_path / "gone.md")],
+                       capture_output=True, text=True)
+    assert r.returncode == 0 and "Traceback" not in r.stderr
+    assert (tmp_path / "inst.md").read_text() == managed("0.1.0", "user-edited content")
+    assert (tmp_path / "inst.md.cairn-new").exists()

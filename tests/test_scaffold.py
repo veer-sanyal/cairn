@@ -88,3 +88,40 @@ def test_system_map_rendered(tmp_path):
     assert "Last reconciled:" in text
     for fid in ["session-start", "log-event", "guard-write", "review-cycle"]:
         assert f"## Flow: {fid}" in text, fid
+
+
+# --- edge-case hardening (0.7.1): fail clean & early, never leave a corrupt half-scaffold ---
+
+def _run(cfg, target, tmp_path, name="cfg"):
+    cf = tmp_path / f"{name}.json"; cf.write_text(json.dumps(cfg))
+    return subprocess.run([sys.executable, str(REPO / "skills" / "build" / "scaffold.py"),
+                           str(cf), str(target)], capture_output=True, text=True)
+
+def test_missing_triggers_fails_before_any_write(tmp_path):
+    cfg = {k: v for k, v in CFG.items() if k != "triggers"}
+    target = tmp_path / "inst"
+    r = _run(cfg, target, tmp_path)
+    assert r.returncode != 0 and "triggers" in (r.stdout + r.stderr)
+    assert not target.exists() or not any(target.iterdir())   # no corrupt residue
+
+def test_north_star_wrong_type_clean_error(tmp_path):
+    cfg = dict(CFG, north_star="just a string")
+    r = _run(cfg, tmp_path / "inst", tmp_path)
+    assert r.returncode != 0 and "Traceback" not in r.stderr
+
+def test_owner_map_missing_key_clean_error(tmp_path):
+    cfg = dict(CFG, owner_map=[{"fact": "x"}])   # no 'owner'
+    r = _run(cfg, tmp_path / "inst", tmp_path)
+    assert r.returncode != 0 and "Traceback" not in r.stderr
+
+def test_target_is_a_file_clean_refusal(tmp_path):
+    f = tmp_path / "afile"; f.write_text("i am a file")
+    r = _run(CFG, f, tmp_path)
+    assert r.returncode != 0 and "Traceback" not in r.stderr
+
+def test_user_content_with_double_braces_still_scaffolds(tmp_path):
+    cfg = dict(CFG, one_line_purpose="a tool that renders {{handlebars}} templates")
+    target = tmp_path / "inst"
+    r = _run(cfg, target, tmp_path)
+    assert r.returncode == 0, r.stderr
+    assert "{{handlebars}}" in (target / "CLAUDE.md").read_text()   # literal, not an error

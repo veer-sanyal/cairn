@@ -29,10 +29,12 @@ Build-config JSON fields (all required unless noted):
   data_paths         [{"need", "rung", "why", "date"}, ...] (optional) — passed through
   boundary           {"ask_budget_per_session", "autonomy"} (optional) — passed through
 """
-import json, sys, shutil, datetime
+import json, sys, shutil, datetime, re
 from pathlib import Path
 
 REPO = Path(__file__).resolve().parents[2]
+PLACEHOLDER = re.compile(r"\{\{(\w+)\}\}")
+REQUIRED = ("instance_name", "one_line_purpose", "north_star", "intents", "triggers")
 T = REPO / "templates"
 CAIRN_VERSION = json.loads((REPO / ".claude-plugin" / "plugin.json").read_text())["version"]
 CAPS = {"CLAUDE.md": {"soft": 4096, "hard": 8192},
@@ -40,16 +42,43 @@ CAPS = {"CLAUDE.md": {"soft": 4096, "hard": 8192},
         "state/working/*": {"soft": 16384, "hard": 32768}}
 
 def render(tmpl, subs):
+    # Check the TEMPLATE (trusted) for placeholders subs doesn't cover — a real authoring
+    # bug — instead of scanning substituted output for any "{{", which false-positives on
+    # legitimate user content (a purpose mentioning {{handlebars}} would abort the build).
+    unknown = {name for name in PLACEHOLDER.findall(tmpl) if name not in subs}
+    if unknown:
+        sys.exit(f"template has unrendered placeholder(s): {', '.join(sorted(unknown))}")
     out = tmpl
     for k, v in subs.items():
         out = out.replace("{{" + k + "}}", str(v))
-    if "{{" in out:
-        sys.exit(f"unrendered placeholder remains: {out[out.index('{{'):out.index('{{')+40]}")
     return out
+
+def validate_config(cfg):
+    # Validate EVERYTHING before the first mkdir, so a bad config fails clean with nothing
+    # written — never a corrupt half-scaffold that then blocks retry (the old failure: a
+    # missing 'triggers' crashed after writing 25 files).
+    if not isinstance(cfg, dict):
+        sys.exit("build-config must be a JSON object")
+    missing = [k for k in REQUIRED if k not in cfg]
+    if missing:
+        sys.exit(f"build-config missing required key(s): {', '.join(missing)}")
+    ns = cfg["north_star"]
+    if not (isinstance(ns, dict) and "name" in ns and "statement" in ns):
+        sys.exit("north_star must be an object with 'name' and 'statement'")
+    if not isinstance(cfg["intents"], list) or not cfg["intents"]:
+        sys.exit("intents must be a non-empty list")
+    if not isinstance(cfg["triggers"], list):
+        sys.exit("triggers must be a list")
+    for o in cfg.get("owner_map", []):
+        if not (isinstance(o, dict) and "fact" in o and "owner" in o):
+            sys.exit("each owner_map entry needs 'fact' and 'owner'")
 
 def main():
     cfg = json.loads(Path(sys.argv[1]).read_text())
     target = Path(sys.argv[2])
+    validate_config(cfg)
+    if target.is_file():
+        sys.exit(f"target {target} is a file, not a directory — refusing")
     if target.exists() and any(target.iterdir()):
         sys.exit(f"target {target} exists and is not empty — refusing (no silent overwrite)")
     today = datetime.date.today().isoformat()

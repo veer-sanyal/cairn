@@ -37,3 +37,12 @@ def test_system_map_template_has_kernel_flows():
                 "review-cycle", "suspend-conclude", "upgrade"]:
         assert f"## Flow: {fid}" in text, fid
     assert "```mermaid" in text and "Boundary:" in text and "Verification:" in text
+
+
+def test_system_map_mermaid_labels_are_quoted():
+    # `[/text]` triggers mermaid's parallelogram lexer and never closes → broken diagram
+    # on GitHub. The /log, /cairn:review, /cairn:upgrade node labels must be quoted.
+    text = (REPO / "templates" / "instance" / "SYSTEM-MAP.md.tmpl").read_text()
+    assert "A[/" not in text
+    for lbl in ('A["/log"]', 'A["/cairn:review"]', 'A["/cairn:upgrade"]'):
+        assert lbl in text, lbl

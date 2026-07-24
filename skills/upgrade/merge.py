@@ -22,7 +22,13 @@ def main():
         print(f"identical: {installed}"); return
     if not HEADER.search(inst_text):
         print(f"untouched (unmanaged): {installed}"); return          # user's own file: never touch
-    if orig is not None and inst_text == orig.read_text():
+    orig_text = None
+    if orig is not None:
+        try:
+            orig_text = orig.read_text()
+        except OSError:
+            orig_text = None   # can't prove it's unmodified → fall through to safe .cairn-new
+    if orig_text is not None and inst_text == orig_text:
         shutil.copy(new, installed)
         print(f"replaced: {installed}")
     else:
