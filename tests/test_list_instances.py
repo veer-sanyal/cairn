@@ -104,6 +104,39 @@ def test_register_flag(tmp_path, _cairn_home):
     assert str(inst.resolve()) in reg["instances"]
 
 
+def test_null_registry_entry_does_not_kill_portfolio(tmp_path, _cairn_home):
+    # a null entry value used to AttributeError entry_for → whole --json dead (A3)
+    healthy = make_instance(tmp_path, "healthy")
+    seed_registry(_cairn_home, healthy)
+    reg = json.loads((_cairn_home / "registry.json").read_text())
+    reg["instances"][str(tmp_path / "nulled")] = None
+    (_cairn_home / "registry.json").write_text(json.dumps(reg))
+    out = json.loads(run_list("--json").stdout)
+    by_name = {e["name"]: e for e in out}
+    assert by_name["healthy"]["status"] == "active"
+    assert len(out) == 2                               # nulled row present, not fatal
+
+
+def test_null_name_coerced_to_string(tmp_path, _cairn_home):
+    inst = make_instance(tmp_path, "named")
+    seed_registry(_cairn_home, inst)
+    reg = json.loads((_cairn_home / "registry.json").read_text())
+    reg["instances"][str(inst.resolve())]["name"] = None
+    reg["instances"][str(inst.resolve())]["purpose"] = 42
+    (_cairn_home / "registry.json").write_text(json.dumps(reg))
+    out = json.loads(run_list("--json").stdout)
+    assert out[0]["name"] == "" and out[0]["purpose"] == "42"
+
+
+def test_same_second_resume_counts_as_active(tmp_path, _cairn_home):
+    # a session start in the same second as the suspend is a resume, not a suspend (A7)
+    same_second_start = dict(LATER_START, ts=SUSPEND["ts"])
+    inst = make_instance(tmp_path, "tied", events=[SUSPEND, same_second_start])
+    seed_registry(_cairn_home, inst)
+    out = json.loads(run_list("--json").stdout)
+    assert out[0]["status"] == "active"
+
+
 def test_binary_instance_does_not_kill_portfolio(tmp_path, _cairn_home):
     # 0x80 bytes in HOT.md and events.jsonl must not UnicodeDecodeError the whole list (A1)
     healthy = make_instance(tmp_path, "healthy")
