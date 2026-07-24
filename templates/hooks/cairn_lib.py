@@ -80,9 +80,13 @@ def now_iso():
 def append_event(root, etype, **fields):
     ev = {"ts": now_iso(), "type": etype, **fields}
     p = Path(root) / "telemetry" / "events.jsonl"
-    p.parent.mkdir(parents=True, exist_ok=True)
-    with open(p, "a", encoding="utf-8") as f:
-        f.write(json.dumps(ev) + "\n")
+    # telemetry is best-effort: a read-only dir/full disk drops one event, never a banner
+    try:
+        p.parent.mkdir(parents=True, exist_ok=True)
+        with open(p, "a", encoding="utf-8") as f:
+            f.write(json.dumps(ev) + "\n")
+    except OSError:
+        return None
     return ev
 
 # --- global registry (SP6): a rebuildable cache of instance pointers, never state ---

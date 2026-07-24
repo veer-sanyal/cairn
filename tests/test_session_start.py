@@ -184,6 +184,22 @@ def test_guardrail_max_as_string_does_not_blank_banner(instance):
     _assert_full_banner(instance)
 
 
+def test_unwritable_telemetry_still_prints_banner(instance):
+    # telemetry is best-effort: a read-only log must not cost the banner (A4)
+    import os, pytest
+    if os.geteuid() == 0:
+        pytest.skip("perms are advisory as root")
+    log = instance / "telemetry" / "events.jsonl"
+    log.chmod(0o444)
+    (instance / "telemetry").chmod(0o555)
+    try:
+        out = boot(instance)
+        assert "cairn boot:" in ctx(out)
+    finally:
+        (instance / "telemetry").chmod(0o755)
+        log.chmod(0o644)
+
+
 def test_malformed_triggers_type_does_not_blank_banner(instance):
     # triggers as a dict (hand-edited manifest) must not AttributeError away the banner
     m = json.loads((instance / "manifest.json").read_text())
