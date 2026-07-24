@@ -13,6 +13,8 @@ def test_skills_have_frontmatter_and_load_bearing_content():
         "upgrade": ["merge.py", "managed-by-cairn", ".cairn-new"],
         "research": ["GROUNDING", "scriptPath", "deep-research.js", "doctrine_write.py",
                      "degraded", "Refuted", "decision", "perishability"],
+        "audit": ["manifest.json", "/cairn:review", "north star", "ladder", "file:line",
+                  "BUILD", "PARK", "REJECT", "AUDIT.md", "blast", "dirty tree"],
     }.items():
         p = REPO / "skills" / name / "SKILL.md"
         text = p.read_text()
