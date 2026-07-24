@@ -45,8 +45,11 @@ def main():
             # runtime work events (via cairn_event.py / /log) carry no session_id, so
             # associate by time: any real work event at/after the previous session started.
             last_start = parse_ts(last["ts"])
+            # a deliberate lapse (/suspend) IS typed activity — a suspend-only session
+            # must not draw the "cause unknown" nag (suspend.md's no-guilt promise)
             worked = any(e for e in evs
-                         if e["type"] not in ("session", "lapse")
+                         if (e["type"] not in ("session", "lapse")
+                             or (e["type"] == "lapse" and e.get("deliberate") == "true"))
                          and parse_ts(e["ts"]) >= last_start)
             if not worked:
                 append_event(root, "lapse", cause="untyped", about_session=last_id)

@@ -51,6 +51,16 @@ def test_untyped_lapses_do_not_trigger_suspend(instance):
     out = boot(instance)
     assert "/suspend" not in ctx(out)
 
+def test_deliberate_lapse_is_typed_activity_no_nag(instance):
+    # a suspend-only session must not draw the "cause unknown" nag or a spurious
+    # untyped lapse on the next boot — suspend.md promises no guilt (A8)
+    seed_event(instance, days_ago=2, type="session", phase="start", session_id="s1")
+    seed_event(instance, days_ago=2, type="lapse", cause="suspended", deliberate="true")
+    out = boot(instance)
+    assert "cause unknown" not in ctx(out)
+    assert not any(e["type"] == "lapse" and e.get("cause") == "untyped"
+                   for e in events(instance))
+
 def test_refire_same_session_id_no_false_lapse(instance):
     boot(instance)                      # first boot, session s2
     boot(instance)                      # re-fire, same session_id s2 (resume/compact)
