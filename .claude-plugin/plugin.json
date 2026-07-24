@@ -1,6 +1,6 @@
 {
   "name": "cairn",
-  "version": "0.5.0",
+  "version": "0.6.0",
   "description": "Interview-driven scaffolding for long-lived personal agentic systems: metric contract, local telemetry, typed-lapse abandonment model, human-gated self-improvement.",
   "author": { "name": "Veer", "url": "https://github.com/veer-sanyal" }
 }

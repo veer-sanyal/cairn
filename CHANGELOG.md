@@ -1,5 +1,12 @@
 # Changelog
 
+## 0.6.0 — /cairn:audit (SP4 — the level-zero umbrella is complete)
+
+- **`/cairn:audit`** — point Cairn's diagnosis stack at any existing Claude Code agentic setup: mechanism mapping with measured boot cost (P23/P1), north-star elicitation (P14), environment census + data-access-ladder upgrades (P23), and a doctrine walk (memory, verification, orchestration, Goodhart, boundary, staleness) where every finding carries a principle ref AND file:line evidence. Output: blast-ordered BUILD/PARK/REJECT proposals; dispositions are fix-in-place (git checkpoint first, never destructive), a persistent `AUDIT.md` with anti-re-litigation, or migration to a full instance via a pre-filled /cairn:build hand-off.
+- Detects Cairn instances and redirects to `/cairn:review` — the governor outranks the audit where telemetry exists.
+
+Umbrella complete: SP1 research engine (0.3.0) · SP2 doctrine P1–P24 (0.4.0) · SP3 wiring (0.5.0) · SP4 audit (0.6.0).
+
 ## 0.5.0 — builder/governor wiring (SP3 of the level-zero umbrella)
 
 - **Environment census + data-access ladder** — the builder enumerates this machine's MCP servers/surfaces and records a rung (1 API → 5 manual) with provenance per data need; the governor re-censuses at review and proposes rung upgrades when the environment improves.
