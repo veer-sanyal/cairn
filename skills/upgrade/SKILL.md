@@ -10,6 +10,19 @@ Run from inside a cairn instance. Never silent, never destructive (P10: versione
 1. Read instance manifest cairn_version and the version in
    ${CLAUDE_PLUGIN_ROOT}/.claude-plugin/plugin.json.
    Same → say so, stop. Instance newer → warn, stop.
+1a. **Always check the source GitHub for a newer release first (network; degrade gracefully).**
+   The installed plugin can itself be behind the upstream repo — upgrading an instance to a
+   stale local copy is the trap this prevents. Read `homepage` from
+   ${CLAUDE_PLUGIN_ROOT}/.claude-plugin/plugin.json (e.g. `https://github.com/veer-sanyal/cairn`),
+   derive `<owner>/<repo>`, and fetch the latest manifest version:
+   `curl -fsSL https://raw.githubusercontent.com/<owner>/<repo>/main/.claude-plugin/plugin.json`
+   (parse `version`). If GitHub's version is NEWER than the installed plugin version, say so
+   BEFORE touching the instance and recommend updating the plugin first
+   (`claude plugin update cairn@<marketplace>`, or `git pull` in a local clone) so the instance
+   upgrades to the latest — then re-run `/cairn:upgrade`. The user may still proceed to the
+   installed version if they choose. If the fetch fails (offline, rate-limited, no `curl`),
+   note it in one line and continue with the local comparison — never block the upgrade on the
+   network.
 2. Show the user the changelog between the two versions
    (${CLAUDE_PLUGIN_ROOT}/CHANGELOG.md) BEFORE touching anything. Get a go-ahead.
 3. Hook scripts are plugin-owned and never user-edited: copy every *.py file from
@@ -44,3 +57,6 @@ Run from inside a cairn instance. Never silent, never destructive (P10: versione
    The renderer skips either doc the user has made their own (managed header removed) and
    reports it; a pre-this-feature instance simply gets them created.
 7. Run `python3 .claude/hooks/validate.py`. Commit: "cairn upgrade <old> -> <new>".
+8. If the instance has no `origin` remote (`git remote` is empty), offer the same GitHub
+   backup the builder does — ask once, default private, warn before public (see build Stage 5,
+   "Offer to back the instance up on GitHub"). Skip silently if a remote already exists.

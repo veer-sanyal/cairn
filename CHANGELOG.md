@@ -1,5 +1,10 @@
 # Changelog
 
+## 0.8.4 — upgrade checks upstream; optional GitHub backup (private by default)
+
+- **`/cairn:upgrade` checks the source GitHub first.** Before touching an instance it fetches the latest manifest version from the plugin's `homepage` repo (`.claude-plugin/plugin.json` gained a `homepage` field) and, if the installed plugin is behind, tells you to update the plugin first — so you never upgrade an instance to a stale local copy. Degrades gracefully offline (one-line note, continues with the local comparison).
+- **Build and upgrade offer to back the instance up on GitHub — privacy-first.** One question, default *not* pushed; if yes, private-vs-public is asked with **private recommended** and an explicit warning that an instance's telemetry/state/working files are personal and a public repo makes them world-readable. Public requires informed consent; uses `gh repo create`, and if `gh` is absent it prints manual steps rather than authenticating for you. Existing instances get the offer on their next upgrade if they have no remote.
+
 ## 0.8.3 — instance onboarding: `/help`, README, and a manual that stay current
 
 Every scaffolded instance now ships a human-facing onboarding layer, closing the "I built it and don't know how to use it" gap. All of it loads on demand — zero boot-context regression.

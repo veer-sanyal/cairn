@@ -206,8 +206,22 @@ Then: after scaffold.py succeeds, persist Stage 2.5's research — for each save
 result.json run
 `python3 "${CLAUDE_PLUGIN_ROOT}/templates/hooks/doctrine_write.py" <result.json> <target-dir> --domain "<name>" --perishability <class>`
 against the new instance root. Never hand-write RESEARCH.md, never run doctrine_write
-before scaffold. Then `git init`, commit
-"cairn scaffold", run one boot to show the user their banner — open a session in the
+before scaffold. Then `git init`, commit "cairn scaffold".
+
+**Offer to back the instance up on GitHub (privacy-first — ask, default private).** After the
+initial commit, ask ONE question: "Want this system on GitHub? It stays a normal git repo
+either way." Default to NOT pushing if they hesitate. If yes, ask **private or public — and
+recommend private**: an instance's `telemetry/events.jsonl`, `state/HOT.md`, and working files
+hold personal usage data, so a public repo makes all of it world-readable and search-indexed.
+State that plainly before they can choose public; only an explicit, informed "public" creates a
+public repo. Create it with the GitHub CLI from the instance root:
+`gh repo create <name> --private --source=. --remote=origin --push` (swap `--public` ONLY on
+informed consent). If `gh` is missing or unauthenticated, do NOT authenticate or create an
+account for them — print the two manual steps (make a repo at github.com, then
+`git remote add origin <url> && git push -u origin main`) and let them do it. Never push a
+public repo without the warning above.
+
+Then run one boot to show the user their banner — open a session in the
 instance, or invoke the hook manually from the instance root:
 `echo '{"cwd":"'$PWD'"}' | python3 .claude/hooks/session_start.py` — and hand over with the three habits that matter: /log real work, trust
 the banner, expect the first review after the minimum telemetry window (not sooner —
