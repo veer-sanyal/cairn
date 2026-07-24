@@ -91,3 +91,43 @@ def test_system_map_no_stamp_flags(instance):
     (instance / "docs").mkdir(exist_ok=True)
     (instance / "docs" / "SYSTEM-MAP.md").write_text("# map, no stamp\n")
     assert len(checks(instance, "system_map")) == 1
+
+
+# --- edge-case hardening (0.7.1): one malformed field must never suppress other findings ---
+
+def test_malformed_census_does_not_suppress_other_sweeps(instance):
+    (instance / "docs").mkdir(exist_ok=True)
+    (instance / "docs" / "RESEARCH.md").write_text(
+        f"## a — researched 2026-01-01\nPerishability: perishable · Refresh-by: {days_ago(10)} · Engine: x\n")
+    set_manifest(instance, census=["gmail"])            # wrong type: list, not dict
+    names = {f["check"] for f in valid(instance)}
+    assert "research_expired" in names                  # NOT swallowed by the census crash
+    assert "census_stale" in names                      # malformed census surfaced, not silent
+
+def test_census_date_wrong_type_is_contained(instance):
+    set_manifest(instance, census={"date": 20260101})   # int, not an iso string
+    assert len(checks(instance, "census_stale")) == 1   # diagnostic, no crash/suppression
+
+def test_metrics_not_a_dict_does_not_crash(instance):
+    (instance / "docs").mkdir(exist_ok=True)
+    (instance / "docs" / "RESEARCH.md").write_text(
+        f"## a — researched 2026-01-01\nPerishability: x · Refresh-by: {days_ago(5)} · Engine: x\n")
+    set_manifest(instance, metrics=["oops"])            # wrong type
+    assert "research_expired" in {f["check"] for f in valid(instance)}
+
+def test_hot_md_bad_date_does_not_suppress_findings(instance):
+    (instance / "state" / "HOT.md").write_text("Last reconciled: 2026-02-30\n")  # impossible date
+    assert "staleness" in {f["check"] for f in valid(instance)}                   # surfaced, not a crash
+    (instance / "telemetry" / "events.jsonl").write_text("{bad json\n")
+    assert "jsonl_integrity" in {f["check"] for f in valid(instance)}            # hard finding survives
+
+def test_degenerate_cadence_review_days_zero(instance):
+    (instance / "docs").mkdir(exist_ok=True)
+    (instance / "docs" / "SYSTEM-MAP.md").write_text(f"Last reconciled: {days_ago(1)}\n")
+    set_manifest(instance, cadence={"review_days": 0})   # 2*0=0 would flag a 1-day-old map
+    assert checks(instance, "system_map") == []          # falls back to sane default
+
+def test_degenerate_proxy_days_non_positive(instance):
+    set_manifest(instance, metrics={"last_revalidated": days_ago(1)},
+                 cadence={"review_days": 30, "proxy_revalidation_days": -5})
+    assert checks(instance, "proxy_revalidation_due") == []   # non-positive = don't check
