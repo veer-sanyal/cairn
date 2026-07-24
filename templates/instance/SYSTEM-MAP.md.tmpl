@@ -52,7 +52,7 @@ flowchart TD
 ```
 
 ## Flow: review-cycle — the governor
-Trigger: /cairn:review (cadence: review_days) · Writes: state/*, manifest.json, telemetry, this file · Verification: validate.py + user gate on every proposal · Boundary: ask
+Trigger: /cairn:review (cadence: review_days) · Writes: state/*, manifest.json, telemetry, this file · Verification: validate.py + user gate on every proposal · Boundary: ask (auto-adopt lane, when armed, may apply low-blast two-way VERIFIED proposals unasked — 7-day revert window)
 
 ```mermaid
 flowchart TD
