@@ -1,6 +1,6 @@
 import json, datetime
 from conftest import run_script, events
-from cairn_helpers_for_tests import seed_event  # defined in step 2
+from cairn_helpers_for_tests import seed_event
 
 def boot(instance):
     r = run_script("session_start.py", cwd=instance, payload={

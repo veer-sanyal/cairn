@@ -1,5 +1,6 @@
 #!/usr/bin/env python3
-"""Heuristic Bash guard for cairn-protected paths. Known-incomplete by design (spec §1.3):
+"""Heuristic Bash guard for cairn-protected paths. Known-incomplete by design
+(docs/superpowers/specs/2026-07-19-cairn-design.md §1.3):
 review re-validation is the real backstop. Patterns cover the common destructive forms."""
 import json, re, sys, os
 from cairn_lib import find_root

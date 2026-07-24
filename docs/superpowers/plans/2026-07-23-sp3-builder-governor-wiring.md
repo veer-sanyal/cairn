@@ -1,5 +1,7 @@
 # SP3: Builder + Governor Wiring Implementation Plan
 
+**Executed — shipped as 0.5.0 (42a8407)**
+
 > **For agentic workers:** REQUIRED SUB-SKILL: Use superpowers:subagent-driven-development (recommended) or superpowers:executing-plans to implement this plan task-by-task. Steps use checkbox (`- [ ]`) syntax for tracking.
 
 **Goal:** Wire the level-zero doctrine into behavior: three deterministic sweep checks in validate.py, scaffolder passthrough for census/data_paths/boundary, builder stages for census + ladder + pass^k probes + boundary interview, governor sweeps + failure audit + de-automation rule.

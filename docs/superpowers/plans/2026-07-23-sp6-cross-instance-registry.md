@@ -1,5 +1,7 @@
 # SP6: Cross-Instance Registry Implementation Plan
 
+**Executed — shipped as 0.8.0 (98c6c7b)**
+
 > **For agentic workers:** REQUIRED SUB-SKILL: Use superpowers:subagent-driven-development (recommended) or superpowers:executing-plans to implement this plan task-by-task. Steps use checkbox (`- [ ]`) syntax for tracking.
 
 **Goal:** A self-maintaining global index (`~/.cairn/registry.json`) of all cairn instances, plus a `/cairn:list` skill for portfolio view, name→path routing, and read-only cross-instance peeks.
@@ -751,7 +753,7 @@ instances maintain themselves at scaffold and every boot.
 - [ ] **Step 4: Full suite + commit**
 
 Run: `python3 -m pytest tests/ -q`
-Expected: all tests pass (121 pre-existing + ~17 new).
+Expected: all tests pass (121 pre-existing + 21 new (20 planned + 1 review-added)).
 
 ```bash
 git add .claude-plugin/plugin.json README.md CHANGELOG.md

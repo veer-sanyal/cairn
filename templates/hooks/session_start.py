@@ -55,7 +55,8 @@ def main():
                 append_event(root, "lapse", cause="untyped", about_session=last_id)
                 lines.append("Previous session logged no intent/outcome — cause unknown "
                              "(forgot / upkeep / skipped?). Worth typing it via /log.")
-        # 3. trigger rules (welcome-back tone, never guilt — spec §3.3)
+        # 3. trigger rules (welcome-back tone, never guilt —
+        # docs/superpowers/specs/2026-07-19-cairn-design.md §3.3)
         # pos_int on every day-count field: a hand-edited "7" (string) must not
         # TypeError its way into losing the whole banner at the >= compare
         t = trig(m, "gap_nudge")
@@ -95,7 +96,8 @@ def main():
                          f"door={e.get('door', '?')}] — revert window open to "
                          f"{e.get('revert_until')}; say 'revert #{e.get('id')}' to undo.")
 
-    # guardrail regression flag (spec §2.1): standing anti-bloat check
+    # guardrail regression flag (docs/superpowers/specs/2026-07-19-cairn-design.md §2.1):
+    # standing anti-bloat check
     # type-guarded end to end: metrics as a list, a bare-string guardrail entry, or a
     # string max are all hand-edit shapes that must not AttributeError/TypeError the banner
     metrics = m.get("metrics") if isinstance(m.get("metrics"), dict) else {}

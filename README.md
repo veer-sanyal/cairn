@@ -187,7 +187,7 @@ measurably get *worse*.
 | `/cairn:research` | The research engine: frames a decision, runs a claim-scaled 3-vote adversarial deep-research workflow, persists graded findings (with refresh-by dates) into the instance's `docs/RESEARCH.md`. Used by build and review; callable directly. |
 | `/cairn:audit` | Diagnose an existing (non-Cairn) agentic setup against the doctrine: measured boot cost, missing metric contract, census + ladder upgrades, verification gaps — blast-ordered BUILD/PARK/REJECT fixes, or migrate via a pre-filled `/cairn:build`. |
 | `/cairn:review` | The governor: re-validates invariants, consolidates memory (probe → verify → repair), reports your metrics, and proposes changes as **BUILD / PARK / REJECT** — you are the gate. |
-| `/cairn:upgrade` | Migrates an instance to a new kernel version. Never overwrites a file you've modified — new versions land alongside as `.cairn-new`. |
+| `/cairn:upgrade` | Migrates an instance to a new kernel version. Hooks and the research engine are plugin-owned and always replaced wholesale; command files you've modified are never overwritten — new versions land alongside as `.cairn-new`. |
 | `/cairn:list` | Portfolio view of every instance on this machine — status (active/suspended/concluded), routing by name ("open my job system"), and read-only peeks into another instance's state. |
 | `/log` `/suspend` `/conclude` | Instance-local. Log intent/outcome/metrics; pause honorably; or conclude — **concluding is a success state**, not churn. |
 

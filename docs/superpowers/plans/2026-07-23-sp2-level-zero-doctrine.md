@@ -1,5 +1,7 @@
 # SP2: Level-Zero Doctrine Implementation Plan
 
+**Executed — shipped as 0.4.0 (eb105ad)**
+
 > **For agentic workers:** REQUIRED SUB-SKILL: Use superpowers:subagent-driven-development (recommended) or superpowers:executing-plans to implement this plan task-by-task. Steps use checkbox (`- [ ]`) syntax for tracking.
 
 **Goal:** PRINCIPLES.md v2 — synthesize R5–R9 + the mechanisms reference into P16–P24, retrofit P1–P15 with perishability/verified annotations, guarded by a new structural test.

@@ -1,6 +1,6 @@
 ---
 name: upgrade
-description: Migrate a cairn instance to the installed plugin version, never overwriting user-modified files
+description: Migrate a cairn instance to the installed plugin version — plugin-owned hooks and research engine are always replaced; user-modified command files are never overwritten (.cairn-new)
 ---
 
 # /cairn:upgrade
