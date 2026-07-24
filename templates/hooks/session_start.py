@@ -2,27 +2,7 @@
 """SessionStart: session event + gap look-back + banner from manifest trigger rules."""
 import json, sys, os, datetime, subprocess
 from pathlib import Path
-from cairn_lib import find_root, manifest, append_event, parse_ts, registry_upsert
-
-def load_events(root):
-    p = Path(root) / "telemetry" / "events.jsonl"
-    if not p.is_file():
-        return []
-    out = []
-    for line in p.read_text().splitlines():
-        if not line.strip():
-            continue
-        try:
-            e = json.loads(line)
-        except json.JSONDecodeError:
-            continue
-        # Keep only well-formed events — a dict with a type and a parseable ts — so every
-        # downstream parse_ts / e["type"] / days_since is safe. One malformed row must not
-        # blow up the banner: fail-soft is exit-0, but a lost banner loses all boot guidance.
-        if not isinstance(e, dict) or "type" not in e or parse_ts(e.get("ts")) is None:
-            continue
-        out.append(e)
-    return out
+from cairn_lib import find_root, manifest, append_event, load_events, parse_ts, registry_upsert
 
 def days_since(ts):
     return (datetime.datetime.now(datetime.timezone.utc) - parse_ts(ts)).days

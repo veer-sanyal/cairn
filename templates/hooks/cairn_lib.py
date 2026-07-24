@@ -45,6 +45,26 @@ def pos_int(x):
     """x if a positive int, else None. Excludes bool (a subclass of int in Python)."""
     return x if isinstance(x, int) and not isinstance(x, bool) and x > 0 else None
 
+def load_events(root):
+    p = Path(root) / "telemetry" / "events.jsonl"
+    if not p.is_file():
+        return []
+    out = []
+    for line in p.read_text().splitlines():
+        if not line.strip():
+            continue
+        try:
+            e = json.loads(line)
+        except json.JSONDecodeError:
+            continue
+        # Keep only well-formed events — a dict with a type and a parseable ts — so every
+        # downstream parse_ts / e["type"] / days_since is safe. One malformed row must not
+        # blow up the banner: fail-soft is exit-0, but a lost banner loses all boot guidance.
+        if not isinstance(e, dict) or "type" not in e or parse_ts(e.get("ts")) is None:
+            continue
+        out.append(e)
+    return out
+
 def now_iso():
     return datetime.datetime.now(datetime.timezone.utc).isoformat(timespec="seconds")
 

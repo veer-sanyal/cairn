@@ -13,22 +13,7 @@ import json, re, sys
 from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[2] / "templates" / "hooks"))
-from cairn_lib import load_registry, manifest, parse_ts, registry_remove, registry_upsert
-
-
-def load_events(root):
-    p = Path(root) / "telemetry" / "events.jsonl"
-    if not p.is_file():
-        return []
-    out = []
-    for line in p.read_text().splitlines():
-        try:
-            e = json.loads(line)
-        except json.JSONDecodeError:
-            continue
-        if isinstance(e, dict) and "type" in e and parse_ts(e.get("ts")) is not None:
-            out.append(e)
-    return out
+from cairn_lib import load_events, load_registry, manifest, parse_ts, registry_remove, registry_upsert
 
 
 def status_of(root):
