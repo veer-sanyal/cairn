@@ -55,6 +55,21 @@ def sweeps(root, m, today):
                 out.append({"check": "proxy_revalidation_due", "level": "soft", "age_days": age})
         except ValueError:
             pass
+    smap = root / "docs" / "SYSTEM-MAP.md"
+    if smap.is_file():
+        stamp = STAMP.search(smap.read_text())
+        limit = 2 * m.get("cadence", {}).get("review_days", 30)
+        if not stamp:
+            out.append({"check": "system_map", "level": "soft",
+                        "file": "docs/SYSTEM-MAP.md", "detail": "no 'Last reconciled:' stamp"})
+        else:
+            try:
+                age = (today - datetime.date.fromisoformat(stamp.group(1))).days
+                if age > limit:
+                    out.append({"check": "system_map", "level": "soft",
+                                "file": "docs/SYSTEM-MAP.md", "age_days": age})
+            except ValueError:
+                pass
     return out
 
 def run(root):

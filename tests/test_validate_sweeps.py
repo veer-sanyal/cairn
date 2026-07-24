@@ -75,3 +75,19 @@ def test_malformed_dates_never_break_validator(instance):
     set_manifest(instance, census={"date": "garbage"})
     out = valid(instance)          # must still return findings JSON, not crash
     assert isinstance(out, list)
+
+def test_system_map_missing_is_silent(instance):
+    assert checks(instance, "system_map") == []
+
+def test_system_map_stale_and_fresh(instance):
+    (instance / "docs").mkdir(exist_ok=True)
+    smap = instance / "docs" / "SYSTEM-MAP.md"
+    smap.write_text(f"# map\n\nLast reconciled: {days_ago(100)}\n")
+    assert len(checks(instance, "system_map")) == 1          # 100d > 2*30d review cadence
+    smap.write_text(f"# map\n\nLast reconciled: {days_ago(10)}\n")
+    assert checks(instance, "system_map") == []
+
+def test_system_map_no_stamp_flags(instance):
+    (instance / "docs").mkdir(exist_ok=True)
+    (instance / "docs" / "SYSTEM-MAP.md").write_text("# map, no stamp\n")
+    assert len(checks(instance, "system_map")) == 1
