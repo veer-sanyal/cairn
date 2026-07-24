@@ -9,6 +9,14 @@ scaffolds a **long-lived personal agentic system** — a study coach, a job-sear
 a training log, a writing practice, any domain that needs memory, honesty, and months of
 your real life. Not a coding framework: a kernel for systems about *you*.
 
+Under the hood it works like a systems engineer, not a template dispenser: a bundled
+**level-zero doctrine** (24 evidence-graded principles about how agentic systems fail,
+how objectives resist corruption, where the human boundary sits, when knowledge expires),
+a **vendored research engine** that manufactures the domain-specific knowledge each
+instance needs at build time, and an **environment census** of what your machine can
+actually do — so it can design, probe, and govern a system for problems it has never
+seen before. It can also [audit an agentic setup you already have](#what-you-get).
+
 **Before:** you ask Claude to help you study; three weeks later the folder is a graveyard
 of stale notes and you're re-explaining everything from scratch.
 
@@ -41,9 +49,10 @@ Claude Code — the plugin is a dependency, not a cage:
 ```
 your-instance/
   CLAUDE.md              # thin router: what this system is, where each fact lives
-  manifest.json          # your metric contract + every design decision, with its evidence grade
+  manifest.json          # metric contract, boundary contract, census, every decision with its grade
   docs/
     SYSTEM-MAP.md        # every flow as mermaid — the system's source of truth
+    RESEARCH.md          # graded domain findings with refresh-by dates, from the research engine
   state/
     HOT.md               # lean "where things stand" snapshot — boots every session
     working/             # topic files, loaded on demand
@@ -53,6 +62,7 @@ your-instance/
   .claude/
     hooks/               # the kernel runtime, copied INTO your instance
     commands/            # /log, /suspend, /conclude — yours even if you uninstall Cairn
+    workflows/           # your own copy of the deep-research engine (/deep-research)
 ```
 
 | Command | What it does |
@@ -64,7 +74,7 @@ your-instance/
 | `/cairn:upgrade` | Migrates an instance to a new kernel version. Never overwrites a file you've modified — new versions land alongside as `.cairn-new`. |
 | `/log` `/suspend` `/conclude` | Instance-local. Log intent/outcome/metrics; pause honorably; or conclude — **concluding is a success state**, not churn. |
 
-## The three ideas
+## The four ideas
 
 **1. A metric contract, or no instance.**
 The interview won't scaffold until you've declared — in your own words — a north star
@@ -87,6 +97,15 @@ Models reviewing their own work without external feedback measurably get *worse*
 nothing in Cairn self-applies. Reviews must cite your telemetry events (no vibes
 features), proposals arrive as BUILD / PARK / REJECT for you to decide, and the kernel
 itself only changes through versioned releases you explicitly upgrade to.
+
+**4. Knowledge is manufactured, graded, and expires on schedule.**
+The kernel knows *methods* (level-zero doctrine: failure taxonomy, Goodhart resistance,
+orchestration economics, the human-agent boundary); it never pretends to know your
+domain. Domain knowledge is produced per instance by a claim-scaled, 3-vote adversarial
+research engine, persisted with evidence grades and **perishability classes** — and
+because models can't feel their own knowledge going stale (~55%, a coin flip), expiry is
+structural: refresh-by dates, census diffs, and an unconditional annual ceiling that the
+governor sweeps deterministically.
 
 ## Enforced, not requested
 
@@ -117,20 +136,27 @@ The first question you should ask of any plugin that installs hooks:
 
 ## The evidence base
 
-Cairn's design was derived from — not decorated with — research. Four adversarially
-verified deep-research rounds (~415 subagents; every claim faced a 3-vote refutation
-panel) produced [**docs/PRINCIPLES.md**](docs/PRINCIPLES.md): 15 principles, each graded
-**VERIFIED / PREPRINT / BET / REFUTED**, each traceable to primary sources — context-rot
-studies, the MemGPT→HMO memory lineage, multi-turn instruction-drift experiments, the
-self-correction failure literature, OpenTelemetry GenAI conventions, north-star/guardrail
-metric frameworks, and the HCI abandonment research.
+Cairn's design was derived from — not decorated with — research. Nine adversarially
+verified deep-research rounds (~1,280 subagents across R1–R9; every claim faced a 3-vote
+refutation panel) plus a docs-verified platform reference produced
+[**docs/PRINCIPLES.md**](docs/PRINCIPLES.md): 24 principles, each graded
+**VERIFIED / PREPRINT / BET / REFUTED** and annotated with a perishability class and
+verified date, each traceable to primary sources — context-rot studies, the MemGPT→HMO
+memory lineage, instruction-drift experiments, the MAST failure taxonomy, METR
+time-horizon and pass^k reliability work, the Goodhart/specification-gaming literature,
+Horvitz mixed-initiative and automation-bias human factors, LLM-as-judge calibration
+studies, living-systematic-review epistemics, orchestration/cascade economics,
+north-star/guardrail metric frameworks, and the HCI abandonment research. A traceability
+audit maps every principle's commitments to their implementation sites — the four gaps it
+found were closed, not filed.
 
 Three things make this unusual:
 
-- **The refuted claims ship too.** 21+ plausible-sounding claims that *failed*
-  verification (turn-count cliffs, popular abandonment statistics, "filesystem as sole
-  source of truth") are recorded as do-not-build-on negatives — and the design routes
-  around them.
+- **The refuted claims ship too.** 80+ plausible-sounding claims that *failed*
+  verification (turn-count cliffs, heterogeneous cheap-model swarms beating strong
+  models, fixed failure-mode percentages, unscoped chain-of-thought judging gains,
+  "filesystem as sole source of truth") are recorded as do-not-build-on negatives — and
+  the design routes around them.
 - **Bets are labeled.** Where the literature was empty (drift detection, cap values),
   the spec says **[BET]** and names the telemetry that would settle it — no fake
   certainty.
@@ -142,10 +168,14 @@ Implementation plan: [docs/superpowers/plans/](docs/superpowers/plans/)
 
 ## Status
 
-`v0.1.0` — kernel, builder, governor, and upgrade path built and reviewed (53 tests;
-every component adversarially code-reviewed, 8 review-caught bugs fixed pre-release).
-Currently in the validation phase the spec prescribes: dogfood migration of a real
-system, one greenfield build, and a telemetry soak before this repo goes public-public.
+`v0.7.0` — the level-zero umbrella is complete on top of the 0.1.0 kernel (92 tests;
+every component built TDD with two-stage adversarial review): **SP1** vendored research
+engine (0.3.0) → **SP2** level-zero doctrine, P1–P24 (0.4.0) → **SP3** builder/governor
+wiring — census, data-access ladder, pass^k probes, failure-mode telemetry, four
+deterministic sweeps, boundary contract (0.5.0) → **SP4** `/cairn:audit` + traceability
+gap closure (0.6.0) → **SP5** `SYSTEM-MAP.md` source-of-truth flows (0.7.0).
+Still ahead of the public-public bar the spec prescribes: dogfood migration of a real
+system, one greenfield build, and a telemetry soak.
 
 Contributions: see [CONTRIBUTING.md](CONTRIBUTING.md). If Cairn worked (or didn't) for
 you, the [instance-stats issue template](.github/ISSUE_TEMPLATE/instance-stats.md) lets
