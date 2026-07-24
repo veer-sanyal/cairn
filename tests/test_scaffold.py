@@ -29,11 +29,21 @@ def test_scaffold_layout(tmp_path):
                 ".claude/hooks/session_start.py", ".claude/hooks/cairn_lib.py",
                 ".claude/commands/log.md", ".claude/commands/suspend.md",
                 ".claude/commands/conclude.md", ".claude/commands/help.md",
+                ".claude/commands/research.md",
                 "README.md", "docs/MANUAL.md", ".cairn",
                 ".cairn/.gitkeep", "state/working/.gitkeep",
                 ".claude/hooks/doctrine_write.py",
                 ".claude/workflows/deep-research.js"]:
         assert (t / rel).exists(), rel
+
+def test_vendored_research_frames_before_engine(tmp_path):
+    # The instance /research command must embed the framing front door and forbid raw launches
+    # (framing fires first, engine only if warranted) — the vendored directing-research gate.
+    r = (scaffold(tmp_path) / ".claude" / "commands" / "research.md").read_text()
+    assert "{{" not in r
+    assert "Frame (fires first" in r and "Right-size" in r
+    assert "Never launch" in r and "deep-research.js" in r          # no raw launches
+    assert "GROUNDING" in r and "doctrine_write.py" in r            # ground + persist
 
 def test_generated_docs_show_metric_tree(tmp_path):
     t = scaffold(tmp_path)

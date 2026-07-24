@@ -1,5 +1,14 @@
 # Changelog
 
+## 0.8.6 — vendored `/research`: directing-research framing fires before any research
+
+Every instance now ships its own `/research` command, so the **framing front door is embedded, not plugin-only** — it survives uninstall and can't be bypassed.
+
+- **`/research` (new instance command)** — the directing-research discipline fires FIRST, every time: name the decision (no decision → no research), check what's already settled in `docs/RESEARCH.md`, then **right-size** (already-known → just answer; a few angles → targeted searches; broad/contested → the full engine). The engine runs only if framing says it should; findings persist to `docs/RESEARCH.md` graded and dated. Includes the degraded-mode fallback (caps at THIN) when the Workflow tool is unavailable.
+- **Fires automatically.** The instance `CLAUDE.md` now instructs: the moment a factual/design question could set or change a parameter, route through `/research` on your own — framing first — and never launch `.claude/workflows/deep-research.js` raw. Previously the framing discipline lived only in the plugin's build/governor flows; an instance's native engine had no enforced front door.
+- Closes the seam in the "works without the plugin" promise: the engine *and* the discipline that governs it now both live in the instance.
+- Tests: +1 (framing-before-engine); layout assertion updated. 179 pass.
+
 ## 0.8.5 — clearer upstream-behind guidance
 
 - When `/cairn:upgrade` finds the installed plugin is behind upstream, it now spells out the exact three-step sequence — **update the plugin → restart Claude Code → re-run `/cairn:upgrade`** — and says why it's necessarily manual (plugin code loads at session start, so the plugin can't update itself mid-run). Proceeding to the currently-installed version stays available as a deliberate, non-default choice.
