@@ -3,7 +3,6 @@ import json, os, sys
 from pathlib import Path
 sys.path.insert(0, str(Path(__file__).resolve().parents[1] / "templates" / "hooks"))
 import cairn_lib
-from conftest import MANIFEST
 
 
 def read_reg(home):
@@ -49,6 +48,14 @@ def test_corrupt_registry_coerced_fresh_not_crash(instance, _cairn_home):
     assert cairn_lib.registry_upsert(instance) is True
     reg = read_reg(_cairn_home)
     assert list(reg["instances"]) == [str(instance.resolve())]
+
+
+def test_binary_corrupt_registry_coerced_fresh(instance, _cairn_home):
+    # invalid UTF-8: read_text raises UnicodeDecodeError, not JSONDecodeError
+    _cairn_home.mkdir(parents=True)
+    (_cairn_home / "registry.json").write_bytes(b"\xff\xfe")
+    assert cairn_lib.registry_upsert(instance) is True
+    assert str(instance.resolve()) in read_reg(_cairn_home)["instances"]
 
 
 def test_non_object_registry_coerced_fresh(instance, _cairn_home):

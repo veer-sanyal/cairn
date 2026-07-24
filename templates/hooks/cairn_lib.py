@@ -59,7 +59,8 @@ def append_event(root, etype, **fields):
 # --- global registry (SP6): a rebuildable cache of instance pointers, never state ---
 
 def registry_path():
-    return Path(os.environ.get("CAIRN_HOME", str(Path.home() / ".cairn"))) / "registry.json"
+    # `or`, not a default: empty CAIRN_HOME would resolve to cwd-relative ./registry.json
+    return Path(os.environ.get("CAIRN_HOME") or str(Path.home() / ".cairn")) / "registry.json"
 
 def load_registry():
     """Well-formed registry dict, or a fresh empty one. Corrupt/non-object files are
@@ -68,7 +69,8 @@ def load_registry():
         data = json.loads(registry_path().read_text())
         if isinstance(data, dict) and isinstance(data.get("instances"), dict):
             return data
-    except (json.JSONDecodeError, OSError):
+    # ValueError covers JSONDecodeError and UnicodeDecodeError — binary corruption heals too
+    except (ValueError, OSError):
         pass
     return {"version": 1, "instances": {}}
 
@@ -99,7 +101,8 @@ def registry_upsert(root):
         return False
 
 def registry_remove(path):
-    """Drop one entry (user-confirmed prune). Fail-soft: returns bool, never raises."""
+    """Drop one entry (user-confirmed prune). Fail-soft: returns bool, never raises.
+    path must be the exact registry key — no resolution; stale keys may not resolve at all."""
     try:
         reg = load_registry()
         if reg["instances"].pop(path, None) is None:
