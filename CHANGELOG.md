@@ -1,5 +1,17 @@
 # Changelog
 
+## 0.7.1 — edge-case hardening (two adversarial hunts over the deterministic runtime)
+
+Robustness pass on the python that runs on users' machines. Theme: **one malformed field must never suppress unrelated findings, blank a banner, or silently corrupt a file.** Every fix is TDD'd; no behavior change on well-formed input.
+
+- **validate.py** — a malformed manifest field (`census` a list, a non-ISO date, `metrics` not a dict) or a well-formed-but-impossible date (`2026-02-30`) in HOT.md no longer propagates out and blanks *all* findings (hard `size_cap`/`jsonl_integrity` included) plus the boot banner. Each sweep section is independently type-robust; a broken HOT.md stamp is surfaced as its own finding. Degenerate cadence (`review_days: 0`, negative `proxy_revalidation_days`) falls back to sane defaults instead of false-flagging.
+- **session_start.py / session_end.py** — one event with a garbage or naive `ts` no longer suppresses the entire boot banner or drops the session-end record; `load_events` keeps only well-formed rows so every downstream date parse is safe.
+- **cairn_lib.py** — a scalar `manifest.json` (`5`, `true`) at an inner directory no longer raises and masks a valid outer instance root; `manifest()` returns `{}` for non-object JSON, protecting every caller.
+- **doctrine_write.py** — a `sources` value that's a bare string is no longer char-split into a corrupt doctrine line; malformed `findings`/`confirmed`/`refuted` and a non-object result exit clean instead of tracebacking.
+- **scaffold.py** — all required config keys/types are validated **before** any file is written (a missing `triggers` previously crashed after writing 25 files, leaving a corrupt directory that then blocked retry); `render()` checks the template rather than substituted output, so a purpose containing `{{handlebars}}` no longer aborts the build; a file target is refused cleanly.
+- **merge.py** — a missing/unreadable `--original` falls through to the safe `.cairn-new` path instead of `FileNotFoundError`, never overwriting a user file.
+- **SYSTEM-MAP.md.tmpl** — `/log`, `/cairn:review`, `/cairn:upgrade` node labels are quoted; the unquoted `[/` broke mermaid's parallelogram lexer, rendering three core flows as broken diagrams on GitHub.
+
 ## 0.7.0 — SYSTEM-MAP.md: the system's flows as a source of truth
 
 - **`docs/SYSTEM-MAP.md`** in every instance — one Mermaid flowchart per workflow with a machine-checkable metadata line (Trigger · Writes · Verification · Boundary) and stable flow ids telemetry can cite (`flow=<id>`). Kernel flows ship pre-authored from a template; the builder appends instance-specific flows before the first commit.
