@@ -16,6 +16,7 @@ their parameters — and iterate on the draft with the user. React-to-artifact b
 batteries. Prefer pairwise choices ("weekly plan file, or per-topic files?") over open ratings.
 
 ## Stage 1.5 — Environment census & data paths (P23)
+The platform-capability baseline the census builds on is `capabilities/snapshot.md` (in the plugin).
 Enumerate what THIS machine can actually do, before designing around presence or absence:
 list the session's MCP servers/tools (and `claude mcp list` via Bash where available), and
 note surfaces (Chrome extension, computer use). Record in the build-config `census` field

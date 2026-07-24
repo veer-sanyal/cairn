@@ -1,6 +1,8 @@
 # Claude Code capabilities snapshot (for the Cairn builder)
 
-Snapshot date: 2026-07-19 — refresh by re-verifying against official Claude Code docs before each release.
+Snapshot date: 2026-07-24 — refresh by re-verifying against official Claude Code docs before each release.
+
+Changelog — 2026-07-24: re-verified for 0.8.x; MCP deferred tool-list cost 120 tokens per official context-window docs; no other changes.
 
 This is the builder's *bundled* knowledge of the platform surface Cairn compiles onto. It is
 deliberately thin — every token here is a distractor token at build time (P1). It documents

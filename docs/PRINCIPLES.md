@@ -106,7 +106,7 @@ Caveat: one published critique argues the 39% magnitude is partly experimental-d
 Perishability: perishable · Verified: 2026-07 · Round: R2
 
 **[VERIFIED]** Claude Code PreToolUse hooks hard-block tool calls before execution (exit code 2 + stderr fed back, or JSON permissionDecision: deny), fire before permission-mode checks in every mode, and cannot be bypassed even by bypassPermissions / --dangerously-skip-permissions. Hooks can tighten policy but never loosen it.
-Source: Anthropic hooks docs (fetched live Jul 2026). Caveat: open GitHub issues (#37210, #24327) show hook deny enforcement has had real bugs → belt-and-suspenders post-hoc validation for must-never-violate invariants.
+Source: Anthropic hooks docs (fetched live Jul 2026). Caveat: open GitHub issues (#37210, #24327) show hook deny enforcement has had real bugs → belt-and-suspenders post-hoc validation for must-never-violate invariants, and as of the 2026-07-24 re-verification the official docs no longer state the bypassPermissions interaction explicitly (claim retained from the 2026-07-23 live-docs verification; re-verify experimentally).
 
 **Design implication:** the kernel ships hooks for invariants (file-size caps, telemetry write-through, staleness stamps) and treats prose discipline as UX, not enforcement.
 
@@ -377,7 +377,7 @@ Perishability: durable · Verified: 2026-07 · Round: R6
 ## 23. Mechanism selection: context cost first, then the decision tree
 Perishability: perishable · Verified: 2026-07 · Round: docs-verified (claude-code-guide)
 
-**[VERIFIED — first-party docs]** The first question for any new capability is context cost: resident (CLAUDE.md is fully loaded every session; each MCP server holds ~100 tokens of tool list) vs on-demand (skills, subagents, saved workflows load only when used). Resident tokens are P1's distractors — default to on-demand.
+**[VERIFIED — first-party docs]** The first question for any new capability is context cost: resident (CLAUDE.md is fully loaded every session; each MCP server holds ~100–120 tokens of tool list) vs on-demand (skills, subagents, saved workflows load only when used). Resident tokens are P1's distractors — default to on-demand.
 
 **[VERIFIED — first-party docs]** Given the cost class, the selection tree:
 - Fires automatically on an event, no judgment call → hook (deterministic; P9's enforcement primitive).
@@ -390,7 +390,7 @@ Perishability: perishable · Verified: 2026-07 · Round: docs-verified (claude-c
 
 **[VERIFIED — first-party docs]** Census enumerability is asymmetric: MCP servers are enumerable (`claude mcp list` / `system-init` array), but tool schemas are not programmatically queryable and no registry-search API exists — so the builder census infers capability from server identity, and rung 2 of the data-access ladder ("a connector exists but isn't installed") is a manual-assisted web-lookup + user-approval flow, never automatic.
 
-Detail file: `docs/research/research-mechanisms-claude-code-2026-07.md` (full selection matrix, hook-event surface, plugin packaging limits) — refresh-by next release or any Claude Code minor-version jump; this principle expires with it.
+Detail file: `docs/research/research-mechanisms-claude-code-2026-07.md` (full selection matrix, hook-event surface, plugin packaging limits; docs-verified 2026-07-23, re-verified 2026-07-24) — refresh-by next release or any Claude Code minor-version jump; this principle expires with it.
 
 Recorded deviation: the tree says skills subsume legacy slash commands, yet scaffolded instances ship `commands/*.md`. Deliberate — instance commands are parameter-rendered per instance at scaffold time, and per-instance rendering is what the command path supports; migrating them to skills is a kernel-release matter, not an instance fix.
 

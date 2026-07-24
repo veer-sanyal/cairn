@@ -1,7 +1,13 @@
 # Mechanism-selection & environment-census facts — Claude Code, verified 2026-07-23
 
 Verified against official docs (code.claude.com/docs) by a claude-code-guide docs agent.
-Refresh-by: next Cairn release, or on any Claude Code minor-version jump. This file is the
+
+> **Re-verified against official docs 2026-07-24** (release 0.8.x refresh trigger): core
+> selection-tree claims all confirmed. Two adjustments below — the MCP resident-token figure
+> (§1) and the hooks-vs-bypassPermissions claim (§4); plus one omission-claim downgraded (§4).
+
+Refresh-by: next Cairn release, or on any Claude Code minor-version jump (last verified
+2026-07-24). This file is the
 raw verified reference feeding the level-zero mechanism-selection doctrine; grade all items
 [VERIFIED — first-party docs] unless marked "not documented".
 
@@ -14,9 +20,13 @@ raw verified reference feeding the level-zero mechanism-selection doctrine; grad
 | Slash commands (built-in) | Message start | Negligible | Yes | Don't create custom ones — skills subsume legacy `commands/` |
 | Subagents (`agents/<name>.md`) | Model-matched to description, or user-invoked | Full isolated window each | No | Side tasks that would bloat main context; tool-restricted work |
 | Saved workflows (`.claude/workflows/*.js`) | `/name` or Workflow tool; background | Script vars hold state outside model context | Orchestration yes, agents no | >handful of agents, multi-stage verification, repeatable runs |
-| MCP servers (`.mcp.json`) | Tool list at session start; tools on demand | ~100 resident tokens/server | Tool behavior external | External system is source of truth |
+| MCP servers (`.mcp.json`) | Tool list at session start; tools on demand | ~100–120 resident tokens/server¹ | Tool behavior external | External system is source of truth |
 | CLAUDE.md | Every session start | Fully resident (500–2000 tok) | No | Facts every session needs; never regenerable content |
 | Plugins | On install; components as above | Same as components | Per component | Distribution/versioning of the above |
+
+¹ Re-verification 2026-07-24: official context-window docs show **120 tokens** for the
+deferred MCP tool-name list; a per-server resident cost is not explicitly documented. Treat
+~100–120 as the planning figure.
 
 Decision tree: fires automatically → hook; reusable instruction → skill; context-bloating side task → subagent; many agents/stages → workflow; external tools → MCP; every-session facts → CLAUDE.md; distribution → plugin.
 
@@ -48,7 +58,15 @@ CLI shell-hook contract unchanged: JSON on stdin (`session_id`, `cwd`, `hook_eve
 
 Events the kernel already uses remain stable: SessionStart, SessionEnd, PreToolUse. Also available (CLI + SDK): PostToolUse, PostToolUseFailure, UserPromptSubmit, Stop, PermissionRequest, PermissionDenied, SubagentStart, SubagentStop, PreCompact, Setup.
 TypeScript-SDK-only (NOT usable by Cairn's python command hooks): InstructionsLoaded, WorktreeCreate/Remove, CwdChanged, FileChanged, ConfigChange, TaskCreated/Completed, Notification, Elicitation, ElicitationResult, MessageDisplay, PostToolBatch, StopFailure, UserPromptExpansion, PostCompact.
-Python SDK omits SessionStart/SessionEnd/StopFailure (irrelevant to Cairn's CLI command hooks, which do get SessionStart/End).
+Python SDK omits SessionStart/SessionEnd/StopFailure — **NOT-FOUND-IN-DOCS as of 2026-07-24**:
+current docs show no such SDK distinction. Non-structural for Cairn either way (its hooks are
+CLI command hooks, which do get SessionStart/End).
+
+Hooks-vs-permissions caveat (added 2026-07-24): the claim that hooks fire before permission
+checks and cannot be bypassed by `bypassPermissions` is no longer stated explicitly in the
+official docs. Retained from the 2026-07-23 live-docs verification, downgraded to
+**re-verify-experimentally**. Cairn's belt-and-suspenders post-hoc validation (P9's existing
+caveat) already assumes hook enforcement can have gaps.
 
 ## 5. Plugin packaging limits
 
