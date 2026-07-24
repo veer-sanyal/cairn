@@ -31,7 +31,7 @@ def sweeps(root, m, today):
     cadence = _dict(m.get("cadence"))
     research = root / "docs" / "RESEARCH.md"
     if research.is_file():
-        text = research.read_text()
+        text = read_text_safe(research)
         for d in REFRESH.findall(text):
             dd = parse_date(d)
             if dd is not None and dd < today:
@@ -64,7 +64,7 @@ def sweeps(root, m, today):
                         "age_days": (today - dd).days})
     smap = root / "docs" / "SYSTEM-MAP.md"
     if smap.is_file():
-        stamp = STAMP.search(smap.read_text())
+        stamp = STAMP.search(read_text_safe(smap))
         review_days = pos_int(cadence.get("review_days"))
         limit = 2 * review_days if review_days else 60
         if not stamp:
