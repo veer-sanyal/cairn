@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """Deterministic reader for /cairn:list. Registry + live per-instance reads → JSON.
 Usage: list_instances.py --json | --prune <path> | --register <root>
-Plugin-side. Status derivation (SP6 spec §6), precedence order:
+Plugin-side. Status derivation (docs/superpowers/specs/2026-07-23-sp6-cross-instance-registry-design.md §6), precedence order:
   concluded  <- manifest.instance.concluded (authoritative; /conclude sets it)
   suspended  <- last lapse event with deliberate=="true" and cause=="suspended",
                 with no `session phase=start` after it (cairn_event stores values as

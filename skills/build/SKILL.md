@@ -116,8 +116,9 @@ From their statement derive together:
 - north_star: leading, value-representing, NOT directly targetable (if daily work can move it
   directly, it's an input, not the north star)
 - inputs: 1-3 levers daily use actually moves
-- guardrails: keep the standing ones (boot_context_bytes, upkeep lapse rate) + at most one
-  domain guardrail; each must be measurable-within-period, sensitive, timely
+- guardrails: keep the standing ones — boot_context_bytes + upkeep burden (measured via
+  lapse cause=upkeep events) — + at most one domain guardrail; each must be
+  measurable-within-period, sensitive, timely
 
 Then stress the draft contract against P18's mechanisms before it hardens:
 - **Causal validity** per input lever: would moving this lever move the north star, or do
@@ -161,7 +162,7 @@ size (never ask a question whose right answer depends on an unanswered upstream 
 contract-level choices before trigger minutiae, and among equals, irreversible (one-way)
 choices first. Answering a small question before the big one that governs it wastes the
 answer. Map each accepted rule onto the CLOSED trigger-template menu
-(spec §2.1) — exactly these five: gap_nudge, review_due, staleness_escalation,
+(docs/superpowers/specs/2026-07-19-cairn-design.md §2.1) — exactly these five: gap_nudge, review_due, staleness_escalation,
 friction_accumulator, suspend_suggestion.
 (Guardrail regressions are a manifest.metrics.guardrails behavior surfaced at review, and
 intents are a manifest field — neither is a trigger.) Parametrize; never invent new
@@ -190,8 +191,9 @@ result.json run
 `python3 "${CLAUDE_PLUGIN_ROOT}/templates/hooks/doctrine_write.py" <result.json> <target-dir> --domain "<name>" --perishability <class>`
 against the new instance root. Never hand-write RESEARCH.md, never run doctrine_write
 before scaffold. Then `git init`, commit
-"cairn scaffold", run one boot (open a session or invoke session_start manually) to show the
-user their banner, and hand over with the three habits that matter: /log real work, trust
+"cairn scaffold", run one boot to show the user their banner — open a session in the
+instance, or invoke the hook manually from the instance root:
+`echo '{"cwd":"'$PWD'"}' | python3 .claude/hooks/session_start.py` — and hand over with the three habits that matter: /log real work, trust
 the banner, expect the first review after the minimum telemetry window (not sooner —
 adoption verdicts wait ~2 months, P13).
 

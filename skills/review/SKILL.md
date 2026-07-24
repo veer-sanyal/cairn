@@ -39,12 +39,15 @@ bypasses and out-of-band edits surface here — this is the real backstop.
 ## Stage 3 — Metrics report (P12)
 From telemetry/events.jsonl compute and show: north star trend (watched, not chased), each
 input metric, each guardrail (flag regressions), lapse events BY TYPE (forgot/upkeep/skipped/
-suspended — upkeep lapses are kernel bugs: propose removing the demanding step, not nagging
+suspended, plus `untyped` — the cause session_start records when a gap passes unexplained —
+upkeep lapses are kernel bugs: propose removing the demanding step, not nagging
 the user), friction outcomes with notes.
 Also report: failure_mode tag frequencies from events since the last review (spec / verify /
-context / overreach / tooling / upkeep — P16), and asks-per-session against
-manifest.boundary.ask_budget_per_session (P19). An overreach tag is a boundary-contract
-violation — always surfaced, never averaged away.
+context / overreach / tooling / upkeep — P16), and a boundary audit (P19): no per-ask event
+exists, so audit `failure_mode=overreach` tags, then check conversationally — ask the user
+whether the system's asking felt like too much this period, with
+manifest.boundary.ask_budget_per_session as the stated intent. An overreach tag is a
+boundary-contract violation — always surfaced, never averaged away.
 
 ## Stage 4 — System lane: proposals with the user as gate (P10)
 For each friction cluster or guardrail regression, draft a proposal. HARD RULES:
@@ -74,7 +77,8 @@ For each friction cluster or guardrail regression, draft a proposal. HARD RULES:
   flipped) and `[door: one-way|two-way]` (recoverable within one review period?). Present
   dependencies first, then largest blast; among equals, one-way doors first. Never ask a
   question whose right answer depends on an unanswered upstream one.
-- No proposal may regress the standing anti-bloat guardrails (boot_context_bytes, ceremony).
+- No proposal may regress the standing guardrails: boot_context_bytes + upkeep burden
+  (measured via lapse cause=upkeep events).
 - **Advise, don't menu.** Every proposal carries 2-3 mutually exclusive options and a
   recommended default with its grade — pre-chewed to yes/adjust, never a hanging menu.
   The user's attention is the scarce resource.

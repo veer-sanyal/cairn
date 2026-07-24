@@ -7,7 +7,7 @@ export const meta = {
 
 // deep-research: Scope → pipeline(Search → URL-dedup → Fetch+Extract) → 3-vote Verify → Synthesize
 // Ported from bughunter architecture. WebSearch/WebFetch instead of git/grep.
-// Question is passed via Workflow({name: 'deep-research', args: '<question>'}).
+// Question is passed via Workflow({scriptPath: '.claude/workflows/deep-research.js', args: '<question>'}).
 //
 // MODEL TIERING (always on): cheap models for high-fan-out, mechanical stages
 // (search, fetch/extract, verify votes); reserve the smart model for the two
@@ -107,7 +107,7 @@ const REPORT_SCHEMA = {
 phase("Scope")
 const QUESTION = (typeof args === "string" && args.trim()) || ""
 if (!QUESTION) {
-  return { error: "No research question provided. Pass it as args: Workflow({name: 'deep-research', args: '<question>'})." }
+  return { error: "No research question provided. Pass it as args: Workflow({scriptPath: '.claude/workflows/deep-research.js', args: '<question>'})." }
 }
 const scope = await agent(
   "Decompose this research question into complementary search angles — and SIZE the run to the question.\n\n" +

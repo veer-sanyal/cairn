@@ -1,6 +1,7 @@
 #!/usr/bin/env python3
 """Persist a deep-research result JSON as graded findings in docs/RESEARCH.md.
-Engine contract (umbrella spec §4): graded findings + refuted list + caveats,
+Engine contract (docs/superpowers/specs/2026-07-23-level-zero-umbrella-design.md §4):
+graded findings + refuted list + caveats,
 dated, with a perishability class driving the refresh-by date.
 Kernel utility, not an event hook (like validate.py): invoked explicitly, so
 hard failures are correct here — no exit-0 swallowing.
