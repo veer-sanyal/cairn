@@ -115,9 +115,14 @@ Findings from Stage 2.5 inform the metric DEFAULTS you propose (e.g., evidence-b
 values) — but the user still authors the goals (Stage 2 is untouched by research).
 From their statement derive together:
 - north_star: leading, value-representing, NOT directly targetable (if daily work can move it
-  directly, it's an input, not the north star). The leading-indicator requirement is
-  VERIFIED (P12) but the construction method is BET-grade (P18): propose candidate
-  indicators and verify them causally — never present the derivation as settled.
+  directly, it's an input, not the north star). Both the leading-indicator requirement AND the
+  construction method are VERIFIED (P12/P18, R10). Construct it as a **predictive-power-weighted
+  composite of several short-term signals**, never a single bet — and validate by **falsification,
+  not confirmation**: for each candidate proxy, try to *reject* its causal link to the north star
+  (a surrogate that survives a genuine attempt to reject it is the best you can claim; "failing to
+  reject" is never "validated"). De-weight proxies that merely correlate with each other. Do not
+  treat any proxy as confirmed from a small sample — confirmation accrues as the instance's own
+  telemetry accumulates (P24 shrinkage), not at build time.
 - inputs: 1-3 levers daily use actually moves
 - guardrails: keep the standing ones — boot_context_bytes + upkeep burden (measured via
   lapse cause=upkeep events) — + at most one domain guardrail; each must be
@@ -153,7 +158,11 @@ Set, with the user, blast-ordered largest first (build-config `boundary` field):
   never autonomous). Autonomy inversely proportional to irreversibility.
 - **ask_budget_per_session** — default 1. Asks are a rationed budget: ask FREQUENCY, not
   per-ask depth, drives abandonment (P19). Every prompt the instance adds must name which
-  budget slot it spends.
+  budget slot it spends. R10: the per-additional-ask harm gradient is VERIFIED in direction
+  (clinical alert acceptance −~30% per extra alert/encounter, IRR≈0.70) but no conversational
+  dose curve exists — so 1 is a defensible conservative floor, graded BET, and the instance's
+  own friction/overreach telemetry tunes it once it clears the P24 n₀=5 handover. Do NOT assume
+  an override "lock-in" after the first dismissal — that mechanism was refuted (R10).
 - **Over-constraint check (P19):** if the drafted autonomy table has NOTHING in `act`,
   push back once — an all-ask/never table collapses the agent into rule-following
   automation with nothing real to oversee, and spends the ask budget on noise. The user

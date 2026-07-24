@@ -71,7 +71,7 @@ The frontier is a *method*, not a list — the fastest-decaying knowledge Cairn 
 - Severity scales with optimization power — agentic systems are the worst case [VERIFIED verbatim].
 - Proxy rewards are theoretically hackable except in degenerate cases (Skalse, NeurIPS 2022) [VERIFIED — medium]. **Consequence: no metric contract is permanently safe; revalidation of every proxy-goal link is a scheduled lifecycle event, not a one-time hardening.**
 - LM agents specification-game zero-shot [VERIFIED]. The north star stays non-actionable by design (watched-not-chased survives as doctrine, now with a mechanism).
-Caveat carried honestly: leading/lagging-indicator sub-area verified weakly (two canonical-sounding claims refuted 0-3) — grade those sections [BET]. Durable.
+Caveat updated (R10): the leading/lagging-indicator sub-area, previously [BET], is now VERIFIED — the surrogate-index construction method (predictive-power-weighted composite, falsification-not-confirmation validation, three failure guardrails) settled P18's open method question. Durable.
 
 ### 3.5 Economics of delegation & human-agent boundary (R8)
 - Humans are structurally bad at sustained oversight of reliable automation: 33% failure detection under constant reliability vs 82% variable; expertise does not fix it [VERIFIED — canonical human-factors].
@@ -116,8 +116,8 @@ When to use hook / skill / subagent / workflow / MCP / CLAUDE.md / plugin — de
 ### 3.11 Trust & adoption (R8 + existing R3)
 Subsumes friction economics (§3.5 findings), the override-channel result, and R3's lapse typology. Already partially implemented (typed lapses, no streaks); SP2 merges the general evidence in. Durable.
 
-### 3.12 Cold start (cross-cutting) [BET]
-A fresh instance has zero telemetry. Doctrine: defensible defaults come from level-zero (ask-budgets, blast-radius table, single-writer) + the build-time research round; control shifts to instance data on a declared schedule (first governor review). Graded [BET] — no direct research round; revisit if it earns one.
+### 3.12 Cold start (cross-cutting) [VERIFIED mechanism, R10]
+A fresh instance has zero telemetry. Doctrine: defensible defaults come from level-zero (ask-budgets, blast-radius table, single-writer) + the build-time research round. R10 settled *how control shifts off them*: not on a fixed schedule (the old "first governor review" checkpoint is refuted) but continuously, by earned precision — empirical-Bayes/James-Stein shrinkage, discretized to a per-default n₀=5 rule (own-data outranks a doctrine default once it has ≥5 relevant events). Mechanism VERIFIED; n₀ per-metric calibration is the residual open knob.
 
 ---
 
@@ -190,9 +190,9 @@ Each sub-project: own spec → plan → implementation → review, per the exist
 
 ## 9. Known gaps & open questions (honest ledger)
 
-- Leading/lagging-indicator doctrine is weak ([BET]) — two canonical claims refuted; watch for better evidence.
+- ~~Leading/lagging-indicator doctrine is weak ([BET]) — two canonical claims refuted; watch for better evidence.~~ **Resolved R10:** surrogate-index construction (P18) flipped to VERIFIED — derive the leading indicator as a predictive-power-weighted composite, validate by falsification, three failure guardrails encoded.
 - No MCP registry-search API — ladder rung 2 stays manual-assisted until one ships.
-- Cold start (§3.12) has no dedicated research round.
+- ~~Cold start (§3.12) has no dedicated research round.~~ **Resolved R10:** the doctrine→telemetry handover (P24) is VERIFIED as continuous empirical-Bayes shrinkage; the old fixed "first review" checkpoint is refuted and replaced by a per-default n₀=5 earned-precision rule.
 - Cheap-swarm enthusiasm is *capped* by R9: heterogeneous swarms lost to best-of-n from a strong model; the tiering selector must encode this, not the folk version.
 - Judge calibration against human labels requires *the user* to label a small set for any instance that builds its own judge — this is an ask-budget expense SP3 must price in.
 - Workflow availability requires Pro+/API and can be disabled (`disableWorkflows`) — SP1 needs a degraded-mode path (subagent-based research fallback).
@@ -200,12 +200,14 @@ Each sub-project: own spec → plan → implementation → review, per the exist
 - Probe-tagging idea (P5): when a Stage-2 memory probe fails and the missing fact turns out to have been demoted working→archive, tag the failure `demotion_miss` — those events are the direct evidence stream for P5's PREPRINT-grade decay-formula bet (recency-only demotion in v1). Not yet implemented; costs one tag, buys the bet its settling telemetry.
 - Open-bets cross-reference: the 2026-07-19 design spec's "'Unfilled niche' beyond Claude Code ecosystem" bet row is unchanged by the 2026-07-23 README broadening — that rewrite is domain-generality *framing* (Cairn builds systems for any domain), not a competitive-uniqueness claim; the niche question still awaits verification before public positioning.
 
-### Ranked research candidates (2026-07-24 audit; locked decision 8 — recorded here, not executed in the 0.8.1 pass)
+### Ranked research candidates — EXECUTED in R10 (2026-07-24; docs/research/research-round10-gaps-ledger-closeout.json; decision spec 2026-07-24-r10-gaps-ledger-closeout-design.md)
 
-| # | Candidate | Principle | Decision it would settle |
+| # | Candidate | Principle | Outcome |
 |---|---|---|---|
-| 1 | Drift / re-elicitation triggers | P14 | Which behavioral signals (typed-lapse patterns, input-metric decline windows) should fire the governor's goal-drift check — current 2-review-period heuristic is a BET |
-| 2 | Surrogate-index construction (Athey et al. econometrics; clinical surrogate-endpoint criteria) | P18 | How the builder derives a valid leading indicator from a lagging outcome — the construction method behind every north-star proposal |
-| 3 | Cold-start handover | P24 | Whether first-completed-review is the right doctrine→telemetry handover point, and what evidence volume "earns authority" |
-| 4 | Ask-budget dose-response | P19 | The default ask_budget_per_session value (currently 1) — Kovacs gives frequency-harms direction, not a dose curve |
-| 5 | Multi-instance patterns | SP6 | What cross-instance signals (shared lapse patterns, portfolio-level metrics) the registry should surface beyond names/paths/purpose |
+| 1 | Drift / re-elicitation triggers | P14 | **BET, better-specified.** Behavioral/variable-window direction supported (ADWIN), but the one drift paper is simulation-only and a retraining confounder means "fire more triggers" buys refresh, not detection accuracy. Triggers kept; §8/§14 gain the confounder caveat; specific signals/windows stay unvalidated for live agents. |
+| 2 | Surrogate-index construction (Athey et al.; clinical surrogate-endpoint criteria) | P18 | **BET → VERIFIED (method).** Surrogate = predictive-power-weighted composite of short-term signals; validate by falsification (Prentice can only reject, never bless); three failure guardrails (asymmetry, surrogate paradox, sample-size floor). Cairn applies the *discipline* (falsify-not-confirm, composite, no small-sample validation), not the literal two-sample estimator. |
+| 3 | Cold-start handover | P24 | **BET → VERIFIED (mechanism); fixed checkpoint REFUTED.** Handover is continuous empirical-Bayes/James-Stein shrinkage (own-data weight n/(n₀+n)), not the "first completed review" flip. Discretized to a per-default n₀=5 rule in the review skill; n₀-calibration is the residual knob. |
+| 4 | Ask-budget dose-response | P19 | **BET, stronger.** Per-additional-ask harm gradient VERIFIED in direction (clinical −30%/alert, IRR≈0.70) but cross-domain and no conversational curve; default 1 held as a conservative floor; override "lock-in" refuted. |
+| 5 | Multi-instance patterns | SP6 | **BET (deferred), design shape recorded.** Fleet noisy-neighbor pattern (aggregate → correlate → cross-impact) settles the *shape* of a hub meta-review from a single patent; efficacy unproven, so SP6 stays a non-goal pending an A/B on real registry data. |
+
+Residual open knobs (carried forward, not silently closed): n₀ per-metric calibration (P24); an in-domain asks-per-session→abandonment curve (P19); live-agent drift thresholds measured with the refresh benefit held separate (P14); portfolio-pattern efficacy vs a plain aggregate baseline (SP6).

@@ -79,7 +79,9 @@ def test_p23_p24_tokens():
     b = blocks()
     for tok in ["hook", "census", "skill", "workflow", "mechanisms-claude-code"]:
         assert tok in b[23], f"P23 missing '{tok}'"
-    for tok in ["cold start", "BET", "first governor review"]:
+    # P24 flipped BET → VERIFIED mechanism in R10: continuous shrinkage handover,
+    # the old "first governor review" checkpoint refuted. Tokens track the new doctrine.
+    for tok in ["Cold start", "handover", "shrinkage", "James-Stein", "REFUTED"]:
         assert tok in b[24], f"P24 missing '{tok}'"
 
 def _synth(*annots):
@@ -110,10 +112,14 @@ def test_no_principle_expired_in_real_file():
     stale = expired_principles(TEXT, datetime.date.today())
     assert not stale, f"doctrine expired: {stale}"
 
-def test_verified_na_is_p24_only():
+def test_no_principle_uses_verified_na():
+    # Pre-R10, P24 was the one un-researched "Verified: n/a" explicit BET. R10 settled it
+    # (Round: R10, dated), so every shipped principle is now dated/researched — no principle
+    # may carry the n/a marker. The expiry checker still *exempts* n/a as a capability
+    # (see test_expiry_checker_flags_synthetic_old_dates), but no real doctrine uses it.
     na = [n for n, block in blocks().items()
           if "Verified: n/a" in block.split("\n", 1)[1].split("\n", 1)[0]]
-    assert na == [24], f"'Verified: n/a' is reserved for P24 (explicit BET), got {na}"
+    assert na == [], f"post-R10 every principle is dated; 'Verified: n/a' no longer used, got {na}"
 
 def test_grade_vocabulary_defined():
     head = TEXT.split("## 1. ", 1)[0]

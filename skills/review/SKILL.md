@@ -58,6 +58,12 @@ Log the outcome either way:
 `python3 .claude/hooks/cairn_event.py re_elicit outcome=<changed|unchanged>`
 No trigger fired → no interview; re-elicitation on a calendar is exactly the refuted
 pattern P14 warns against.
+**R10 confounder — don't chase sensitivity.** Firing the check more often buys a *refresh*
+benefit as much as it detects real drift (the two are confounded in the literature). So an
+`unchanged` outcome is a legitimate result (the goals got re-confirmed), not a wasted ask —
+and "we should trigger more to catch more drift" is exactly the mistake R10 flags. Keep the
+two behavioral triggers as-is; the `re_elicit changed`-vs-`unchanged` ratio is the settling
+evidence, read it, don't pre-empt it by ratcheting the trigger.
 
 ## Stage 4 — System lane: proposals with the user as gate (P10)
 For each friction cluster or guardrail regression, draft a proposal. HARD RULES:
@@ -140,19 +146,25 @@ A live entry needs no status field. Reverting an auto-adoption = the same protoc
 reverse (the revert mints its own superseding entry pointing back).
 
 ## Stage 4.5 — Bounded auto-adopt lane (only if manifest `auto_adopt.armed` is true)
-**Telemetry handover (P24).** After this instance's first completed review, where the
-instance's own telemetry and a generic doctrine default conflict, the telemetry wins —
-doctrine retains only the invariants (hooks, caps, privacy). From that point a telemetry
-citation (event counts/trends from telemetry/events.jsonl) is valid evidence for
-auto-adopt eligibility alongside P-refs and RESEARCH.md findings.
+**Telemetry handover (P24 — continuous, by earned precision; R10).** The handover is NOT a
+one-time flip at the first review (that checkpoint is refuted). It is per-default and
+gradual: each generic doctrine default carries an implicit sample size n₀ = 5, and the
+instance's own telemetry outranks that default for a given decision only once it has
+accumulated **n ≥ n₀ = 5 relevant own-data events** (own-data weight n/(n₀+n) ≥ ½). Below
+5 events, doctrine still wins the conflict; at or above, the telemetry citation wins.
+Count the events that actually bear on the specific default (e.g. friction/overreach events
+for an ask-budget default, guardrail-trend points for a metric default) — not total events.
+The invariants (hooks, caps, privacy, the metric contract itself) never hand over. Once a
+default clears its n₀, a telemetry citation (event counts/trends from telemetry/events.jsonl)
+is valid evidence for auto-adopt eligibility alongside P-refs and RESEARCH.md findings.
 
 A proposal skips the per-item ask and applies immediately ONLY when ALL hold:
 - `[blast: low]` AND `[door: two-way]`;
 - its backing is graded VERIFIED (a PRINCIPLES.md P-ref or a docs/RESEARCH.md finding that
   survived refutation) — of the canonical enum (VERIFIED / VERIFIED-probed / PREPRINT /
   THIN / BET, build Stage 5), only plain VERIFIED qualifies; VERIFIED-probed never
-  auto-adopts (probes are perishable), and BET / THIN / PREPRINT never auto-adopt — OR,
-  after the first completed review, a telemetry citation per the handover rule above;
+  auto-adopts (probes are perishable), and BET / THIN / PREPRINT never auto-adopt — OR
+  a telemetry citation for a default that has cleared its n₀ = 5 handover (P24 rule above);
 - it touches none of: the metric contract (north_star / inputs / guardrails), privacy,
   caps, cadence minimums, anything involving money, or text the user authored in their
   own words.

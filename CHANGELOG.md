@@ -1,5 +1,19 @@
 # Changelog
 
+## 0.8.2 — R10: gaps-ledger closeout (the five ranked research candidates, settled)
+
+One deep-research round (R10 — 175 agents, 7 angles, 45 claims verified, 3-vote adversarial) settled the five ranked candidates the 0.8.1 umbrella spec had recorded but not executed. Doctrine + wiring only; no new capability, no new resident context. Evidence: `docs/research/research-round10-gaps-ledger-closeout.json`; decision spec: `docs/superpowers/specs/2026-07-24-r10-gaps-ledger-closeout-design.md`.
+
+- **Two BETs flipped to VERIFIED.**
+  - **P18 surrogate-index construction** — the method behind every north-star proposal is now settled (Athey-Chetty-Imbens-Kang surrogate index + Google proxy-metric, KDD'24): derive the leading indicator as a *predictive-power-weighted composite* of short-term signals, validate by **falsification not confirmation** (Prentice's test can only reject a proxy, never bless it), with three failure guardrails encoded (asymmetry, surrogate paradox, sample-size floor). Cairn's builder applies the *discipline*, not the literal two-sample estimator a single instance can't run. Wired into `skills/build` Stage 3.
+  - **P24 cold-start handover** — the arbitrary "first completed governor review" checkpoint is **refuted**; the handover is continuous empirical-Bayes / James-Stein shrinkage (own-data weight `n/(n₀+n)`), discretized to a per-default rule: the instance's own telemetry outranks a doctrine default once it has **≥ n₀ = 5 relevant events**. Wired into `skills/review` Stage 4.5 (and the auto-adopt eligibility line).
+- **Three BETs held, materially better-specified.**
+  - **P14 drift triggers** — behavioral/variable-window direction supported (ADWIN), but the only drift paper is simulation-only and a retraining confounder means "fire more triggers" buys refresh, not detection accuracy. Triggers kept; the review skill and §8/§14 gain the confounder caveat (don't chase trigger sensitivity; read the `re_elicit changed`-vs-`unchanged` ratio).
+  - **P19 ask-budget** — the per-additional-ask harm gradient is VERIFIED in direction (clinical alert acceptance −~30%/alert, IRR≈0.70) but cross-domain with no conversational dose curve, so the default of **1 holds** as a conservative floor; the override "lock-in after first dismissal" mechanism is refuted.
+  - **SP6 multi-instance** — the fleet noisy-neighbor pattern (aggregate → correlate → cross-impact) records the *design shape* of a portfolio meta-review, but on a single patent with no measured efficacy; SP6's meta-review stays a non-goal pending an A/B on real registry data.
+- **Residual open knobs, carried in the ledger (not silently closed):** n₀ per-metric calibration; an in-domain asks-per-session→abandonment curve; live-agent drift thresholds measured with the refresh benefit held separate; portfolio-pattern efficacy vs a plain aggregate baseline.
+- **Tests:** two `test_principles.py` assertions that hard-coded "P24 is the sole explicit BET" moved with the doctrine; 176 pass.
+
 ## 0.8.1 — production-readiness pass (six-dimension deep audit)
 
 Six parallel auditors (docs↔code consistency, runtime edge cases, skill-instruction integrity, open loops, research gaps, live e2e lifecycle) produced 45 findings pre-dedup; every one is closed here. Fixes only, no new capability.

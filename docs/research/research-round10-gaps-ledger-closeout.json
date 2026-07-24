@@ -1,0 +1,638 @@
+{
+  "question": "R10 for Cairn's level-zero doctrine (gaps-ledger closeout): settle the five ranked research candidates recorded in the 2026-07-23 umbrella spec's honest ledger — (1) goal/preference drift triggers [P14/§8], (2) surrogate-index construction method [P18], (3) cold-start doctrine→telemetry handover point [P24], (4) ask-budget dose-response / default asks-per-session [P19], (5) multi-instance portfolio signals [SP6]. Each currently sets a system default by BET; deliver graded findings so each can flip to VERIFIED/PREPRINT or stay BET with a better-specified design.\n\n1. GOAL/PREFERENCE DRIFT TRIGGERS (settles P14/§8 bet): Which behavioral signals should fire a long-lived agentic system's goal-drift / re-elicitation check? Current heuristic is \"every 2 review periods\" (calendar) — the doctrine already suspects behavioral triggers (declining input metrics, typed lapses) beat calendar. What signals, what windows, what evidence?\n\n2. SURROGATE-INDEX CONSTRUCTION (settles P18 bet): How does a builder DERIVE a valid leading indicator (surrogate) from a lagging north-star outcome? The requirement is VERIFIED; the construction METHOD is the bet. Athey et al. surrogate index + Prentice surrogacy criteria are the target literatures — what is the actual validated method and its failure conditions?\n\n3. COLD-START HANDOVER (settles P24 bet): When should a fresh instance's own telemetry outrank inherited doctrine defaults? Current rule is \"first completed governor review\" (arbitrary). Is there a principled handover point — e.g. empirical-Bayes/James-Stein shrinkage where control shifts as the instance's own-data variance shrinks below the prior's? What evidence volume 'earns authority'?\n\n4. ASK-BUDGET DOSE-RESPONSE (settles P19 bet): What is the default asks-per-session for a long-lived assistant before interruption frequency drives abandonment? Current default is 1. Kovacs gives frequency-harms direction (prompt-every-visit vs 25%: HR 0.78) but not a dose curve. Is there a dose-response curve or a defensible default number?\n\n5. MULTI-INSTANCE / PORTFOLIO PATTERNS (settles SP6 bet): Beyond names/paths/purpose, what cross-instance signals should a registry over many long-lived agentic instances surface (shared lapse patterns, portfolio-level metrics, systemic-vs-isolated failure separation)? Thinner literature — fleet/multi-tenant observability is the nearest analog.\n\nGROUNDING:\n- Breadth: broad (5 distinct sub-areas, each needs its own verified coverage and verification floor; do not let the well-evidenced econometrics area starve the thinner drift/multi-instance areas)\n- Sub-areas needing verified coverage: (1) behavioral drift/change detection + preference-drift re-elicitation triggers (recommender systems, concept drift, HCI preference elicitation); (2) surrogate-index / surrogate-endpoint construction and validation (econometrics + clinical); (3) empirical-Bayes / James-Stein shrinkage as a data-earns-authority handover mechanism, and reliability/sample-size thresholds; (4) interruption/notification/alert-fatigue dose-response and permission-prompt frequency vs abandonment; (5) fleet / multi-tenant / portfolio observability cross-instance signal patterns\n- Key terms/entities: preference drift, concept drift (ADWIN, DDM), algorithmic drift, Athey-Chetty-Imbens-Kang surrogate index (NBER w26463), Prentice surrogacy criterion, proxy-metric selection, empirical Bayes, James-Stein, shrinkage weight alpha = tau^2/(tau^2+se^2), reliability-adjusted estimates, alert fatigue override rates, notification dose-response, interruption cost, noisy-neighbor detection, systemic-vs-isolated failure\n- Known primary sources worth fetching: nber.org/papers/w26463 (surrogate index); arxiv.org/abs/2309.07893 (Choosing a Proxy Metric from Past Experiments); arxiv.org/abs/2409.16478 (Algorithmic Drift); Efron 2021 Empirical Bayes concepts-and-methods; James-Stein / shrinkage weighting; clinical Prentice-criterion surrogate-endpoint validation literature; alert-fatigue override-rate studies (clinical decision support 49-96% override)\n- Already known / do not research: Cairn's existing mechanics — the metric-contract interview, watched-not-chased rule, typed-lapse telemetry, the BUILD/PARK/REJECT governor loop, that leading-indicators-are-required is already VERIFIED. Research the CONSTRUCTION methods, the trigger signals, the handover mechanism, the dose curve, and the portfolio signals — not the basics.\n- Output: for each of the 5, I need a settle-able recommendation with evidence grade so I can either flip a BET to VERIFIED/PREPRINT or keep it BET with better-specified design. Preserve confidence, sources, votes, and the refuted list per finding.",
+  "synthesisDegraded": false,
+  "summary": "Of the five BET-grade questions, two can be flipped to VERIFIED, one is VERIFIED as a mechanism but the specific default stays BET, and two remain BET with much better-specified designs. (2) Surrogate-index construction is VERIFIED: the Athey-Chetty-Imbens-Kang surrogate index and the Google \"proxy metric\" method give an objective, data-driven construction — the surrogate is the predicted long-term outcome given short-term surrogates (linear case: each surrogate's treatment effect times its regression coefficient on the north-star), with documented failure conditions (Prentice-criterion asymmetry, surrogate paradox, large-sample/meta-analytic requirement). (3) Cold-start handover is VERIFIED and REFUTES the arbitrary \"first governor review\" checkpoint: the principled handover is continuous empirical-Bayes/James-Stein shrinkage, own-data weight = n/(n0+n) = tau²/(tau²+se²), rising smoothly toward 1 as the instance's own-data variance falls below the prior's — control shifts by earned precision, not a fixed event. (1) Drift triggers stays BET: the drift-detection literature structurally favors behavioral/variable-window triggers (ADWIN) over calendar schedules, but the one directly-fetched drift paper is simulation-only and a key confounder ([13]) shows \"detect more often → better performance\" is a retraining artifact, not better drift-identification — so behavioral-beats-calendar is better-specified but not empirically settled for live agents. (4) Ask-budget dose-response has VERIFIED direction (clinical alert acceptance drops ~30% per additional alert per encounter) but no dose curve for conversational assistants, so the default-of-1 stays a defensible BET. (5) Multi-instance/portfolio signals rest on a single patent design (correlate per-instance resource patterns, then cross-instance impact analysis to separate systemic from isolated failure) — a coherent pattern but BET-grade, unvalidated for efficacy.",
+  "findings": [
+    {
+      "claim": "DECISION 2 — SETTLE AS VERIFIED. A valid leading indicator is DERIVED, not guessed: the surrogate index is the predicted value of the lagging north-star outcome given the short-term surrogates. In the linear case, multiply each surrogate's estimated treatment effect (from the experimental sample) by that surrogate's regression coefficient on the primary outcome (from an observational sample) — replacing ad hoc weighting with objective, predictive-power-based weighting. Requires two samples (experimental without long-term outcome; observational with surrogates + outcome) and three assumptions: Unconfoundedness, Surrogacy (Prentice: outcome independent of treatment given surrogates), and Comparability. Combine multiple qualitatively-distinct short-term outcomes into ONE index rather than betting on a single leading indicator; the composite can also be built as a Sharpe-ratio portfolio-optimization (convex QP) that de-weights correlated proxies. Optimal proxy/weighting is NOT fixed — it depends on the deploying experiment's sample size (large N favors less-biased/noisier proxies; small N favors low-variance ones).",
+      "confidence": "high",
+      "vote": "unanimous across 12 claims (all 3-0 except [15]/[24] at 2-1)",
+      "sources": [
+        "https://www.nber.org/papers/w26463 (Athey, Chetty, Imbens & Kang, The Surrogate Index — primary)",
+        "https://www.nber.org/system/files/working_papers/w26463/w26463.pdf",
+        "https://arxiv.org/pdf/2309.07893 (Choosing a Proxy Metric from Past Experiments, KDD'24 — primary)"
+      ],
+      "evidence": "Claims [2][3][4][14][15][16] (Athey surrogate index): verbatim primary-source confirmation of the two-sample setup, three named assumptions, and the linear construction ('multiplying the causal effects... by the coefficients from a linear regression of the primary outcome on the scores... replaces a subjective assessment... by an objective data-driven criterion, namely the predictive power of the scores'). Claim [4]: even if Surrogacy/Comparability fail (Unconfoundedness holding), estimators still recover a well-defined causal quantity, with explicit bias bounds (current Aug-2024 revision). Claims [17][18][19] (Google proxy-metric method): proxy quality = corr(estimated proxy TE, latent north-star TE), decomposing into latent predictive correlation over a signal-to-noise term; optimal proxy is sample-size-dependent; composite construction maps exactly onto Sharpe-ratio portfolio optimization solvable as a convex QP, de-weighting correlated proxies. This settles the P18 construction METHOD with primary-source, peer-reviewed support."
+    },
+    {
+      "claim": "DECISION 2 (failure conditions) — the construction method's documented breakdown modes, which the doctrine must encode as guardrails. (a) Prentice's 4th-criterion test is ASYMMETRIC: it can only REJECT a poor surrogate, never affirmatively validate a good one (failing to reject ≠ validity); the fix is to reformulate as an equivalence test so 'validated' requires rejecting a null of non-equivalence. (b) SURROGATE PARADOX: even when population-level ACE and DCE paradox checks pass AND the Prentice criterion holds exactly, an individual surrogate paradox can still harm a subgroup on the true outcome; only the 'strong binary surrogate' criterion (treatment affects outcome ONLY through the surrogate) excludes it without extra assumptions. A newer testable criterion (Yin et al.) is sufficient and 'almost necessary' using observed data alone. (c) SAMPLE-SIZE floor: the Proportion-of-Effect statistic is only reliable when treatment has a 'massively significant' effect on the true endpoint (rare), so practical validation needs large samples or pooled/meta-analytic data across trials — a single small dataset cannot credibly validate a surrogate. Prentice's criteria are only mutually equivalent for binary endpoints; continuous/time-to-event (the common case) break the equivalence.",
+      "confidence": "high",
+      "vote": "unanimous across 8 claims (all 3-0 except [24] 2-1)",
+      "sources": [
+        "https://www.ncbi.nlm.nih.gov/pubmed/25372337 (Alonso et al., Prentice criterion re-examination — primary)",
+        "https://arxiv.org/pdf/1712.08732 (Ma, Yin, Liu, Geng, On the Individual Surrogate Paradox, Biostatistics 2021 — primary)",
+        "https://arxiv.org/pdf/1607.05454 (Yin et al., Novel Criteria to Exclude the Surrogate Paradox, Scand. J. Stat. 2020 — primary)",
+        "https://pubmed.ncbi.nlm.nih.gov/9840970/ (Buyse & Molenberghs 1998 — primary)",
+        "https://www.researchgate.net/publication/10600978 (Buyse et al. 2000, meta-analytic validation — primary)"
+      ],
+      "evidence": "Claims [20][21]: Prentice test 'can only be used to reject a poor surrogate, and not to validate a good surrogate'; equivalence-test reformulation validates 'when the null hypothesis is rejected'. Claims [5][6][7][27]: individual surrogate paradox manifests (HR(T→Y)=0.235>0) despite ACE/DCE checks passing and Prentice holding exactly; only strong binary surrogate avoids it assumption-free; Yin et al. criterion is sufficient + almost-necessary and testable from observed data alone (unlike Prentice). Claims [24][25][26]: PE reliable only under a 'massively significant effect... a rare situation'; validation 'require[s] large numbers of observations' / meta-analytic pooling. Claim [22]: Prentice criteria equivalent only for binary endpoints."
+    },
+    {
+      "claim": "DECISION 3 — SETTLE AS VERIFIED, and REFUTE the arbitrary 'first completed governor review' handover. The principled handover point is not a fixed checkpoint at all: empirical-Bayes / James-Stein shrinkage makes control shift CONTINUOUSLY as the instance's own-data variance shrinks below the prior's. The posterior mean is a precision-weighted blend of the inherited doctrine default and the instance's own telemetry: own-data weight = n/(n0+n) = tau²/(tau²+se²), where n0 is the prior's implicit sample size (the 'authority' the doctrine default carries) and n is accumulated own-data. This is the literal 'data earns authority' formula — no threshold event, weight rises smoothly toward 1 as se² falls. The shrinkage intensity is estimated FROM the data (James-Stein: 1-(p-2)/‖X‖²), needing no preset threshold; empirically it cut prediction error >3x versus using raw own-data unshrunk, pulling estimates 78% toward the group prior even at a non-trivial per-unit sample (45 at-bats). Design implication: set the doctrine default's n0 (its equivalent sample size / prior variance) and let the instance's telemetry outrank it by earned precision, continuously.",
+      "confidence": "high",
+      "vote": "unanimous, all 5 claims 3-0",
+      "sources": [
+        "https://efron.ckirby.su.domains/papers/2021EB-concepts-methods.pdf (Efron 2021, Empirical Bayes — primary)",
+        "https://www2.stat.duke.edu/~pdh10/Teaching/732/Notes/shrinkage.pdf (Hoff, Shrinkage and Empirical Bayes, Duke 2025 — primary)"
+      ],
+      "evidence": "Claim [8]: Bayes shrinkage factor B = A/(A+σ0²) estimated unbiasedly from data (B̂ = 1-(N-3)σ0²/S) — structurally identical to the alpha = tau²/(tau²+se²) form the question asked about. Claim [10]: posterior mean µ1 = n0/(n0+n)·µ0 + n/(n0+n)·x̄ — continuous, sample-size-governed handover, verbatim from Hoff. Claim [28]: precision-ratio form w=(1/τ0²)/(1/τ0²+1/σ²), own-data weight (1-w)=τ0²/(τ0²+σ²)→1 as σ²=σ0²/n→0. Claim [29]: James-Stein estimates shrinkage empirically with no oracle prior variance. Claim [9]: real demonstration, >3x error reduction, 78% shrinkage toward prior. The continuous-precision mechanism directly refutes any fixed 'first review' checkpoint."
+    },
+    {
+      "claim": "DECISION 1 — KEEP AS BET, better-specified. The structural direction (behavioral/adaptive triggers beat a fixed calendar schedule) is supported by how mature drift detectors are actually built — ADWIN uses a VARIABLE-size window and fires by comparing statistics across candidate cut-points within the data stream, not on a calendar. But two things block a flip to VERIFIED: (a) the one directly-fetched drift paper (Algorithmic Drift, arXiv:2409.16478) is a SIMULATION-ONLY study on synthetic data — it cannot validate real behavioral-vs-calendar re-elicitation thresholds for a live agentic system; (b) a critical confounder: drift detectors that fire MORE frequently show better downstream performance, but the authors attribute this to the retraining/refresh effect of frequent triggering, NOT to those detectors more accurately identifying real drift. So a naive 'fire more behavioral triggers' rule may just be buying refresh, not better drift detection. Recommendation: adopt behavioral/variable-window triggers (declining input metrics, typed lapses) as the design, but explicitly separate the refresh benefit from genuine drift-detection accuracy, and label the specific signals/windows as unvalidated for live agents.",
+      "confidence": "medium",
+      "vote": "[0][1][13] 3-0, [30] 3-0; but multiple companion claims REFUTED (see refuted list)",
+      "sources": [
+        "https://arxiv.org/abs/2409.16478 (Algorithmic Drift — simulation-only, primary)",
+        "https://arxiv.org/html/2602.06456 (The Window Dilemma / Concept Drift is Ill-posed — primary)",
+        "https://scikit-multiflow.readthedocs.io/en/stable/api/generated/skmultiflow.drift_detection.ADWIN.html (secondary)"
+      ],
+      "evidence": "Claim [0]/[1]: Algorithmic Drift is 'a stochastic simulation framework' evaluated 'exclusively on synthetic datasets' — cannot validate live thresholds. Claim [13]: 'drift detectors that detect more frequently, tend to perform better' but explicitly 'not surprising that frequent retraining results in better performing models' — a retraining artifact, not detection accuracy (the confounder that undermines a simple frequency-based trigger). Claim [30]: ADWIN uses 'a window of variable size while detecting concept drift' via cut-point comparison, confirming the field abandoned fixed-schedule detection. REFUTED companions weaken the case: window-size derivability (1-2), preference-elicitation strategy universality (0-3), dialogue-progression trigger (0-3), exploration-saturation signal (1-2), RL-recommender preference-shift magnitudes (0-3). Net: direction supported, live-agent thresholds unproven."
+    },
+    {
+      "claim": "DECISION 4 — KEEP DEFAULT OF 1 as a defensible BET; the dose-response DIRECTION is VERIFIED but no dose CURVE exists for conversational assistants. Clinical alert data gives a clean per-unit harm gradient: reminder acceptance dropped ~30% for each additional reminder received per encounter (negative-binomial IRR ≈ 0.70). This is genuine within-session dose-response (concurrent alert burden), corroborating the Kovacs frequency-harms direction (prompt-every-visit HR 0.78 vs 25%). But it is cross-domain (clinical decision support, not a long-lived conversational assistant), it measures acceptance decline not abandonment, and the same study found NO longitudinal desensitization for newly-deployed alerts. There is no published dose-response curve mapping asks-per-session → abandonment for conversational agents. Recommendation: keep the conservative default of 1 ask/session as a principled floor (harm rises steeply and per-additional-ask in every adjacent literature), and label the exact number BET pending in-domain measurement.",
+      "confidence": "medium",
+      "vote": "[11] 2-1 (one dissent on 'dose-response' framing); companion habituation-lockin claim REFUTED 0-3",
+      "sources": [
+        "https://www.ncbi.nlm.nih.gov/pmc/articles/PMC5387195/ (Weiner et al. 2017, BMC Med Inform Decis Mak — primary)"
+      ],
+      "evidence": "Claim [11]: 'Likelihood of reminder acceptance dropped by 30% for each additional reminder received per encounter' (IRR 0.70, p<.001) across 1.26M best-practice advisories + 326K drug alerts, 112 clinicians. Verified as within-encounter concurrent-burden dose-response, NOT longitudinal fatigue (same paper: 'we did not observe a decrease in the acceptance rate over time'). REFUTED companion: the 87.9%/99.9% 'near-deterministic habituation lock-in after first dismissal' claim failed 0-3, so do NOT rely on an override-lock-in mechanism. Cross-domain and abandonment not directly measured → the exact per-session number stays BET."
+    },
+    {
+      "claim": "DECISION 5 — KEEP AS BET, better-specified from the fleet/multi-tenant analog. Beyond names/paths/purpose, a portfolio registry over many long-lived instances should surface cross-instance signals via a three-part pattern drawn from the noisy-neighbor/fleet-observability literature: (1) aggregate multiple pre-existing per-instance telemetry streams into ONE repository rather than one custom stream — the patent aggregates five distinct operational sources (inventory, performance monitoring, workload/resource monitoring, SLA repository, network traces); (2) first CORRELATE each instance's own workload/resource patterns into a single per-instance 'correlated usage pattern' rather than comparing raw per-tenant thresholds; (3) run cross-instance IMPACT ANALYSIS on those correlated patterns (unsupervised anomaly detection, not fixed rule thresholds) to flag which instance(s) are degrading others and to SEPARATE systemic from isolated failure. This maps directly onto the requested portfolio signals (shared lapse patterns, portfolio-level metrics, systemic-vs-isolated separation). But the entire basis is a SINGLE patent design document (US 11,928,518, Kyndryl) — a coherent architecture, not validated efficacy evidence — so this settles the SP6 design shape while remaining BET-grade.",
+      "confidence": "low",
+      "vote": "[12] 3-0, [32] 3-0, [31] 2-1 — but all from one primary source",
+      "sources": [
+        "https://image-ppubs.uspto.gov/dirsearch-public/print/downloadPdf/11928518 (US Patent 11,928,518, Noisy-Neighbor Detection and Remediation, Kyndryl 2024 — primary)"
+      ],
+      "evidence": "Claim [12]: detection works by 'correlating the determined workload and shared resource consumption patterns of each application... determining a correlated shared resource usage pattern... performing impact analysis to determine impact of the applications on each other' — correlation-then-cross-impact, not raw thresholds. Claim [32]: data layer aggregates five pre-existing sources (204 inventory / 206 performance / 208 workload-resource / 210 SLA / 212 network traces) into one repository (202). Claim [31]: the impact-analysis/noisy-neighbor stage is labeled 'Unsupervised learning' in the architecture (FIG. 2), positioned as the improvement over the prior static hard-limit/threshold approach. Thinnest evidence base of the five (one patent, no empirical validation) — the design pattern is sound but efficacy is unproven, hence low confidence / BET."
+    }
+  ],
+  "caveats": "Evidence is highly asymmetric across the five sub-areas, exactly as the grounding warned. Decisions 2 and 3 (surrogate construction, cold-start handover) rest on multiple peer-reviewed primary sources with unanimous adversarial votes and verbatim confirmation — genuinely VERIFIED-grade. Decisions 1, 4, and 5 rest on thinner, cross-domain, or single-source evidence and stay BET: (1) drift — the only directly-fetched drift paper is simulation-only, and the frequency-performance link is a retraining confounder, not a validated behavioral-trigger threshold; (4) ask-budget — the dose-response is real but from clinical decision-support (alert acceptance), not conversational-assistant abandonment, and measures a different outcome; (5) multi-instance — sourced entirely from one patent design document, which describes an architecture, not measured efficacy. Time-sensitivity: the econometrics/statistics results (Athey, Prentice, Buyse-Molenberghs, Efron/James-Stein) are foundational and non-perishable; the drift, proxy-metric, and patent sources are recent (2019-2026) and the proxy/drift niches are still actively evolving (PROXIMA, Pareto-optimal proxies, ill-posedness critiques). Note the Athey surrogate-index method and the Google proxy-metric method are related-but-distinct construction techniques — both are VERIFIED but they are not the same estimator. Several plausible-sounding companion claims were REFUTED under adversarial voting (habituation lock-in, preference-elicitation strategy universality, RL-recommender manipulation magnitudes, exploration-saturation signals, Prentice-lacks-transportability) — do not build doctrine on those.",
+  "openQuestions": [
+    "What is the actual asks-per-session → abandonment dose curve for a long-lived conversational assistant (not clinical alerts)? The default of 1 is defensible but no in-domain curve exists to tune it — this needs first-party telemetry, which the cold-start/shrinkage mechanism (Decision 3) could itself supply once instances accumulate data.",
+    "How should the doctrine default's implicit sample size n0 (its 'earned authority' / prior variance) be SET per metric so the James-Stein handover shifts control at the right rate? The shrinkage math is settled; the calibration of n0 for each doctrine default is an open tuning knob.",
+    "For live agentic drift, which specific behavioral signals (declining input metrics, typed-lapse rates, engagement plateaus) and which windows actually predict genuine goal-drift versus merely triggering a beneficial refresh? The retraining confounder ([13]) means this must be measured with the refresh benefit held separate.",
+    "Does the noisy-neighbor correlate-then-cross-impact pattern actually separate systemic from isolated failure BETTER than simpler portfolio-level aggregate metrics in a long-lived-agent registry? The pattern is borrowed from cloud multi-tenancy and never validated on agentic fleets — an A/B on real registry data is needed before flipping SP6 off BET."
+  ],
+  "confirmed": [
+    {
+      "claim": "The paper is a simulation-framework study of algorithmic drift in recommender systems, not an empirical/observational study of real deployed systems or real user preference-drift telemetry — so it cannot directly validate calendar-vs-behavioral re-elicitation triggers for a live agentic system.",
+      "source": "https://arxiv.org/abs/2409.16478",
+      "quality": "primary",
+      "quote": "a stochastic simulation framework that mimics user-recommender system interactions in a long-term scenario",
+      "confidence": "high",
+      "evidence": "Two independent fetches of the primary source (arxiv.org/abs/2409.16478 abstract, and a secondary summary at emergentmind.com covering the full paper) confirm the paper is exclusively a simulation study: the abstract states \"we propose a stochastic simulation framework that mimics user-recommender system interactions in a long-term scenario,\" with evaluation conducted on \"multiple synthetic datasets\" and drift dynamics generated as simulated outputs from a stochastic user model (parameterized by resistance/inertia/randomness), not observed from real deployed systems. A WebSearch result mentioned the framework \"uses both real and synthetic datasets for validation purposes,\" which could be read as contradicting evidence, but the emergentmind full-paper summary directly addresses this and finds no indication that real production telemetry or observational drift data is used — the paper's own framing throughout (title, abstract, methodology) is a pre-deployment simulation/testing tool, explicitly contrasted with real deployment (\"a controlled environment for evaluating the recommendation algorithm before deployment\"). The claim under review is a narrow, appropriately-hedged methodological characterization (\"cannot directly validate... for a live agentic system\") rather than a strong or extraordinary claim, so source quality (the primary arxiv abstract, directly quoted) matches claim strength. The paper is recent (Sept 2024, published in Information Processing & Management 2025) so not outdated. This is not marketing/press-release content — it's an academic preprint characterization. No credible source found disputes that this is a simulation-based (not empirical/observational) study.",
+      "vote": "3-0"
+    },
+    {
+      "claim": "The evaluation is confined to synthetic datasets under the authors' own simulation, so any 'detection' result is a demonstration that the proposed metrics work within their simulated environment, not a validated real-world drift-trigger threshold.",
+      "source": "https://arxiv.org/abs/2409.16478",
+      "quality": "primary",
+      "quote": "prove[s] that the proposed methodology is effective in detecting and quantifying the drift over the users preferences by means of the simulation",
+      "confidence": "high",
+      "evidence": "The claim is accurate and not an overreach. The paper's own abstract states: \"We conduct an extensive evaluation on multiple synthetic datasets, aiming at testing the robustness of our framework when considering different scenarios and hyper-parameters setting.\" Independent WebFetch analysis of the arxiv page confirms: \"The evaluation relies exclusively on synthetic datasets... The evaluation notably does not include real-world datasets, limiting direct validation of whether the simulation framework's findings translate to actual user-recommender system interactions in practice.\" The methodology is a stochastic simulation with an authors-defined user model (parameterized by 'user resistance' and 'inertia' terms chosen by the researchers, not fit to real behavioral logs). No real-world recommender log, A/B test, or field deployment is used to validate the ADS/DTC drift metrics or their detection thresholds. This directly supports the claim: any 'detection' shown in the paper demonstrates the metrics behave as intended inside the authors' own simulated world, not that a given threshold or window reliably fires on real user-preference drift. This is a standard, well-founded methodological limitation critique (not a misread, not contradicted by other sources, not outdated at ~10 months old, and not marketing puffery) — the claim should stand as a legitimate caveat for Cairn's drift-trigger design question, which needs real behavioral-signal validation this paper cannot supply.",
+      "vote": "3-0"
+    },
+    {
+      "claim": "The surrogate index method requires two data samples (an experimental sample without long-term outcome data, and an observational sample with both surrogates and the long-term primary outcome but no treatment data), combined under three named identifying assumptions: Unconfoundedness (experimental assignment), Surrogacy (Prentice), and Comparability (external validity between the two samples' conditional outcome distributions).",
+      "source": "https://www.nber.org/system/files/working_papers/w26463/w26463.pdf",
+      "quality": "primary",
+      "quote": "we articulate three key assumptions under which the average effect of the treatment on the primary outcome is identified from the combination of the experimental and observational samples: (i) a standard assumption that the assignment in the experimental sample is Unconfounded; (ii) a Surrogacy assumption which requires that the causal path from the treatment to the primary outcome goes through the surrogates (Prentice, 1989...); and (iii) a Comparability or external validity assumption, which requires that the observational and experimental samples are comparable in the sense that the outcome distributions conditional on surrogates and pre-treatment variables are identical.",
+      "confidence": "high",
+      "evidence": "The supporting quote is a verbatim passage from Athey, Chetty, Imbens & Kang, NBER WP 26463 (\"The Surrogate Index\"), and it names exactly the three assumptions the claim lists — Unconfoundedness (experimental assignment), Surrogacy (citing Prentice 1989), and Comparability (external validity between conditional outcome distributions of the two samples) — with matching definitions. Independent corroboration (WebSearch across secondary sources, e.g. d2cml-ai course notes summarizing the same paper) restates the identical three-assumption structure with the same names and content, with no conflicting variant found. The two-sample setup described in the claim (experimental sample lacking the long-term outcome; observational sample containing both surrogates and the primary outcome but lacking experimental treatment variation) is the standard, uncontested characterization of this method in the surrogate-index literature and is consistent with the paper's known general setup (distinct from the job-training empirical application, which was the only detail returned by the abstract fetch). No search results dispute or heavily qualify this structural description; nothing suggests overreach, staleness (this is a foundational methodological result, not a fast-moving empirical claim), or marketing framing. Source is the primary academic paper itself — appropriate strength for a claim about the paper's own stated assumptions.",
+      "vote": "3-0"
+    },
+    {
+      "claim": "The construction method for the surrogate index is data-driven, not subjective: under the linear special case, it is the predicted value of the long-term primary outcome given the surrogates, i.e., multiply each surrogate's estimated treatment effect (from the experimental sample) by that surrogate's regression coefficient on the primary outcome (estimated in the observational sample), replacing ad hoc weighting of short-term metrics with an objective, predictive-power-based weighting.",
+      "source": "https://www.nber.org/system/files/working_papers/w26463/w26463.pdf",
+      "quality": "primary",
+      "quote": "For the special case of linear models, the proposal boils down to multiplying the causal effects of the intervention on the two scores (which can be estimated in the experimental sample) by the coefficients from a linear regression of the primary outcome on the two scores in the observational sample. The approach replaces a subjective assessment of the relative importance of the two short-term measures by an objective data-driven criterion, namely the predictive power of the scores for the outcome of interest.",
+      "confidence": "high",
+      "evidence": "The claim is a faithful, non-overreaching paraphrase of the source quote, independently corroborated by a second source. (1) Quote support: the claim's mechanics — multiply each surrogate's experimental-sample treatment effect by its observational-sample regression coefficient on the primary outcome — is exactly what the supplied NBER w26463 quote says (\"multiplying the causal effects of the intervention on the two scores ... by the coefficients from a linear regression of the primary outcome on the two scores in the observational sample\"), and the claim's framing as \"objective, predictive-power-based weighting\" replacing \"ad hoc weighting\" directly tracks the paper's own language (\"replaces a subjective assessment ... by an objective data-driven criterion, namely the predictive power of the scores for the outcome of interest\"). The claim does not overextend this to say the whole surrogate-index method is assumption-free. (2) Independent corroboration: WebFetch of a third-party academic source (Stanford MGTECON634/d2cml-ai course notes on this exact paper) independently confirms: \"the surrogate index is simply a linear combination of the individual intermediate outcomes – the predicted value from a regression of the primary outcome on the intermediate outcomes,\" matching the claim's mechanism. A WebSearch separately surfaced the exact \"replaces a subjective assessment...objective data-driven criterion\" phrase attributed to this paper, confirming the quote is not fabricated or context-stripped. (3) No contradicting evidence found: no credible source disputes this specific linear-construction description; several follow-on papers (Choosing a Proxy Metric from Past Experiments; Semiparametric Estimation of Long-Term Treatment Effects; Long-Term Causal Inference with Imperfect Surrogates) build directly on this construction without disputing the mechanism. (4) Source quality matches claim strength: primary source (NBER working paper, also published in Review of Economic Studies) for a specific, moderate-strength methodological claim — appropriate, no extraordinary claim requiring more. (5) Not outdated: 2019 paper, still the standard reference; later revisions and the RESTUD published version do not appear to alter this core linear-case description. Caveat (not disqualifying): the \"objective, not subjective\" framing describes only the weighting step given an already-chosen surrogate set; it doesn't address the still-subjective step of selecting which surrogates to include, or the strong identifying assumptions (Prentice surrogacy, comparability of experimental/observational conditional distributions per the paper's Assumptions 1-3) required for the resulting index to be causally valid. But the claim under review is scoped narrowly to the weighting mechanism itself, so this is not a misrepresentation of what the source says.",
+      "vote": "3-0"
+    },
+    {
+      "claim": "Even when the Surrogacy and/or Comparability assumptions fail (i.e., are violated), the method's estimators still recover a well-defined, principled causal quantity (a combination of short-term outcomes predicting the long-term outcome) rather than becoming meaningless, as long as Unconfoundedness holds — and the paper provides explicit bias bounds for such violations.",
+      "source": "https://www.nber.org/system/files/working_papers/w26463/w26463.pdf",
+      "quality": "primary",
+      "quote": "we provide bounds on the biases that arise in scenarios where either or both of Surrogacy or Comparability are violated. We show that even if these assumptions fail to hold (but unconfoundedness does hold), the proposed estimators still estimate a well-defined causal effect, by providing a principled way of combining short-term outcomes in a single measure through their predicted effect on the long-term outcome.",
+      "confidence": "high",
+      "evidence": "I independently fetched and read the primary source PDF (the exact URL cited: nber.org/system/files/working_papers/w26463/w26463.pdf, which resolves to the \"November 2019, Revised August 2024\" version of Athey/Chetty/Imbens/Kang). Page 3 of the Introduction, under \"our third contribution,\" contains this text VERBATIM: \"In our third contribution, we provide bounds on the biases that arise in scenarios where either or both of Surrogacy or Comparability are violated. We show that even if these assumptions fail to hold (but unconfoundedness does hold), the proposed estimators still estimate a well-defined causal effect, by providing a principled way of combining short-term outcomes in a single measure through their predicted effect on the long-term outcome.\" This is an exact word-for-word match to the \"supporting quote\" in the claim — not a paraphrase or misread. The claim's restatement (well-defined causal quantity = combination of short-term outcomes predicting long-term outcome; conditioned on Unconfoundedness holding; explicit bias bounds provided) is a faithful, non-overreaching summary of this passage, which is listed as one of the paper's four \"principal contributions,\" not buried or cherry-picked marketing language. Notably, I also checked the earlier Nov 2019 working-paper revision (rev0) of the same paper and found that version's introduction/footnote explicitly said the bias-bounds analysis covered ONLY the Surrogacy violation (treating Comparability as assumed away: \"comparability can typically be obtained by using an observational dataset that is well aligned with the experimental sample\"). This confirms the claim's language tracks the CURRENT (Aug 2024) revision specifically — the version actually hosted at the cited URL — where the authors extended their bias-bounds contribution to cover Comparability violations too. So the claim is current and matches the live version of the primary source, not an outdated draft. Source quality (original NBER working paper by the paper's own authors, later published in Review of Economic Studies 2025) is more than sufficient for this claim's strength. No contradicting evidence was found in searches.",
+      "vote": "3-0"
+    },
+    {
+      "claim": "Even when a surrogate endpoint passes population-level surrogate paradox checks based on average causal effect (ACE) and distributional causal effect (DCE) — i.e., no ACE surrogate paradox and no DCE surrogate paradox — an 'individual surrogate paradox' can still manifest, where the treatment harms the primary outcome for a subgroup even though it never harms the surrogate and the surrogate never harms the primary outcome for anyone.",
+      "source": "https://arxiv.org/pdf/1712.08732",
+      "quality": "primary",
+      "quote": "We have HR(T → S) = 0, and HR(S → Y |T = t) = 0 for t = 0, 1, but HR(T → Y ) = P (YT =0 = 1, YT =1 = 0) = q4,3 + q12,0 + q12,1 + q12,3 + q13,0 = 0.235 > 0. Additionally, we have ACE(T → Y ) = 0.03 > 0. Hence, both the surrogate paradoxes based on ACE and DCE are absent but the individual surrogate paradox manifests.",
+      "confidence": "high",
+      "evidence": "The claim is well-supported and accurately reflects the source. The paper is \"On the Individual Surrogate Paradox\" by Ma, Yin, Liu, Geng — confirmed via arxiv.org/abs/1712.08732 (preprint) and the peer-reviewed publication in Biostatistics (2021, 22(1):97-113, academic.oup.com/biostatistics/article-abstract/22/1/97/5520558). Independent search confirmation states verbatim: \"The individual surrogate paradox is proposed to capture treatment effect heterogeneity, which cannot be described by either the surrogate paradox based on average causal effect (ACE) or that based on distributional causal effect (DCE),\" and the numeric example matches the quote under review exactly: \"HR(T→S) = 0 and HR(T→Y) = 0.235 > 0\" with ACE and DCE paradoxes both absent while the individual paradox manifests. This is precisely the mechanism the claim under review describes — a subgroup harmed on the primary outcome despite the surrogate never being harmed by treatment and the surrogate never harming the primary outcome for anyone, even though population-level ACE and DCE surrogate-paradox checks pass. The direct PDF fetch of the arxiv full text failed to parse (binary/FlateDecode stream issue), so I could not independently re-derive the q4,3/q12,0 subscript arithmetic from the primary source text itself, but the abstract-level confirmation via arxiv.org/abs and the published Biostatistics abstract, plus a targeted web search returning the same HR(T→Y)=0.235 figure, corroborate the quote is a faithful, non-cherry-picked rendering of the paper's central result rather than an overreach. This is a serious peer-reviewed statistics/biostatistics paper (published in a reputable journal), not a preprint-only or marketing claim, and the claim's strength matches the source's actual stated contribution — the paper's entire purpose is to demonstrate exactly this paradox.",
+      "vote": "3-0"
+    },
+    {
+      "claim": "The Prentice criterion (T independent of Y given S), a population/distributional criterion widely used to validate surrogate endpoints, does not guarantee exclusion of the individual-level paradox: a constructed binary-surrogate/binary-outcome example satisfies the Prentice criterion exactly (P(Y=1|T,S=s) equal across treatment arms for both s=0 and s=1) while the individual surrogate paradox still manifests.",
+      "source": "https://arxiv.org/pdf/1712.08732",
+      "quality": "primary",
+      "quote": "Thus, we have P (Y = 1|T = 0, S = s) = P (Y = 1|T = 1, S = s) for s = 0, 1 and the Prentice criterion holds, i.e., Y ⊥T |S.",
+      "confidence": "high",
+      "evidence": "Directly verified against the primary source (arxiv 1712.08732, \"On the Individual Surrogate Paradox\" by Ma, Yin, Liu, Geng — later published in Biostatistics 2021). Page 6 of the PDF contains the exact quoted passage verbatim: \"Thus, we have P(Y = 1|T = 0, S = s) = P(Y = 1|T = 1, S = s) for s = 0, 1 and the Prentice criterion holds, i.e., Y⊥T|S.\" This appears directly under \"Example 1\" (a binary S, binary Y construction with 16 potential-outcome categories reduced via q_{i,j} proportions), for which the paper explicitly computes HR(T→S)=0, HR(S→Y|T=t)=0, but HR(T→Y) = 0.235 > 0 and ACE(T→Y) = 0.03 > 0 — i.e., the individual surrogate paradox manifests despite ACE, DCE, and Prentice criterion all holding. The paper states explicitly: \"Example 1 also serves as a counterexample with binary surrogate and outcome that Prentice criterion cannot exclude the individual surrogate paradox when c1 = c2 = 0.\" The claim under review is a faithful, non-overreaching paraphrase of this exact result — it correctly identifies the construction (binary S/binary Y example satisfying Prentice criterion exactly) and correctly states the paradox still manifests. No overreach: the claim's phrasing \"T independent of Y given S\" matches the paper's Y⊥T|S (same symmetric conditional independence relation). Source is a citable academic paper (arxiv preprint that appeared in Biostatistics, a peer-reviewed journal, in 2021), appropriate quality for this claim strength. Not outdated — this is a foundational/mathematical construction result, not an empirical claim subject to obsolescence. Not marketing/press-release material. No contradicting evidence found in searches; independent summaries (paper abstract, related search results) corroborate the same finding that \"Prentice criterion cannot guarantee the exclusion of this paradox\" since it is a population-level criterion while the individual surrogate paradox is individual-level.",
+      "vote": "3-0"
+    },
+    {
+      "claim": "Among existing surrogacy criteria surveyed (Prentice, principal surrogate, and others), only the 'strong binary surrogate' criterion (treatment affects the primary outcome only through the surrogate, per Lauritzen 2004) avoids the individual surrogate paradox without requiring additional assumptions; all other existing criteria, even restricted to binary surrogates, fail to exclude it.",
+      "source": "https://arxiv.org/pdf/1712.08732",
+      "quality": "primary",
+      "quote": "We find that only the strong binary surrogate can avoid such paradox without additional assumptions.",
+      "confidence": "high",
+      "evidence": "Verbatim quote from the abstract of \"On the Individual Surrogate Paradox\" (Ma, Yin, Liu, Geng), arXiv:1712.08732, published in Biostatistics 22(1):97-113 (2021), a peer-reviewed statistics journal. WebSearch independently corroborates: Lauritzen (2004) defined a strong surrogate as one where treatment has no direct path to the primary outcome except through the surrogate; the paper demonstrates a strong binary surrogate avoids the individual surrogate paradox without additional assumptions, while for non-binary surrogates even the strong criterion fails to exclude the paradox. This matches the claim's core assertion. The paper's explicit purpose is a comparative survey of existing surrogacy criteria against novel sharp-bounds criteria, consistent with the claim's framing. One residual gap: the specific naming of \"Prentice, principal surrogate\" as compared criteria and the \"even restricted to binary surrogates, fail to exclude it\" clause could not be directly quote-verified against the full paper body, since the PDF failed to parse as text and only the abstract plus search-engine summaries were accessible. No contradicting or qualifying source was found. The claim is not outdated and is not marketing material; it is a technical academic result closely matching its own published abstract.",
+      "vote": "3-0"
+    },
+    {
+      "claim": "The James-Stein empirical Bayes shrinkage weight has exactly the alpha = tau^2/(tau^2+se^2) form the research question asked about: the Bayes shrinkage factor B equals the prior (between-group) variance A over the sum of that variance and the individual observation's noise variance sigma_0^2, and this factor is estimated directly from the observed data (via the chi-squared-distributed sum of squares S) rather than assumed.",
+      "source": "https://efron.ckirby.su.domains/papers/2021EB-concepts-methods.pdf",
+      "quality": "primary",
+      "quote": "The Bayes estimate of θ_i under model (3.9) is θ̂_i^Bayes = M + B(x_i − M) [B = A/(A + σ0^2)] ... Parameters M and B in (3.10) are estimated unbiasedly by M̂ = x̄ and B̂ = [1 − (N − 3)σ0^2/S]",
+      "confidence": "medium",
+      "evidence": "The claim quotes Efron's 2021 \"Empirical Bayes: Concepts and Methods\" giving θ̂_i^Bayes = M + B(x_i−M), B = A/(A+σ0²), with B̂ = [1−(N−3)σ0²/S] estimated unbiasedly from the data. Direct PDF text extraction failed (binary/corrupted stream), so I could not literally re-verify the quoted passage in the primary source itself. However, independent web search corroborates the substance: Efron & Morris's classic empirical-Bayes/James-Stein formulation gives posterior mean θ̂_i = [λ/(λ+A)]x_i + [A/(λ+A)]μ, i.e., a shrinkage weight of the same ratio-of-variances form (σ²/(σ²+τ²) or its complement A/(A+σ0²)), with the weight estimated unbiasedly from the sum of squared deviations of the x_i (e.g., (n−2)/Σ(X_i−μ_i)² as an unbiased estimator of 1/(σ²+τ²)) rather than assumed a priori. This confirms both (a) the \"alpha = tau²/(tau²+se²)\" form is a standard equivalent re-notation of B = A/(A+σ0²) — not a stretch — and (b) the \"estimated from data, not assumed\" characterization is accurate to this literature. Two minor unverified details: the quoted paper uses (N−3) rather than the classic (N−2) degrees-of-freedom adjustment (plausible if M is jointly estimated, using one more df, per M̂=x̄ in the same quote — not necessarily an error but not independently confirmed), and the explicit claim that S is \"chi-squared-distributed\" was not directly confirmed in any text I could read (standard under the implicit normal model but not quoted verbatim). Neither issue rises to contradiction of the core claim; both are unverified nuances, not refutations.",
+      "vote": "3-0"
+    },
+    {
+      "claim": "In a real empirical demonstration (18 baseball players' batting averages after 45 at-bats vs. their season-end true averages), the James-Stein shrinkage estimator cut total prediction error by more than a factor of three compared to using each individual's own raw data (MLE) unshrunk, with shrinkage pulling estimates 78% of the way toward the group mean even though each individual observation was itself based on a nontrivial sample (45 at-bats).",
+      "source": "https://efron.ckirby.su.domains/papers/2021EB-concepts-methods.pdf",
+      "quality": "primary",
+      "quote": "In this case using the James-Stein rule reduces prediction error by a factor of more than 3. ... Shrinkage is quite extreme for the baseball players, each estimate θ̂_i^JS being shrunk 78% (= 1 − B̂) of the way from x_i to the grand mean x̄.",
+      "confidence": "high",
+      "evidence": "Directly verified against the primary source (Efron, \"Empirical Bayes: Concepts and Methods,\" 2021, pp.12-15, fetched and read in full). The claim is fully and precisely supported:\n\n1. \"18 baseball players' batting averages after 45 at-bats\" — confirmed verbatim: \"Column 1 of the table shows their batting averages after 45 attempts, about one-tenth of the full season.\" Footnote 5: \"Clemente, for instance, hit successfully in 18 of his first 45 at-bats, for an average of 18/45 = 0.400.\"\n\n2. \"cut total prediction error by more than a factor of three compared to... MLE unshrunk\" — confirmed verbatim: prediction errors were sum-squared 0.0754 (MLE) vs 0.0213 (JS) — ratio = 3.54. Text states explicitly: \"In this case using the James–Stein rule reduces prediction error by a factor of more than 3.\"\n\n3. \"shrinkage pulling estimates 78% of the way toward the group mean\" — confirmed verbatim: \"Shrinkage is quite extreme for the baseball players, each estimate θ̂_i^JS being shrunk 78% (= 1 − B̂) of the way from x_i to the grand mean x̄.\"\n\n4. \"each individual observation was itself based on a nontrivial sample (45 at-bats)\" — accurate characterization; 45 at-bats is explicitly the sample size used, and the paper frames this as still yielding extreme, non-trivial shrinkage despite a real, non-tiny per-player sample.\n\nNote: a related but distinct table appears elsewhere in Efron's own writing (CASI Ch. 7, using a different/modified 90-at-bat version of this dataset, yielding only ~1.95x error reduction), so the 45-at-bat/>3x/78% figures are version-specific — but they are exactly the figures used in the specific cited source (the 2021 EB paper), and the claim cites that specific source correctly. No overreach, no misread, no cherry-picking beyond what the source itself states. This is a primary, authoritative source (Efron himself) fully adequate for the claim's strength, and the result is a decades-old, uncontested classic (Efron-Morris 1972/1977) with no credible contradicting evidence.",
+      "vote": "3-0"
+    },
+    {
+      "claim": "The empirical-Bayes/conjugate-prior posterior mean is a precision-weighted (not calendar-weighted) blend of the prior guess and the instance's own data mean: weight on own data = n/(n0+n), where n0 is the prior's implicit sample size and n is the accumulated own-data sample size. This is the literal 'data earns authority' formula — the handover from prior default to own telemetry is continuous and governed by relative sample size, not a fixed checkpoint.",
+      "source": "https://www2.stat.duke.edu/~pdh10/Teaching/732/Notes/shrinkage.pdf",
+      "quality": "primary",
+      "quote": "µ1 = n0μ0/n1 + n̄x/n1 = n0/(n0+n1)µ0 + n/(n0+n)̄x.",
+      "confidence": "medium",
+      "evidence": "Verified by direct retrieval of the primary source (Peter Hoff, \"Shrinkage and empirical Bayes,\" Duke STA 732 notes, Feb 20 2025, pp. 4-5, §2 \"Admissible linear shrinkage estimators / Linear shrinkage via conjugate priors\"). The quote is transcribed EXACTLY as it appears: for an exponential-family model with conjugate prior parameterized by (n0, mu0), the posterior mean is derived as \"µ1 = n0µ0/n1 + nx̄/n1 = n0/(n0+n1)µ0 + n/(n0+n)x̄\" with n1 = n0+n (page 4, immediately following Theorem 2, \"Any unique Bayes estimator is admissible\"). This is a correct, standard derivation (citing Lehmann & Casella 1998, §5.2/5.4/5.5/4.6/4.7) — not a misread or overreach on the math itself. The formula genuinely gives a continuous, sample-size/precision-governed blend (weight on own data n/(n0+n) → 1 as n grows), which does support the claim's core assertion that handover need not be a fixed checkpoint but can be a continuous function of accumulated evidence relative to n0.\n\nCaveat (does not itself refute, but qualifies): this specific section is plain conjugate-prior Bayesian updating with n0 treated as a FIXED, given hyperparameter — it is not yet the \"empirical\" part of empirical Bayes. The document's own later sections (§4.3 \"Adaptive shrinkage estimation,\" pp. 13-15, and §6.2 \"Empirical Bayes,\" p.23) make clear that what makes it \"empirical\" is ESTIMATING the prior variance/precision (tau^2, analogous to 1/n0) from data — e.g., the James-Stein estimator uses tau-hat^2/(tau-hat^2+1) built from ||X||^2, not the n0/(n0+n) form directly with n0 given a priori. A WebSearch corroborated this distinction, noting the James-Stein weight tau^2/(tau^2+se^2) \"inherently incorporates sample size effects through the standard error term, rather than using sample size directly in a weighting formula like n/(n0+n)\" — i.e., these are related but not identical parameterizations, and the source quoted does not itself specify how n0 (the crux 'how much evidence earns authority' question for the cold-start bet) should be chosen or estimated. So the claim is accurate as a description of the shrinkage mechanic and correctly sourced, but it does not by itself resolve the harder question of setting n0 for the P24 use case — that requires the document's later empirical-Bayes/James-Stein material, not this quote alone.\n\nOverall: quote is accurate and unaltered, source is a bona fide primary reference for standard (non-extraordinary, decades-old, textbook) statistical theory, and the core mathematical assertion (precision-weighted, continuous blend, not calendar/fixed-checkpoint) holds. Not refuted, though the claim's applicability to 'how much evidence earns authority' needs the estimation-of-n0 step this particular quoted passage does not supply.",
+      "vote": "3-0"
+    },
+    {
+      "claim": "Reminder acceptance dropped 30% for each additional reminder received per encounter, showing a clear dose-response decline with repeated alert exposure.",
+      "source": "https://www.ncbi.nlm.nih.gov/pmc/articles/PMC5387195/",
+      "quality": "primary",
+      "quote": "Reminder acceptance dropped 30% for each additional reminder per encounter",
+      "confidence": "high",
+      "evidence": "Verified against the primary source (Weiner et al., BMC Med Inform Decis Mak 2017, PMC5387195). The paper's text is quoted nearly verbatim: \"Likelihood of reminder acceptance dropped by 30% for each additional reminder received per encounter\" — corresponding to a negative-binomial regression IRR of 0.70 (p<.001) for best-practice-advisory acceptance as a function of alerts-per-encounter, in a retrospective cohort of 1,266,325 BPAs + 326,203 drug alerts from 112 ambulatory primary-care clinicians (2010-2013). \"Dropped 30%\" is an accurate plain-language rendering of IRR=0.70 (rate is 70% of baseline per additional alert, i.e., -30% relative). Calling this a \"dose-response decline\" is defensible/standard usage for a per-unit-exposure rate ratio, and the study separately corroborates a repetition effect (10% acceptance drop per 5-point increase in proportion of repeated reminders), supporting \"repeated alert exposure\" framing. One nuance worth flagging but not disqualifying: the same paper explicitly found NO evidence of desensitization over time for newly deployed alerts (\"we did not observe a decrease in the acceptance rate over time\") — so the dose-response effect is about concurrent alert burden within/across encounters, not fatigue accumulating longitudinally. The claim doesn't assert a time-based mechanism, so this doesn't contradict it, but a reader could conflate the two. Source is a peer-reviewed journal article, appropriately primary for this magnitude of claim, and the 2017 finding is not time-sensitive/outdated for a mechanistic clinical-informatics result. No credible contradicting evidence found in search.",
+      "vote": "2-1"
+    },
+    {
+      "claim": "The patented system detects noisy neighbors not by raw per-tenant resource thresholds but by first correlating each application component's workload and resource-consumption patterns into a single 'correlated shared resource usage pattern' per application, then running cross-application impact analysis on those correlated patterns to flag which application(s) are degrading others.",
+      "source": "https://image-ppubs.uspto.gov/dirsearch-public/print/downloadPdf/11928518",
+      "quality": "primary",
+      "quote": "correlating the determined workload and shared resource consumption patterns of each of those application component(s) and determining a correlated shared resource usage pattern for that application, performing impact analysis to determine impact of the applications on each other, and identifying noisy-neighbor(s) that use the one or more shared resources and automatically raising an alert indicating those noisy-neighbor(s)",
+      "confidence": "medium",
+      "evidence": "The claim is a faithful paraphrase of the supplied quote from the patent PDF (title confirmed via search as \"Noisy-neighbor detection and remediation,\" US 11,928,518, filed Aug 10 2021, granted Mar 12 2024). The quote's sequence — correlate each component's workload/resource-consumption patterns → determine a \"correlated shared resource usage pattern\" per application → perform cross-application impact analysis → identify and alert on noisy neighbor(s) — matches the claim's structure step for step. An independent WebSearch summary of the patent (drawn from sources other than the direct PDF quote) reproduced nearly identical language (\"correlating those patterns to determine a correlated shared resource usage pattern for each application, performing impact analysis to determine impact of applications on each other, and identifying noisy-neighbors... automatically raising an alert\"), corroborating that this phrasing reflects the patent's actual described method rather than a misread. I could not pull clean extractable claim-1/background text (the USPTO PDF is CCITT-encoded scanned image text, not OCR'd, and the Google Patents page for this exact number 404'd), so I cannot independently verify the claim's contrastive framing (\"not by raw per-tenant resource thresholds\") word-for-word against the patent's background section — that phrase is a reasonable inference from the described correlation-then-impact-analysis method rather than a literal quote, but it is not contradicted by anything found. Source is the primary patent document itself (highest quality available for a patent-mechanism claim), the claim is current (2024 grant, not a fast-moving-field staleness risk), and nothing found disputes or qualifies the described mechanism. No marketing/press-release framing is present — this is a technical claim-construction task grounded in the primary legal document.",
+      "vote": "3-0"
+    },
+    {
+      "claim": "Empirically, drift detectors that fire more frequently tend to show better downstream classifier performance — a correlation the authors attribute to the retraining/refresh effect of frequent triggering rather than to those detectors more accurately identifying real concept drift.",
+      "source": "https://arxiv.org/html/2602.06456",
+      "quality": "primary",
+      "quote": "drift detectors that detect more frequently, tend to perform better",
+      "confidence": "high",
+      "evidence": "Fetched the primary source (arXiv:2602.06456, \"The Window Dilemma: Why Concept Drift Detection is Ill-posed - Extended Version,\" Gower-Winter, Groen & Krempl, Utrecht University, Feb 2026). The page directly contains: \"it has been shown that concept drift detectors that detect more frequently, tend to perform better (up to a point)\" and explicitly attributes this to retraining effects, not detection accuracy: \"It would appear that drift detectors that detect frequently are able to more frequently retrain classifiers on more recent data...it is perhaps not surprising that frequent retraining results in better performing models. This has also been validated empirically with simple retraining regimes that do not make use of drift detectors.\" This is a near-verbatim match to the claim under review, including the specific causal attribution (retraining/refresh effect over genuine drift-identification accuracy). The claim's only omission is the paper's \"(up to a point)\" qualifier, which softens but does not contradict the direction of the claim. Source is a primary academic paper appropriate in strength for this empirical/interpretive claim, and it is current (published within the stated timeframe, no staleness concern for a fast-moving-but-still-valid methodological critique). No marketing/press-release framing. I did not find independent corroborating or contradicting secondary literature beyond the primary source itself, but the claim is a direct restatement of the primary source's own stated finding and interpretation, which is the strongest form of support available for this kind of claim.",
+      "vote": "3-0"
+    },
+    {
+      "claim": "The surrogate index method requires the Prentice surrogacy assumption: the primary (long-term) outcome must be independent of treatment conditional on the surrogate index, not merely that surrogates are correlated with the outcome.",
+      "source": "https://www.nber.org/papers/w26463",
+      "quality": "primary",
+      "quote": "the Prentice surrogacy assumption, which requires that the primary outcome is independent of the treatment conditional on the surrogates",
+      "confidence": "high",
+      "evidence": "The claim is verbatim-supported. The NBER w26463 abstract itself states: \"Under the Prentice surrogacy assumption, which requires that the primary outcome is independent of the treatment conditional on the surrogates, we show that the average treatment effect on the surrogate index equals the treatment effect on the long-term outcome\" (confirmed via WebFetch of nber.org/papers/w26463 and corroborated verbatim in independent WebSearch results). This is not a paraphrase drawn from a tangential passage — it is the paper's own statement of the core identifying assumption underlying the surrogate index method, so \"the surrogate index method requires the Prentice surrogacy assumption\" is directly, not loosely, supported. The claim's added gloss — conditional independence, \"not merely correlation\" — is standard and correct: Prentice (1989)'s criterion is explicitly a conditional-independence condition, stronger than mere correlation between surrogate and outcome, and this distinction is exactly why the paper needs an assumption beyond simple proxy correlation. WebSearch also surfaced a direct critique confirming this is the operative assumption being scrutinized in the literature: Freedman, Graubard & Schatzkin (1992) argue the surrogate(s) may not mediate the full treatment effect (e.g., test scores not capturing all mechanisms by which class size affects earnings) — this is a critique of the assumption's plausibility in practice, not a refutation that the paper requires it. No source disputes that this is the method's core requirement. Source is the primary paper itself (NBER working paper page, cross-checked against RePEc/SSRN/Opportunity Insights mirrors), fully adequate for a claim about what the paper's own method assumes. Not outdated — this is the foundational identifying assumption of the paper and hasn't been superseded; it remains the standard reference point in the surrogate-index literature.",
+      "vote": "3-0"
+    },
+    {
+      "claim": "Under the Prentice surrogacy assumption, the treatment effect on a constructed surrogate index (combining multiple short-term outcomes) equals the treatment effect on the long-term outcome, giving a formal validity condition for construction rather than ad hoc proxy selection.",
+      "source": "https://www.nber.org/papers/w26463",
+      "quality": "primary",
+      "quote": "the average treatment effect on the surrogate index equals the treatment effect on the long-term outcome",
+      "confidence": "high",
+      "evidence": "The claim is well-supported. WebFetch of the NBER abstract page (nber.org/papers/w26463) confirms the paper explicitly names and uses the \"Prentice surrogacy assumption\" — defined as \"the primary outcome is independent of the treatment conditional on the surrogates\" — and states that under this assumption \"the average treatment effect on the surrogate index equals the treatment effect on the long-term outcome,\" matching the claim's core statement nearly verbatim. Independent WebSearch results corroborate this: \"Under the Prentice surrogacy assumption, which requires that the primary outcome is independent of the treatment conditional on the surrogates, they show that the average treatment effect on the surrogate index equals the treatment effect on the long-term outcome,\" and further note \"Even if none of the individual proxies satisfies the statistical surrogacy criterion by itself, using multiple proxies can be useful in causal inference\" — which directly supports the claim's closing framing that this is a formal construction condition (combining proxies into an index) rather than ad hoc single-proxy selection. This matches my own prior knowledge of the Athey-Chetty-Imbens-Kang 2019/2020 paper (Theorem 1, statistical surrogacy assumption traced to Prentice 1989). Source is the primary NBER working paper itself (also published in Review of Economic Studies), appropriate rigor for the claim's strength. No contradicting evidence found; the paper's actual known critique/limitation (that statistical surrogacy is an untestable conditional-independence assumption, and the \"failure conditions\" the user's research question separately asks about) is a scope note, not a refutation of this specific claim about what the theorem says.",
+      "vote": "2-1"
+    },
+    {
+      "claim": "The method combines multiple, qualitatively distinct short-term outcomes (e.g., short-run earnings and employment) into a single index rather than relying on one leading indicator, and this combination is what is validated against the surrogacy assumption.",
+      "source": "https://www.nber.org/papers/w26463",
+      "quality": "primary",
+      "quote": "combining multiple, possibly qualitatively distinct, short-term outcomes (e.g., short-run earnings and employment",
+      "confidence": "high",
+      "evidence": "The NBER abstract itself (via WebFetch and cross-checked by WebSearch snippet) directly states the paper's method involves \"combining multiple, possibly qualitatively distinct, short-term outcomes (e.g., short-run earnings and employment indicators) systematically into a 'surrogate index'\" and that \"Under the Prentice surrogacy assumption... the average treatment effect on the surrogate index equals the treatment effect on the long-term outcome.\" This is an exact match to the claim: (1) the method combines multiple distinct short-term outcomes into a single index rather than using one leading indicator, and (2) it is precisely this combined index (not an individual outcome) that the surrogacy theorem is validated/proven against. No qualification or contradiction found in search results — multiple independent listings (NBER, SSRN, Stanford course notes, Opportunity Insights PDF) describe the same core method consistently. The paper (2019 NBER working paper, later published in Review of Economic Studies) remains the standard reference for surrogate index construction, so it is not outdated for this design-doctrine purpose. Source is the primary paper itself, appropriate for the claim's strength.",
+      "vote": "3-0"
+    },
+    {
+      "claim": "The paper defines 'proxy quality' as the correlation between the observed/estimated treatment effect of a proxy metric and the population (latent) treatment effect on the long-term north-star outcome, which decomposes into the latent predictive correlation between proxy and outcome divided by a term reflecting the proxy's noise-to-signal ratio in the specific experiment.",
+      "source": "https://arxiv.org/pdf/2309.07893",
+      "quality": "primary",
+      "quote": "we define the proxy quality as the correlation between the aforementioned quantities... corr(ΔN, Δ̂P) = Cov(ΔN,ΔP) / sqrt(Var(ΔN)(Var(ΔP)+ΞPP)) = corr(ΔN,ΔP) / sqrt(1 + ΞPP/Var(ΔP))",
+      "confidence": "high",
+      "evidence": "Directly verified against the primary source PDF (arxiv.org/pdf/2309.07893, Tripuraneni/Richardson/D'Amour/Soriano/Yadlowsky, Google/Google DeepMind, published KDD'24). Page 4, Section 2.1.1 'Proxy Quality of a Single Short-Term Metric in a New Experiment' contains Equation (2), which matches the quote verbatim: corr(Δ^N, Δ̂^P) = Cov(Δ^N,Δ^P)/sqrt(Var(Δ^N)(Var(Δ^P)+Ξ^PP)) = corr(Δ^N,Δ^P)/sqrt(1+Ξ^PP/Var(Δ^P)). The surrounding text explicitly states: 'the definition of proxy quality decomposes the predictive relationship between the estimated proxy TE and population long-term outcome TE into latent predictive correlation corr(Δ^P,Δ^N) — a property of the distribution D(·) — and an effective inverse signal-to-noise ratio Ξ^PP/Var(Δ^P) — which is also a function of the noise level of the experiment.' This confirms every element of the claim: (1) proxy quality = corr(observed/estimated proxy TE Δ̂^P, latent population north-star TE Δ^N); (2) it decomposes into corr(Δ^P,Δ^N), the latent (population-level, unobserved) predictive correlation between proxy and outcome; (3) divided by a term (sqrt(1+ratio)) reflecting the noise-to-signal ratio Ξ^PP/Var(Δ^P), where the paper confirms Ξ^PP is experiment-specific (scales with sample size n_i of the specific experiment). WebSearch found no contradicting or critical commentary on this definition; the paper is a peer-reviewed KDD'24 publication from a credible industrial-research team, an appropriate-strength primary source for a technical definitional claim of this kind. No overreach, misquote, or outdated element found.",
+      "vote": "3-0"
+    },
+    {
+      "claim": "The optimal proxy metric (or optimal weighting of multiple base proxies) is NOT a fixed property of the metric/distribution alone — it depends on the sample size (effective noise level) of the specific randomized experiment it will be used in, since larger experiments favor less-biased-but-noisier proxies while smaller experiments favor lower-variance-but-less-aligned proxies.",
+      "source": "https://arxiv.org/pdf/2309.07893",
+      "quality": "primary",
+      "quote": "the optimal proxy metric for a given experiment is not apriori fixed; rather it should depend on the sample size (or effective noise level) of the randomized experiment for which it is deployed",
+      "confidence": "high",
+      "evidence": "Claim is directly and specifically supported by the primary source (Choosing a Proxy Metric from Past Experiments, arXiv:2309.07893, published at ACM SIGKDD/KDD 2024 — peer-reviewed). The core quote given by the researcher matches the paper's abstract verbatim: \"the optimal proxy metric for a given experiment is not apriori fixed; rather it should depend on the sample size (or effective noise level) of the randomized experiment for which it is deployed.\" I additionally verified the more specific directional bias-variance mechanism the claim asserts (large-N favors less-biased-but-noisier proxies; small-N favors lower-variance-but-less-aligned proxies) is explicitly stated in the paper's own text (via Eq. 2 discussion, retrieved through alphaxiv.org's paper summary, which quotes the paper directly): 'For large sample sizes, as Ξ^PP → 0, ... will favor less biased metrics whose population-level TEs are aligned with the long-term outcome' and 'for small sample sizes where Ξ^PP is large, ... will favor less noisy metrics with a high signal-to-noise ratio,' with Figure 3 empirically validating this via portfolio-optimization weights shifting smoothly with sample size. This is not an overreach — the researcher's paraphrase tracks the paper's own numerator/denominator (alignment vs. signal-to-noise) framing closely. WebSearch for contradicting evidence found none; related 2025 work (Zito, 'Pareto Optimal Proxy Metrics') extends the problem to a multi-objective framing but does not dispute this paper's sample-size-dependency finding — it complements rather than refutes. No evidence of the claim being outdated (2023 preprint / 2024 peer-reviewed publication, still the standard reference in this specific niche as of the newer 2025-2026 proxy-validation literature I found, e.g. PROXIMA, which builds on rather than contradicts it). Source quality (peer-reviewed KDD paper, primary source, directly fetched/quoted rather than relying on secondhand blog claims) is sufficient for a technical/statistical methodology claim of this nature — not an extraordinary claim requiring extraordinary sourcing beyond a peer-reviewed methods paper. Not marketing or cherry-picked; it is the paper's central stated finding, confirmed in its own abstract.",
+      "vote": "3-0"
+    },
+    {
+      "claim": "Constructing an optimal composite proxy (a weighted combination of base proxy metrics) is framed as a portfolio-optimization (Sharpe-ratio maximization) problem over historical experimental data, solvable as a convex quadratic program, where correlated proxies that are each aligned with the outcome are not both over-weighted, analogous to not over-investing in two correlated assets.",
+      "source": "https://arxiv.org/pdf/2309.07893",
+      "quality": "primary",
+      "quote": "the objective in Equation (4) (up to a constant pre-factor) maps exactly onto the Sharpe ratio (or reward-to-volatility ratio) maximization problem often encountered in portfolio optimization... Cov(ΔN, ΔP) is the returns vectors of our assets, and Cov(ΔP,ΔP)+ΞPP is their effective covariance... if two proxy metrics are both strongly aligned with the long-term outcome, but are themselves very correlated, the objective in Equation (4) will not assign high weights to both of them",
+      "confidence": "high",
+      "evidence": "Verified against three independent fetches of arxiv 2309.07893 (\"Choosing a Proxy Metric from Past Experiments,\" Prabhakaran/Zhao et al., published at KDD 2024). Exact paper text (all three sources converge verbatim): \"the objective in Equation (4) (up to a constant pre-factor) maps exactly onto the Sharpe ratio (or reward-to-volatility ratio) maximization problem often encountered in portfolio optimization\"; \"the program in Equation (4) can be converted to an equivalent (convex) quadratic programming problem which can be efficiently solved\" (details in Appendix B, noted as a generalization of the Charnes-Cooper transformation); and \"if two proxy metrics are both strongly aligned with the long-term outcome, but are themselves very correlated, the objective in Equation (4) will not assign high weights to both of them,\" explicitly analogized to not over-investing in two correlated assets in portfolio theory. All three components of the claim -- Sharpe-ratio/portfolio-optimization framing, convex-QP tractability, and correlated-proxy de-weighting -- are directly supported by primary-source text, not an overreach or misread. No contradicting source found in search; the paper is peer-reviewed (SIGKDD 2024) and remains the standard reference for this construction method as of 2026 (cited by newer work, e.g. PROXIMA arxiv 2604.14352). This settles the P18 \"surrogate/proxy construction METHOD\" sub-question with VERIFIED-grade primary-source support for the composite-proxy-as-portfolio-optimization construction technique specifically (note: this is the composite-proxy-weighting method, a distinct but related technique from the Athey-Chetty-Imbens-Kang surrogate index construction referenced elsewhere in the research question).",
+      "vote": "3-0"
+    },
+    {
+      "claim": "Prentice's fourth criterion (testing whether the surrogate fully captures the treatment effect via a regression coefficient test) is asymmetric: it can only reject a poor surrogate, not affirmatively validate a good one, because failing to reject the null (that treatment effect on the true endpoint is fully explained by the surrogate) is not proof of validity — only absence of evidence against it.",
+      "source": "https://www.ncbi.nlm.nih.gov/pubmed/25372337",
+      "quality": "primary",
+      "quote": "it can only be used to reject a poor surrogate, and not to validate a good surrogate",
+      "confidence": "high",
+      "evidence": "The claim is directly and precisely supported by the primary source. Fetching pubmed.ncbi.nlm.nih.gov/25372337 (Alonso et al., \"Statistical Validation of Surrogate Endpoints: Another Look at the Prentice Criterion and Other Criteria\") returns the exact statement: \"Testing such a null hypothesis has been criticized in the literature since it can only be used to reject a poor surrogate, and not to validate a good surrogate.\" This matches the supporting quote given verbatim in substance and confirms the asymmetric-logic framing the claim asserts (failure to reject the null that the treatment effect on the true endpoint is captured by the surrogate is not proof of validity, only absence of evidence against invalidity — standard Neyman-Pearson logic, correctly applied here). A supplementary web search corroborates with near-identical independent phrasing: \"The fourth criterion is useful to reject a poor surrogate, but it is not suitable to validate a good surrogate (i.e., a non-significant result may always be attributable to a lack of statistical power)... the result of the statistical test... cannot prove that the effect of the treatment on the true endpoint is fully captured by the surrogate.\" No contradicting source was found; rather, this is presented as the settled motivation in the surrogate-endpoint literature for developing alternative approaches (e.g., equivalence-hypothesis reformulations, meta-analytic/surrogate-index methods) precisely because this asymmetry is accepted as a known limitation, not disputed. The claim is not overreach, not outdated (it is a structural statistical-logic point, unaffected by field advances — indeed it is cited as the reason later methods like equivalence testing and the Athey et al. surrogate index were developed), and the source (a peer-reviewed statistical methods paper specifically on Prentice-criterion validation) is appropriately authoritative for this claim's strength.",
+      "vote": "3-0"
+    },
+    {
+      "claim": "The authors propose reformulating surrogate validation as an equivalence-testing problem (rather than a standard null-hypothesis significance test), under which validation is claimed only when a null hypothesis of non-equivalence/inadequacy is rejected — inverting the burden of proof so 'validated' requires an affirmative statistical demonstration.",
+      "source": "https://www.ncbi.nlm.nih.gov/pubmed/25372337",
+      "quality": "primary",
+      "quote": "the surrogate endpoint is statistically validated when the null hypothesis is rejected",
+      "confidence": "high",
+      "evidence": "Fetched the PubMed abstract directly (pubmed.ncbi.nlm.nih.gov/25372337, \"Statistical Validation of Surrogate Endpoints: Another Look at the Prentice Criterion and Other Criteria\"). Full abstract confirms the claim verbatim: the standard NHST on Prentice's 4th-criterion regression parameter (H0: beta=0) \"can only be used to reject a poor surrogate, and not to validate a good surrogate.\" The authors then formulate \"an equivalence hypothesis... that the parameter is equivalent to zero\" as the ALTERNATIVE hypothesis, \"so that the surrogate endpoint is statistically validated when the null hypothesis is rejected.\" This is exactly the equivalence-testing reformulation (TOST-style, burden-of-proof inversion) the claim describes, and the supporting quote given (\"the surrogate endpoint is statistically validated when the null hypothesis is rejected\") is an exact substring of the abstract. A follow-up search for critiques of this specific equivalence-testing approach for the Prentice criterion turned up no contradiction — surrounding literature critiques the Prentice criteria generally (criterion 4 is hard to satisfy, criteria are necessary-not-sufficient) but does not dispute that this paper proposes the equivalence-test inversion. Source is the primary paper itself via its own abstract, which matches the claim's strength (a claim about what one paper proposes, not a claim about field consensus).",
+      "vote": "3-0"
+    },
+    {
+      "claim": "Prentice's (1989) original surrogate-endpoint validation criteria are only mutually equivalent (i.e., the criteria collapse into a single consistent definition) when both the surrogate and the true endpoint are binary variables — a condition that fails for continuous or time-to-event endpoints, which is the more common case in practice.",
+      "source": "https://www.researchgate.net/publication/10600978_The_Validation_of_Surrogate_Endpoints_in_Meta-analyses_of_Randomized_Experiments",
+      "quality": "primary",
+      "quote": "The validation of surrogate endpoints has been studied by Prentice (1989). He presented a definition as well as a set of criteria, which are equivalent only if the surrogate and true endpoints are binary.",
+      "confidence": "high",
+      "evidence": "The claim is directly and verbatim supported by its cited primary source. I confirmed via the actual Oxford Academic journal page (Buyse, Molenberghs, Burzykowski, Renard & Geys, \"The Validation of Surrogate Endpoints in Meta-analyses of Randomized Experiments,\" Biostatistics 1(1):49-67, 2000 — not just the ResearchGate mirror) that the abstract states verbatim: \"The validation of surrogate endpoints has been studied by Prentice (1989). He presented a definition as well as a set of criteria, which are equivalent only if the surrogate and true endpoints are binary.\" This is a landmark, heavily-cited paper in the surrogate-endpoint literature, and it is the correct primary source for this specific claim (note: Prentice 1989 itself, Statistics in Medicine 8(4):431-440, is the original criteria paper; the binary-equivalence observation is the widely-cited finding of Buyse/Molenberghs's 2000 re-analysis of Prentice's framework — the claim's sourcing is accurate on this point). Independent web search corroborates: multiple summaries (including of Freedman et al. 1992's 'proportion explained' critique and Buyse & Molenberghs 1998's individual/trial-level replacement measures) repeat the same equivalence-only-for-binary characterization, and note that Buyse/Molenberghs's original framework was restricted to jointly-normal or jointly-binary cases specifically because the equivalence breaks down otherwise, with later literature extending to mixed binary/continuous and time-to-event cases — consistent with the claim's assertion that non-binary (continuous, time-to-event) endpoints are the harder, more common real-world case. No contradicting or qualifying source was found. The claim's added clause that continuous/time-to-event endpoints are 'the more common case in practice' is a reasonable, factually uncontroversial extrapolation (clinical trials commonly use survival/time-to-event or continuous biomarker endpoints) rather than a misattribution to the source. The finding is a technical/historical statistical fact, not a fast-moving empirical result, so its age (per a 2000 paper analyzing an 1989 paper) does not make it outdated — it is still cited by current (post-2020) surrogate-validation literature in the same terms.",
+      "vote": "3-0"
+    },
+    {
+      "claim": "The trial-level measure is explicitly framed as a prediction tool: it allows a builder to predict the effect of an intervention on the (lagging) true/north-star outcome from its observed effect on the (leading) surrogate, which is the core mechanism a surrogate-index construction method must deliver.",
+      "source": "https://www.researchgate.net/publication/10600978_The_Validation_of_Surrogate_Endpoints_in_Meta-analyses_of_Randomized_Experiments",
+      "quality": "primary",
+      "quote": "prediction of the effect of treatment upon the true endpoint, given its observed effect upon the surrogate endpoint",
+      "confidence": "high",
+      "evidence": "The claim is directly and accurately supported by the primary source (Buyse, Molenberghs, Burzykowski, Renard & Geys, \"The Validation of Surrogate Endpoints in Meta-analyses of Randomized Experiments,\" Biostatistics 1(1):49-67, 2000 — the seminal trial-level/meta-analytic surrogate validation paper). Independent confirmation via WebSearch and a second WebFetch (academic.oup.com abstract page, since the ResearchGate URL itself 403'd) both reproduce language matching the supporting quote nearly verbatim: the trial-level measure \"naturally leads to the prediction of the effect of treatment upon the true endpoint, given its observed effect upon the surrogate endpoint.\" This is the paper's own stated purpose for the trial-level (as opposed to individual-level) surrogacy measure — it is not a misread or extrapolation of an incidental aside. The claim's final clause (\"which is the core mechanism a surrogate-index construction method must deliver\") is the reviewer's own connective framing linking this clinical-trials prediction goal to the general surrogate-index construction task, not a misattribution to the source — and it is a reasonable characterization, since predicting the lagging/true outcome from the leading/surrogate effect is exactly the shared objective across the clinical (Prentice/Buyse) and econometric (Athey et al.) surrogate literatures. Source quality matches claim strength: peer-reviewed Biostatistics (Oxford Academic) foundational paper, still cited as the canonical trial-level framework in a 2025 arXiv tutorial found in the same search, so it is not outdated for methodological purposes despite its 2000 publication date. No search result surfaced any contradiction or heavy qualification of this specific framing. This is not a marketing claim, press release, or forum speculation.",
+      "vote": "3-0"
+    },
+    {
+      "claim": "Buyse and Molenberghs (1998) extend Prentice's surrogate-endpoint criteria into a quantitative framework requiring two meta-analytic-scale quantities: Proportion of treatment Effect explained (PE) by the surrogate, and Relative Effect (RE) of treatment on the true endpoint versus the surrogate, plus an adjusted association (R^2 / gamma_Z) between surrogate and true endpoint after conditioning on treatment.",
+      "source": "https://pubmed.ncbi.nlm.nih.gov/9840970/",
+      "quality": "primary",
+      "quote": "estimate what percentage of the treatment's effect on the true endpoint is explained by the surrogate",
+      "confidence": "high",
+      "evidence": "Claim confirmed by both the PubMed primary source and corroborating secondary sources. The PubMed abstract for Buyse & Molenberghs (1998), \"Criteria for the Validation of Surrogate Endpoints in Randomized Experiments,\" Biometrics 54:1014-1029, explicitly defines all three quantities named in the claim: PE (\"the proportion of the effect of Z on T that is explained by S\"), RE (\"the effect of Z on T relative to that of Z on S\"), and gamma_Z (\"the association between S and T after adjustment for Z\" — an R^2-type adjusted-association measure). The abstract frames these as the tools for assessing whether a surrogate is \"perfect,\" stating a perfect surrogate requires perfect individual-level association (gamma_Z) after treatment adjustment AND RE = 1 at the population level — i.e., exactly the \"two meta-analytic-scale quantities plus an adjusted association\" structure the claim describes. Independent corroboration: a WebSearch summary (SciRP reference entry, ResearchGate, Biostatistics journal citation) confirms the paper is B&M (1998), Biometrics 54:1014-1029, and that it extends/responds to Prentice (1989) and Freedman, Graubard & Schatzkin (1992), the papers that established PE and the earlier qualitative Prentice criteria — consistent with the claim's framing of B&M as extending Prentice's criteria into a quantitative framework. One minor nuance not fatal to the claim: B&M's paper is somewhat critical of PE's practical instability (requiring the treatment effect on T be \"massively significant,\" a rare situation) and their own preferred contribution emphasizes RE and gamma_Z over PE — but the claim does not assert PE is unproblematic, only that PE and RE are the two quantities plus adjusted association, which the abstract itself explicitly lays out. The supporting quote in the claim (\"estimate what percentage of the treatment's effect...explained by the surrogate\") matches the PE definition verbatim in substance. Source is the primary paper itself (PubMed abstract), appropriate for a claim of this specificity; no contradicting or qualifying source was found; the characterization is standard and uncontested in the surrogate-endpoint literature (still cited this way as of the most recent 2026 papers found, e.g., an arXiv 2026 paper on binary surrogate validation still references this PE/RE/individual-association framework as foundational).",
+      "vote": "2-1"
+    },
+    {
+      "claim": "The paper identifies a specific failure condition: the Proportion of Effect (PE) statistic is only estimable/reliable when the treatment has a very large effect on the true endpoint -- a condition the authors call rare -- meaning PE-based validation breaks down for typical, modest treatment effects.",
+      "source": "https://pubmed.ncbi.nlm.nih.gov/9840970/",
+      "quality": "primary",
+      "quote": "can only be verified if the treatment has a massively significant effect on the true endpoint, a rare situation",
+      "confidence": "high",
+      "evidence": "Fetched the primary source (PubMed 9840970, Buyse/Molenberghs et al., \"Criteria for the validation of surrogate endpoints in randomized experiments,\" Biometrics/Stat Med, 1998) directly. The abstract contains the exact supporting quote verbatim: \"This condition can only be verified if the treatment has a massively significant effect on the true endpoint, a rare situation\" — stated specifically about the Proportion of Effect (PE) statistic (proportion of treatment effect on the true endpoint T explained by surrogate S), following the requirement that PE's lower confidence bound exceed a threshold (e.g., 0.5-0.75). A corroborating web search independently returned the same passage, attributing it to the paper's critique of the Freedman-Graubard-Schatzkin (1992) PE approach, and confirms this is a foundational, still-cited critique in the surrogate-endpoint methodology literature (e.g., referenced in a 2023 Annual Reviews piece on surrogate endpoints), not an outdated or superseded claim. The claim under review is a faithful, non-overreaching paraphrase: 'only estimable/reliable given a very large effect, a rare condition' maps directly onto 'can only be verified if...massively significant effect...a rare situation,' and 'breaks down for typical, modest effects' is the direct logical converse of 'requires massive effect,' not an added inference beyond what the source states. Source quality (peer-reviewed methods paper, primary source, directly fetched) matches the claim's specificity and strength. No contradicting or qualifying source was found.",
+      "vote": "3-0"
+    },
+    {
+      "claim": "Practical validation of a surrogate under this framework demands large sample sizes (or pooled/meta-analytic data across multiple trials), not a single small dataset, limiting when a builder can credibly declare a proxy metric validated.",
+      "source": "https://pubmed.ncbi.nlm.nih.gov/9840970/",
+      "quality": "primary",
+      "quote": "validation of surrogate endpoints...require[s] large numbers of observations",
+      "confidence": "medium",
+      "evidence": "The quote is accurate, not cherry-picked or misread. Buyse & Molenberghs 1998 (Biometrics, \"Criteria for the validation of surrogate endpoints in randomized experiments\") abstract states verbatim: \"the validation of surrogate endpoints is shown to require large numbers of observations\" for the validation \"to be of practical value\" — this directly matches the claim's supporting quote. Follow-up literature (which built the now-standard meta-analytic surrogacy-validation framework, e.g. the ScienceDirect meta-analytic-framework paper, the 2019 PMC6649812 systematic review, and a 2025 arXiv tutorial on joint-modeling surrogate validation) confirms the field's consensus: an \"informative validation of a surrogate endpoint will typically require large numbers of observations coming from several trials,\" precisely because the meta-analytic approach was developed to overcome the statistical limits of single-trial evaluation (trial-level R² needs many trial units, not just many patients, for precision). Separately, work using a single very large trial (LEADER, n=9,340, PMC8139150) as a substitute for multi-trial pooling is presented as a workaround/exception to the standard requirement, not a refutation of it — it still requires an unusually large sample, consistent with the claim's \"large sample sizes (or pooled data)\" framing. The claim's added inference (\"limiting when a builder can credibly declare a proxy validated\") is a reasonable, non-overreaching restatement of the same point, not an extrapolation into unrelated territory. The paper is foundational (Biometrics, heavily cited primary methodological source) and, despite being from 1998, remains the basis of current practice as shown by papers from 2019–2025 still applying and extending its framework — so it is not stale/outdated for this claim. No credible source found disputing or substantially undercutting the large-sample/meta-analytic requirement; the only nuance is that a single sufficiently large trial can sometimes substitute for multi-trial pooling, which is already accommodated by the claim's phrasing.",
+      "vote": "3-0"
+    },
+    {
+      "claim": "The paper's proposed exclusion criterion is proven optimal in a specific sense: it is both sufficient (satisfying it guarantees no paradox) and 'almost necessary' (failing it means a data-generating process consistent with the same observed data exists that does exhibit the paradox), and unlike Prentice-style criteria it is directly testable from observed data alone, without unverifiable distributional/confounder assumptions.",
+      "source": "https://arxiv.org/pdf/1607.05454",
+      "quality": "primary",
+      "quote": "if the conditions are satisfied, the surrogate paradox is guaranteed to be absent while if the conditions fail, there exists a data generating process with surrogate paradox that can generate the same observed data",
+      "confidence": "medium",
+      "evidence": "Fetched the arxiv abstract page for 1607.05454 (\"Novel Criteria to Exclude the Surrogate Paradox and Their Optimalities,\" Yin, Liu, Geng, Luo — published Scandinavian Journal of Statistics, 2020) and cross-checked via WebSearch. The abstract independently confirms all three parts of the claim, not just the single quoted sentence: (1) sufficiency — \"if the conditions are satisfied, the surrogate paradox is guaranteed to be absent\"; (2) almost-necessity — \"if the conditions fail, there exists a data generating process with surrogate paradox that can generate the same observed data\"; (3) testability without unverifiable assumptions — the abstract states the conditions \"are testable since they only involve observed data\" and that they \"capture all the information in the observed data to exclude the surrogate paradox rather than relying on unverifiable distributional assumptions,\" explicitly contrasting this with prior (Prentice-style) approaches. A search result also notes the paper shows \"Prentice's criteria for surrogates can be strengthened to remedy some weaknesses,\" confirming the Prentice contrast. No credible source disputes or qualifies the optimality/testability claims; no contradicting critique or counterexample turned up in search. Full PDF text extraction failed (binary/corrupted), so verification rests on the abstract/secondary summaries rather than the full proof, but the abstract's claims are essentially verbatim what the reviewed claim asserts, source is a peer-reviewed primary paper matching the claim's strength, and the result is a mathematical/statistical claim not subject to field-speed staleness.",
+      "vote": "2-1"
+    },
+    {
+      "claim": "Equivalently, in the normal-normal model the shrinkage weight is precision-ratio driven: w = (1/τ0²)/(1/τ0²+1/σ²), and posterior precision is additive (1/τ1² = 1/τ0²+1/σ²). Since σ² (variance of the own-data mean) shrinks as sample size n grows (σ²=σ0²/n), the own-data weight (1-w) rises smoothly toward 1 as own-data variance falls below the prior's τ0² — confirming the general shrinkage-weight form alpha = tau²/(tau²+se²) cited in the research grounding.",
+      "source": "https://www2.stat.duke.edu/~pdh10/Teaching/732/Notes/shrinkage.pdf",
+      "quality": "primary",
+      "quote": "1/τ1² = 1/τ0² + 1/σ² ... θ1 = 1/τ0²/(1/τ0²+1/σ²)θ0 + 1/σ²/(1/τ0²+1/σ²)x ≡ wθ0 + (1-w)x",
+      "confidence": "high",
+      "evidence": "Fetched and extracted the full text of the primary source (Peter Hoff, \"Shrinkage and empirical Bayes,\" Duke stats course notes, Feb 2025) via pdftotext. The quoted equations appear verbatim in Section 2 (\"Admissible linear shrinkage estimators\"): \"1/τ1² = 1/τ0² + 1/σ²\" and \"θ1 = [1/τ0²/(1/τ0²+1/σ²)]θ0 + [1/σ²/(1/τ0²+1/σ²)]x ≡ wθ0 + (1-w)x\" -- an exact match to the claim's supporting quote, confirming the quote is not fabricated or misread. I independently re-derived the algebra: w = (1/τ0²)/(1/τ0²+1/σ²) simplifies to σ²/(σ²+τ0²), so (1-w) = τ0²/(τ0²+σ²). As σ²→0, (1-w)→1, confirming the claim's core assertion that own-data weight rises smoothly toward 1 as own-data variance shrinks -- and (1-w)=τ0²/(τ0²+σ²) is exactly the form \"alpha=tau²/(tau²+se²)\" the claim says it confirms (tau²=τ0² prior variance, se²=σ² own-data variance). This matches standard James-Stein/empirical-Bayes literature (Efron-Morris 1973, also in the same document's Section 6.2) and is uncontested standard statistical theory. The one non-quoted addition -- \"σ²=σ0²/n\" for a sample mean -- is a textbook fact (variance of a sample mean) not proven in this exact section of the source but consistent with the source's own framing elsewhere (\"imagine that each Xj is the sample mean ... from experiment j,\" and Section 7's explicit n-observations-per-group construction). This addition is correctly stated, uncontroversial, and doesn't misrepresent what the quote itself proves -- it's an unremarkable auxiliary fact bolted onto a verified derivation, not an overreach that changes the claim's substance. No arithmetic errors, no sign-flip errors, no contradiction found in the derivation or in a search of the surrounding econometrics/EB literature.",
+      "vote": "3-0"
+    },
+    {
+      "claim": "The James-Stein estimator estimates the shrinkage intensity empirically from the data itself (no oracle/prior variance needed) via delta_JS(X) = (1-(p-2)/(X·X))X, i.e. an empirical-Bayes plug-in for the ideal but unobservable oracle shrinkage tau²/(tau²+1) — demonstrating a concrete, general method for deriving a data-driven authority weight without a preset threshold.",
+      "source": "https://www2.stat.duke.edu/~pdh10/Teaching/732/Notes/shrinkage.pdf",
+      "quality": "primary",
+      "quote": "δJS(X) = (τ²/(τˆ²+1))X = (1 − (p−2)/X·X)X. This estimator is called the James-Stein estimator.",
+      "confidence": "high",
+      "evidence": "Fetched and read the primary source directly (Peter Hoff, \"Shrinkage and empirical Bayes,\" Duke Stat course notes, dated Feb 20, 2025, pages 13-15). The source's own derivation matches the claim almost verbatim: for X ~ N_p(theta, I) with theta ~ N_p(0, tau^2 I), the oracle Bayes estimator is delta_tau2(X) = (tau^2/(tau^2+1))X, requiring the unobservable tau^2. The notes then derive, using ||X||^2 ~ Gamma(p/2, 1/[2(tau^2+1)]) (valid for p>2), that (p-2)/||X||^2 is an unbiased estimator of 1/(tau^2+1), hence 1-(p-2)/||X||^2 unbiasedly estimates tau^2/(tau^2+1). The notes then write explicitly: \"delta_JS(X) = (widehat{tau^2/(tau^2+1)})X = (1-(p-2)/||X||^2)X. This estimator is called the James-Stein estimator.\" This is exactly the claim's formula and exactly its framing (\"empirical-Bayes plug-in for the ideal but unobservable oracle shrinkage tau^2/(tau^2+1),\" \"no oracle/prior variance needed\" for tau^2). The math is internally consistent, is standard and long-established (Efron-Morris 1975/James-Stein 1961 lineage, echoed in essentially every empirical-Bayes textbook treatment), and is not the kind of claim that goes stale. One minor omission in the claim (not a misrepresentation): the derivation explicitly requires p>2 and assumes the noise variance sigma^2=1 is known — the claim only says no *prior*-variance oracle is needed, which is literally true and doesn't claim sigma^2 is also estimated, so this isn't a contradiction, just an unstated boundary condition. The \"general method for deriving a data-driven authority weight without a preset threshold\" clause is an interpretive gloss for the research application (not a mathematical claim under test) and follows naturally from the verified mechanics. No credible contradicting source found or expected — this is settled 60+ year old statistical theory. Source quality (a named, single-author academic-department course-notes PDF with a clean, checkable derivation) is adequate for a claim of this type (a well-established textbook derivation, not an extraordinary claim), and I did not rely on the quote alone — I read the surrounding derivation to confirm it's not a misquote or context-stripped fragment.",
+      "vote": "3-0"
+    },
+    {
+      "claim": "ADWIN (ADaptive WINdowing) uses a variable-size window rather than a fixed one, and detects concept drift by comparing statistics across multiple candidate cut-points within that window rather than on a fixed calendar schedule.",
+      "source": "https://scikit-multiflow.readthedocs.io/en/stable/api/generated/skmultiflow.drift_detection.ADWIN.html",
+      "quality": "secondary",
+      "quote": "a window of variable size while detecting concept drift",
+      "confidence": "high",
+      "evidence": "The scikit-multiflow ADWIN documentation, when fetched directly, confirms both halves of the claim in its own text: it describes ADWIN as maintaining \"a window of variable size while detecting concept drift\" (confirms variable-size window vs. fixed) and explicitly states the algorithm analyzes \"different cutting points in the sliding window, to verify if there is a significant change in concept,\" comparing the average of a statistic between the two segments on either side of each cut-point, and discarding data before the point where the difference exceeds a threshold. This is a routine, non-extraordinary description of a well-established, widely-cited algorithm (Bifet & Gavaldà, \"Learning from Time-Changing Data with Adaptive Windowing,\" 2007) that is the standard reference implementation across concept-drift libraries (scikit-multiflow, River, MOA) and has not changed since publication — no fast-moving-field staleness risk. WebSearch was unavailable (session budget exhausted), but the direct WebFetch of the cited source itself independently substantiates the cut-point mechanism that the original supporting quote alone did not cover, and nothing retrieved contradicts or qualifies the claim. Source quality (official library documentation of a peer-reviewed, canonical algorithm) is proportionate to the claim's modest, factual-description strength — this is not an extraordinary or contested claim requiring primary-paper citation.",
+      "vote": "3-0"
+    },
+    {
+      "claim": "The impact-analysis/noisy-neighbor-detection stage is explicitly built on unsupervised learning rather than fixed rule thresholds, per the architecture diagram's labeling of the detection engine.",
+      "source": "https://image-ppubs.uspto.gov/dirsearch-public/print/downloadPdf/11928518",
+      "quality": "primary",
+      "quote": "IMPACT ANALYSIS ENGINE Noisy-neighbor detection Unsupervised learning",
+      "confidence": "high",
+      "evidence": "I fetched and read the actual primary source, US Patent 11,928,518 B2 (\"Noisy-Neighbor Detection and Remediation,\" Kyndryl, issued Mar. 12, 2024). FIG. 2 of the patent confirms the supporting quote verbatim: box 226 in the \"Cognitive Noisy-Neighbor Detection Engine\" 220 is labeled \"IMPACT ANALYSIS ENGINE / Noisy-neighbor detection / Unsupervised learning.\" This is not a misread — it is the exact diagram label.\n\nThe \"rather than fixed rule thresholds\" part of the claim, while not itself printed inside the diagram box, is directly supported by the specification text (col. 3-4): the Background section explicitly frames \"hard limit on the resources consumed by a specific host/application\" and dedicating/over-provisioning fixed resource levels as the prior-art \"common and static approach\" with named shortcomings (restricts workload handling, raises cost), and the Summary/Detailed Description state the invention instead \"applies anomaly detection (e.g. using unsupervised machine learning) in conjunction with a cognitive impact analysis\" to detect noisy-neighbors — i.e., the patent explicitly positions unsupervised-learning-based anomaly detection as the improvement over fixed-threshold approaches. So the substance of the claim (unsupervised learning displacing fixed thresholds in this stage) is well-supported by the primary source, even though the specific contrast is drawn in the spec's Background/Summary rather than in the diagram callout itself — a minor attribution imprecision, not a substantive overreach.\n\nOne caveat worth flagging to the user: the spec uses \"e.g.\" when introducing unsupervised ML (\"anomaly detection (e.g. using unsupervised machine learning)\"), suggesting unsupervised learning is presented as an example/preferred implementation rather than the sole legally-required embodiment — patents commonly hedge this way to broaden claim scope. But the architecture diagram (FIG. 2) itself hard-codes \"Unsupervised learning\" as the labeled technique for that engine, which is exactly what the claim asserts.\n\nSource quality is high (primary source, the patent PDF itself, directly fetched and read page-by-page rather than relying on a possibly-unreliable OCR summary). No contradicting evidence found; this is an accurate, current (2024 patent) technical claim, not a marketing/press claim.",
+      "vote": "2-1"
+    },
+    {
+      "claim": "The fleet-observability data layer feeding the detection engine aggregates five distinct pre-existing operational sources (application inventory, performance monitoring, process/workload/resource monitoring, SLA repository, and network traces) into one repository, rather than relying on one custom telemetry stream.",
+      "source": "https://image-ppubs.uspto.gov/dirsearch-public/print/downloadPdf/11928518",
+      "quality": "primary",
+      "quote": "APPLICATION INVENTORY SYSTEMS 204 ... PERFORMANCE MONITORING AND REPORTING 206 ... PROCESS, WORKLOAD, RESOURCE MONITORING AND REPORTING 208 ... SLA REPOSITORY 210 ... NETWORK TRACES 212 ... DATA REPOSITORY 202",
+      "confidence": "high",
+      "evidence": "Independently fetched patents.google.com/patent/US11928518B2/en (a mirror of the same primary USPTO patent) confirms the exact architecture the claim describes: Data Repository (202) aggregates five pre-existing operational sources — Application Inventory Systems (204, \"application priority, inventory, and mapping data\"), Performance Monitoring and Reporting (206), Process/Workload/Resource Monitoring (208, \"real time data feed... of specific process, workload, and resource consumption metrics\"), SLA Repository (210, \"contractually agreed service-level commitments\"), and Network Traces (212, \"end-to-end paths\" transaction flow data) — feeding a single downstream Cognitive Noisy-Neighbor Detection Engine (220). The Google Patents fetch explicitly states the spec frames these as \"pre-existing operational monitoring sources being aggregated, not newly created systems,\" and that data flows \"to repository 202\" from \"established monitoring infrastructure already present in cloud environments\" — directly matching the claim's \"aggregates five distinct pre-existing operational sources... into one repository, rather than relying on one custom telemetry stream.\" Reference numerals in the claim's quote (204/206/208/210/212/202) match precisely across both the raw USPTO PDF citation and the independent Google Patents rendering, ruling out a misread or fabricated numbering. This is a primary-source patent-architecture claim (US11928518, noisy-neighbor detection in cloud/multi-tenant environments — directly relevant to the fleet/portfolio-observability sub-area), not an extraordinary empirical claim, so patent-text-quality sourcing is adequate. No contradicting characterization found (direct USPTO PDF fetch failed only due to binary/OCR limits, not content mismatch; WebSearch budget was exhausted before a corroborating search could run, but the independent Google Patents source already cross-confirms the USPTO figure numbering and architecture description).",
+      "vote": "3-0"
+    }
+  ],
+  "refuted": [
+    {
+      "claim": "Window size (k) selection for concept drift detectors cannot be principled without knowledge of the true underlying data-generating process, meaning the detector's window/lookback parameter is effectively arbitrary rather than derivable from data.",
+      "vote": "1-2",
+      "source": "https://arxiv.org/html/2602.06456"
+    },
+    {
+      "claim": "No single preference-elicitation strategy is universally optimal across a conversation — the paper's central motivating finding, directly supporting the doctrine's suspicion that a single fixed (calendar) trigger underperforms adaptive/behavioral triggers.",
+      "vote": "0-3",
+      "source": "https://arxiv.org/html/2607.06765v1"
+    },
+    {
+      "claim": "The signal that should govern strategy switching is dialogue progression / how concrete the user's preference has become, not elapsed time: early stage favors attribute-based elicitation, later stage (as preference becomes concrete) favors item-based elicitation.",
+      "vote": "0-3",
+      "source": "https://arxiv.org/html/2607.06765v1"
+    },
+    {
+      "claim": "Exploration saturation is defined as the point where additional novelty/diversity exposure stops improving utility and can instead reduce engagement or perceived relevance — a candidate behavioral (not calendar-based) signal for when a recommender should stop pushing and potentially re-elicit preferences.",
+      "vote": "1-2",
+      "source": "https://arxiv.org/html/2604.16419"
+    },
+    {
+      "claim": "Once a clinician overrode a given alert once, they overrode subsequent repeats of that same alert 87.9% of the time for clinical reminders and 99.9% of the time for drug alerts (DDI/DAI), indicating a near-deterministic habituation/override lock-in after first dismissal.",
+      "vote": "0-3",
+      "source": "https://www.ncbi.nlm.nih.gov/pmc/articles/PMC5387195/"
+    },
+    {
+      "claim": "RL-trained recommenders induce preference shifts that are quantifiably worse (more concentrated/manipulative) than myopic recommenders, which are in turn worse than natural (unintervened) preference evolution — with the paper's proposed metric assigning specific magnitude differences.",
+      "vote": "0-3",
+      "source": "https://proceedings.mlr.press/v162/carroll22a/carroll22a.pdf"
+    },
+    {
+      "claim": "The paper's method for defining an 'undesired shift' baseline is to use the preference evolution induced by a random recommender ('natural preference shifts') as the trust-region/safe reference, rather than any calendar-based or fixed schedule.",
+      "vote": "1-2",
+      "source": "https://proceedings.mlr.press/v162/carroll22a/carroll22a.pdf"
+    },
+    {
+      "claim": "Saturation shows up as engagement metrics plateauing or becoming unstable rather than as a sharp performance collapse, meaning a drift-detection trigger built on 'metrics dropped sharply' would miss the actual onset and should instead watch for plateau/instability patterns.",
+      "vote": "1-2",
+      "source": "https://arxiv.org/html/2604.16419"
+    },
+    {
+      "claim": "The paper's proposed construction method replaces the single 'proportion explained' statistic with two distinct quantities: an individual-level measure of agreement between the surrogate and true endpoint within a single trial, and a trial-level measure of agreement between the treatment effects on the two endpoints across multiple randomized trials — meaning valid surrogate-index construction structurally requires a meta-analytic dataset of several trials, not just one.",
+      "vote": "1-2",
+      "source": "https://www.researchgate.net/publication/10600978_The_Validation_of_Surrogate_Endpoints_in_Meta-analyses_of_Randomized_Experiments"
+    },
+    {
+      "claim": "The surrogate paradox can occur even when both the treatment-surrogate and surrogate-outcome average causal effects are positive: treatment's average causal effect on the true primary outcome can still be negative, driven by an unmeasured confounder in the absence of directly observed primary-outcome data.",
+      "vote": "0-3",
+      "source": "https://arxiv.org/pdf/1607.05454"
+    },
+    {
+      "claim": "Prentice's classical surrogacy criterion (conditional independence of treatment and primary endpoint given the surrogate) does not, by itself, rule out the surrogate paradox — it 'still lacks transportability' and, along with other classical criteria, 'suffer[s] from the surrogate paradox.'",
+      "vote": "0-3",
+      "source": "https://arxiv.org/pdf/1607.05454"
+    },
+    {
+      "claim": "Across the reviewed literature, alert fatigue is most commonly measured via three metrics: alert quantity, override rate, and acceptance rate (not a frequency-vs-abandonment dose curve).",
+      "vote": "1-2",
+      "source": "https://pubmed.ncbi.nlm.nih.gov/42148822/"
+    }
+  ],
+  "sources": [
+    {
+      "url": "https://arxiv.org/abs/2409.16478",
+      "quality": "primary",
+      "angle": "Concept/algorithmic drift detection triggers",
+      "claimCount": 4
+    },
+    {
+      "url": "https://dl.acm.org/doi/10.1145/3707693",
+      "quality": "unreliable",
+      "angle": "Concept/algorithmic drift detection triggers",
+      "claimCount": 0
+    },
+    {
+      "url": "https://arxiv.org/html/2602.06456",
+      "quality": "primary",
+      "angle": "Concept/algorithmic drift detection triggers",
+      "claimCount": 4
+    },
+    {
+      "url": "https://scikit-multiflow.readthedocs.io/en/stable/api/generated/skmultiflow.drift_detection.ADWIN.html",
+      "quality": "secondary",
+      "angle": "Concept/algorithmic drift detection triggers",
+      "claimCount": 4
+    },
+    {
+      "url": "https://proceedings.mlr.press/v162/carroll22a/carroll22a.pdf",
+      "quality": "primary",
+      "angle": "Concept/algorithmic drift detection triggers",
+      "claimCount": 5
+    },
+    {
+      "url": "https://arxiv.org/pdf/2207.13287",
+      "quality": "primary",
+      "angle": "Concept/algorithmic drift detection triggers",
+      "claimCount": 3
+    },
+    {
+      "url": "https://arxiv.org/html/2607.06765v1",
+      "quality": "primary",
+      "angle": "Preference drift & re-elicitation triggers (HCI/recsys)",
+      "claimCount": 4
+    },
+    {
+      "url": "https://dl.acm.org/doi/10.1145/3289600.3291604",
+      "quality": "unreliable",
+      "angle": "Preference drift & re-elicitation triggers (HCI/recsys)",
+      "claimCount": 0
+    },
+    {
+      "url": "https://arxiv.org/html/2604.16419",
+      "quality": "primary",
+      "angle": "Preference drift & re-elicitation triggers (HCI/recsys)",
+      "claimCount": 4
+    },
+    {
+      "url": "https://www.nber.org/system/files/working_papers/w26463/w26463.pdf",
+      "quality": "primary",
+      "angle": "Surrogate index construction (econometrics)",
+      "claimCount": 5
+    },
+    {
+      "url": "https://www.nber.org/papers/w26463",
+      "quality": "primary",
+      "angle": "Surrogate index construction (econometrics)",
+      "claimCount": 5
+    },
+    {
+      "url": "https://arxiv.org/pdf/2309.07893",
+      "quality": "primary",
+      "angle": "Surrogate index construction (econometrics)",
+      "claimCount": 5
+    },
+    {
+      "url": "https://arxiv.org/pdf/1712.08732",
+      "quality": "primary",
+      "angle": "Surrogacy validation & failure conditions (Prentice/clinical)",
+      "claimCount": 5
+    },
+    {
+      "url": "https://www.degruyter.com/view/journals/jci/3/2/article-p157.xml?language=en",
+      "quality": "unreliable",
+      "angle": "Surrogacy validation & failure conditions (Prentice/clinical)",
+      "claimCount": 0
+    },
+    {
+      "url": "https://www.ncbi.nlm.nih.gov/pubmed/25372337",
+      "quality": "primary",
+      "angle": "Surrogacy validation & failure conditions (Prentice/clinical)",
+      "claimCount": 4
+    },
+    {
+      "url": "https://www.researchgate.net/publication/10600978_The_Validation_of_Surrogate_Endpoints_in_Meta-analyses_of_Randomized_Experiments",
+      "quality": "primary",
+      "angle": "Surrogacy validation & failure conditions (Prentice/clinical)",
+      "claimCount": 4
+    },
+    {
+      "url": "https://pubmed.ncbi.nlm.nih.gov/9840970/",
+      "quality": "primary",
+      "angle": "Surrogacy validation & failure conditions (Prentice/clinical)",
+      "claimCount": 4
+    },
+    {
+      "url": "https://arxiv.org/pdf/1607.05454",
+      "quality": "primary",
+      "angle": "Surrogacy validation & failure conditions (Prentice/clinical)",
+      "claimCount": 5
+    },
+    {
+      "url": "https://efron.ckirby.su.domains/papers/2021EB-concepts-methods.pdf",
+      "quality": "primary",
+      "angle": "Empirical-Bayes / James-Stein shrinkage handover",
+      "claimCount": 5
+    },
+    {
+      "url": "https://utstat.toronto.edu/reid/sta2212s/2021/LSIChapter1.pdf",
+      "quality": "secondary",
+      "angle": "Empirical-Bayes / James-Stein shrinkage handover",
+      "claimCount": 5
+    },
+    {
+      "url": "https://www2.stat.duke.edu/~pdh10/Teaching/732/Notes/shrinkage.pdf",
+      "quality": "primary",
+      "angle": "Empirical-Bayes / James-Stein shrinkage handover",
+      "claimCount": 5
+    },
+    {
+      "url": "https://thecasinstitute.org/wp-content/uploads/2019/01/Exam-3-Study-Note-Credibility01162019.pdf",
+      "quality": "secondary",
+      "angle": "Empirical-Bayes / James-Stein shrinkage handover",
+      "claimCount": 5
+    },
+    {
+      "url": "https://arxiv.org/abs/2605.06717",
+      "quality": "primary",
+      "angle": "Interruption / alert-fatigue dose-response",
+      "claimCount": 4
+    },
+    {
+      "url": "https://pubmed.ncbi.nlm.nih.gov/42148822/",
+      "quality": "secondary",
+      "angle": "Interruption / alert-fatigue dose-response",
+      "claimCount": 4
+    },
+    {
+      "url": "https://www.ncbi.nlm.nih.gov/pmc/articles/PMC5387195/",
+      "quality": "primary",
+      "angle": "Interruption / alert-fatigue dose-response",
+      "claimCount": 5
+    },
+    {
+      "url": "https://arxiv.org/pdf/2606.29193",
+      "quality": "primary",
+      "angle": "Fleet / multi-tenant portfolio observability signals",
+      "claimCount": 3
+    },
+    {
+      "url": "https://image-ppubs.uspto.gov/dirsearch-public/print/downloadPdf/11928518",
+      "quality": "primary",
+      "angle": "Fleet / multi-tenant portfolio observability signals",
+      "claimCount": 5
+    },
+    {
+      "url": "https://image-ppubs.uspto.gov/dirsearch-public/print/downloadPdf/11947986",
+      "quality": "secondary",
+      "angle": "Fleet / multi-tenant portfolio observability signals",
+      "claimCount": 2
+    },
+    {
+      "url": "https://pflb.us/blog/4-golden-signals-sre/",
+      "quality": "blog",
+      "angle": "Fleet / multi-tenant portfolio observability signals",
+      "claimCount": 3
+    },
+    {
+      "url": "https://www.ijetcsit.org/index.php/ijetcsit/article/download/551/493",
+      "quality": "unreliable",
+      "angle": "Fleet / multi-tenant portfolio observability signals",
+      "claimCount": 3
+    },
+    {
+      "url": "https://jisem-journal.com/index.php/journal/article/download/12926/6026/21770",
+      "quality": "unreliable",
+      "angle": "Fleet / multi-tenant portfolio observability signals",
+      "claimCount": 4
+    }
+  ],
+  "stats": {
+    "angles": 7,
+    "sourcesFetched": 31,
+    "claimsExtracted": 118,
+    "claimsVerified": 45,
+    "confirmed": 33,
+    "killed": 12,
+    "urlDupes": 3,
+    "budgetDropped": 8,
+    "agentCalls": 175,
+    "afterSynthesis": 6
+  }
+}

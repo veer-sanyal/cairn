@@ -259,7 +259,7 @@ short version, grouped:
 **Knowledge & the human boundary**
 - Knowledge expires on events, not clocks — and models can't feel it going stale, so expiry is structural (refresh-by dates, an annual ceiling).
 - Autonomy is graded by blast radius; asks are a rationed budget. Irreversible + externally-visible actions are never autonomous, and their gate is inhibitive, not a passive confirm.
-- A fresh instance runs on inherited doctrine until its own telemetry earns authority at the first review.
+- A fresh instance runs on inherited doctrine, and its own telemetry earns authority *continuously* — per default, as data accumulates (empirical-Bayes shrinkage, not a one-time handover at the first review).
 
 ## Enforced, not requested
 
@@ -298,8 +298,8 @@ The first question you should ask of any plugin that installs hooks:
 
 ## The evidence base
 
-Cairn's design was derived from — not decorated with — research. Nine adversarially verified
-deep-research rounds (~1,280 subagents across R1–R9; every claim faced a 3-vote refutation panel)
+Cairn's design was derived from — not decorated with — research. Ten adversarially verified
+deep-research rounds (~1,450 subagents across R1–R10; every claim faced a 3-vote refutation panel)
 plus a docs-verified platform reference produced [**docs/PRINCIPLES.md**](docs/PRINCIPLES.md): 24
 principles, each graded **VERIFIED / PREPRINT / BET / REFUTED** and annotated with a
 perishability class and verified date, each traceable to primary sources — context-rot studies,
@@ -316,8 +316,12 @@ Three things make this unusual:
   (turn-count cliffs, heterogeneous cheap-model swarms beating strong models, fixed failure-mode
   percentages, unscoped chain-of-thought judging gains, "filesystem as sole source of truth") are
   recorded as do-not-build-on negatives — and the design routes around them.
-- **Bets are labeled.** Where the literature was empty (drift detection, cap values), the spec
-  says **[BET]** and names the telemetry that would settle it — no fake certainty.
+- **Bets are labeled — and settled when they earn evidence.** Where the literature was empty, the
+  doctrine says **[BET]** and names the telemetry that would settle it — no fake certainty. R10
+  (the gaps-ledger closeout) ran exactly that loop: five ranked bets researched, two flipped to
+  **VERIFIED** (surrogate-index construction; the cold-start handover, which also *refuted* its own
+  earlier design), three kept BET but better-specified (drift triggers, the ask-budget default,
+  cross-instance signals).
 - **The raw research is in the repo** ([docs/research/](docs/research/)), so you can audit any
   claim back to its sources.
 
@@ -326,14 +330,15 @@ Implementation plan: [docs/superpowers/plans/](docs/superpowers/plans/)
 
 ## Status
 
-`v0.8.1` — the level-zero umbrella is complete on top of the 0.1.0 kernel (176 tests; every
+`v0.8.2` — the level-zero umbrella is complete on top of the 0.1.0 kernel (176 tests; every
 component built TDD with two-stage adversarial review): **SP1** vendored research engine (0.3.0)
 → **SP2** level-zero doctrine, P1–P24 (0.4.0) → **SP3** builder/governor wiring — census,
 data-access ladder, pass^k probes, failure-mode telemetry, four deterministic sweeps, boundary
 contract (0.5.0) → **SP4** `/cairn:audit` + traceability gap closure (0.6.0) → **SP5**
 `SYSTEM-MAP.md` source-of-truth flows (0.7.0), hardened over two adversarial passes (0.7.1) →
-**SP6** cross-instance registry: `/cairn:list`, routing, read-only peeks (0.8.0), then a
-six-dimension production-readiness audit pass (0.8.1). Still ahead of the public-public bar the
+**SP6** cross-instance registry: `/cairn:list`, routing, read-only peeks (0.8.0), a
+six-dimension production-readiness audit pass (0.8.1), then **R10** — the gaps-ledger closeout that
+researched and settled the five ranked open bets (0.8.2). Still ahead of the public-public bar the
 spec prescribes: dogfood migration of a real system, one greenfield build, and a telemetry soak.
 
 Contributions: see [CONTRIBUTING.md](CONTRIBUTING.md). If Cairn worked (or didn't) for you, the
