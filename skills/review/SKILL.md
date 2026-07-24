@@ -49,6 +49,16 @@ whether the system's asking felt like too much this period, with
 manifest.boundary.ask_budget_per_session as the stated intent. An overreach tag is a
 boundary-contract violation — always surfaced, never averaged away.
 
+**Goal-drift check (P14 — behavioral triggers, never calendar; no reliable threshold
+exists).** IF the lapse report shows a repeated typed-lapse pattern OR any input metric
+has declined across 2+ review periods, re-run the artifact-based goal interview from
+build Stage 2: show the current goals (the user's own goal statement + the metric
+contract) as the artifact and ask what changed — the user still authors any revision.
+Log the outcome either way:
+`python3 .claude/hooks/cairn_event.py re_elicit outcome=<changed|unchanged>`
+No trigger fired → no interview; re-elicitation on a calendar is exactly the refuted
+pattern P14 warns against.
+
 ## Stage 4 — System lane: proposals with the user as gate (P10)
 For each friction cluster or guardrail regression, draft a proposal. HARD RULES:
 - Every proposal cites specific telemetry events (no vibes features).
@@ -127,12 +137,19 @@ A live entry needs no status field. Reverting an auto-adoption = the same protoc
 reverse (the revert mints its own superseding entry pointing back).
 
 ## Stage 4.5 — Bounded auto-adopt lane (only if manifest `auto_adopt.armed` is true)
+**Telemetry handover (P24).** After this instance's first completed review, where the
+instance's own telemetry and a generic doctrine default conflict, the telemetry wins —
+doctrine retains only the invariants (hooks, caps, privacy). From that point a telemetry
+citation (event counts/trends from telemetry/events.jsonl) is valid evidence for
+auto-adopt eligibility alongside P-refs and RESEARCH.md findings.
+
 A proposal skips the per-item ask and applies immediately ONLY when ALL hold:
 - `[blast: low]` AND `[door: two-way]`;
 - its backing is graded VERIFIED (a PRINCIPLES.md P-ref or a docs/RESEARCH.md finding that
   survived refutation) — of the canonical enum (VERIFIED / VERIFIED-probed / PREPRINT /
   THIN / BET, build Stage 5), only plain VERIFIED qualifies; VERIFIED-probed never
-  auto-adopts (probes are perishable), and BET / THIN / PREPRINT never auto-adopt;
+  auto-adopts (probes are perishable), and BET / THIN / PREPRINT never auto-adopt — OR,
+  after the first completed review, a telemetry citation per the handover rule above;
 - it touches none of: the metric contract (north_star / inputs / guardrails), privacy,
   caps, cadence minimums, anything involving money, or text the user authored in their
   own words.
