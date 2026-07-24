@@ -71,11 +71,13 @@ in agent-systems evidence — WITHOUT the user having to ask for research.
    pre-scaffold there is no instance copy yet). If the Workflow tool is unavailable, use
    that skill's degraded mode: 2-5 angle subagents, then per-claim adversarial verifiers
    prompted to REFUTE (≥2/3 refutations kill); degraded-mode grades cap at THIN.
-5. **Grade and persist.** Persist every run through doctrine_write.py (the /cairn:research
-   skill's Step 4): findings land in the instance's `docs/RESEARCH.md` graded VERIFIED
-   (survived refutation, high confidence) / THIN (weaker), with a date stamp, perishability
-   class, and the refuted claims (do-not-build-on negatives). BET is not a research grade —
-   it marks decisions in manifest decisions[] where evidence ran out or research was skipped.
+5. **Grade and hold.** Save each completed run's result JSON to a temp file and HOLD it —
+   there is no instance yet (scaffold.py refuses non-empty targets, and doctrine_write.py
+   needs the instance root). Persistence happens in Stage 5, after scaffold succeeds.
+   Findings will land in the instance's `docs/RESEARCH.md` graded VERIFIED (survived
+   refutation, high confidence) / THIN (weaker), with a date stamp, perishability class,
+   and the refuted claims (do-not-build-on negatives). BET is not a research grade — it
+   marks decisions in manifest decisions[] where evidence ran out or research was skipped.
    Every research-backed parameter in the scaffold cites its finding in the manifest
    decisions[] entry.
 
@@ -183,7 +185,11 @@ Verification field is "none" but whose Writes is not — say so out loud; that g
 finding waiting to happen (P16). This file is the system's source of truth: hidden-in-prompts
 behavior is exactly what it exists to prevent.
 
-Then: write `docs/RESEARCH.md` (from Stage 2.5) into the instance, `git init`, commit
+Then: after scaffold.py succeeds, persist Stage 2.5's research — for each saved
+result.json run
+`python3 "${CLAUDE_PLUGIN_ROOT}/templates/hooks/doctrine_write.py" <result.json> <target-dir> --domain "<name>" --perishability <class>`
+against the new instance root. Never hand-write RESEARCH.md, never run doctrine_write
+before scaffold. Then `git init`, commit
 "cairn scaffold", run one boot (open a session or invoke session_start manually) to show the
 user their banner, and hand over with the three habits that matter: /log real work, trust
 the banner, expect the first review after the minimum telemetry window (not sooner —
