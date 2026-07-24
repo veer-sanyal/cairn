@@ -2,7 +2,7 @@
 """SessionEnd: close the session record. SessionEnd cannot feed context; file-write only."""
 import json, sys, os, datetime
 from pathlib import Path
-from cairn_lib import find_root, append_event
+from cairn_lib import find_root, append_event, parse_ts
 
 def main():
     h = json.load(sys.stdin)
@@ -19,15 +19,11 @@ def main():
             except (json.JSONDecodeError, ValueError):
                 continue
             if isinstance(e, dict) and e.get("type") == "session" and e.get("phase") == "start" and e.get("session_id") == sid:
-                # normalize a naive ts to UTC (else tz-aware minus tz-naive → TypeError,
-                # which would drop the end record entirely); a bad ts just leaves dur=0.
-                try:
-                    start = datetime.datetime.fromisoformat(e["ts"])
-                    if start.tzinfo is None:
-                        start = start.replace(tzinfo=datetime.timezone.utc)
+                # shared parse_ts normalizes a naive ts to UTC and returns None on a bad
+                # one — a malformed start ts just leaves dur=0, never drops the end record.
+                start = parse_ts(e.get("ts"))
+                if start is not None:
                     dur = int((datetime.datetime.now(datetime.timezone.utc) - start).total_seconds())
-                except (KeyError, ValueError, TypeError):
-                    pass
     append_event(root, "session", phase="end", session_id=sid,
                  duration_s=max(dur, 0), reason=h.get("reason", ""))
 

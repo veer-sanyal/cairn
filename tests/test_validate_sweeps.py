@@ -131,3 +131,19 @@ def test_degenerate_proxy_days_non_positive(instance):
     set_manifest(instance, metrics={"last_revalidated": days_ago(1)},
                  cadence={"review_days": 30, "proxy_revalidation_days": -5})
     assert checks(instance, "proxy_revalidation_due") == []   # non-positive = don't check
+
+def test_malformed_trigger_days_not_mislabeled_as_bad_date(instance):
+    # valid fresh stamp + string trigger days: no staleness finding, no "unparseable" mislabel
+    set_manifest(instance, triggers=[{"template": "staleness_escalation", "days": "30"}])
+    assert checks(instance, "staleness") == []
+
+def test_empty_census_reads_as_never_populated(instance):
+    set_manifest(instance, census={}, data_paths=[{"need": "x", "rung": 4}])
+    found = checks(instance, "census_stale")
+    assert len(found) == 1 and "no census" in found[0]["detail"]
+
+def test_bool_cadence_values_fall_back_to_defaults(instance):
+    (instance / "docs").mkdir(exist_ok=True)
+    (instance / "docs" / "SYSTEM-MAP.md").write_text(f"Last reconciled: {days_ago(3)}\n")
+    set_manifest(instance, cadence={"review_days": True})   # bool is an int subclass
+    assert checks(instance, "system_map") == []             # limit falls back to 60, not 2

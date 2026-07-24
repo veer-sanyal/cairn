@@ -125,3 +125,11 @@ def test_user_content_with_double_braces_still_scaffolds(tmp_path):
     r = _run(cfg, target, tmp_path)
     assert r.returncode == 0, r.stderr
     assert "{{handlebars}}" in (target / "CLAUDE.md").read_text()   # literal, not an error
+
+def test_user_content_naming_a_real_placeholder_is_preserved(tmp_path):
+    # "{{today}}" inside user content must stay the user's literal words (single-pass render)
+    cfg = dict(CFG, one_line_purpose="track deadlines using {{today}} as the anchor date")
+    target = tmp_path / "inst"
+    r = _run(cfg, target, tmp_path)
+    assert r.returncode == 0, r.stderr
+    assert "{{today}}" in (target / "CLAUDE.md").read_text()

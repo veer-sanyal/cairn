@@ -25,6 +25,26 @@ def manifest(root):
     except (json.JSONDecodeError, OSError):
         return {}
 
+def parse_date(s):
+    """ISO date string -> datetime.date, or None on malformed/wrong-typed input.
+    The single home for the 'fromisoformat raises TypeError on non-str' rule."""
+    try:
+        return datetime.date.fromisoformat(s)
+    except (ValueError, TypeError):
+        return None
+
+def parse_ts(ts):
+    """ISO timestamp -> aware datetime (naive assumed UTC), or None on malformed input."""
+    try:
+        t = datetime.datetime.fromisoformat(ts)
+    except (ValueError, TypeError):
+        return None
+    return t.replace(tzinfo=datetime.timezone.utc) if t.tzinfo is None else t
+
+def pos_int(x):
+    """x if a positive int, else None. Excludes bool (a subclass of int in Python)."""
+    return x if isinstance(x, int) and not isinstance(x, bool) and x > 0 else None
+
 def now_iso():
     return datetime.datetime.now(datetime.timezone.utc).isoformat(timespec="seconds")
 

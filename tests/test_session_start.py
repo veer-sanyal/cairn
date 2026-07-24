@@ -115,3 +115,13 @@ def test_malformed_ts_does_not_blank_banner(instance):
     out = boot(instance)
     assert ctx(out)                       # banner present, not blanked by the bad row
     assert "gap" in ctx(out).lower()      # the good event's nudge still computed
+
+
+def test_malformed_triggers_type_does_not_blank_banner(instance):
+    # triggers as a dict (hand-edited manifest) must not AttributeError away the banner
+    m = json.loads((instance / "manifest.json").read_text())
+    m["triggers"] = {"foo": "bar"}
+    (instance / "manifest.json").write_text(json.dumps(m))
+    seed_event(instance, days_ago=2, type="session", phase="start", session_id="s1")
+    out = boot(instance)
+    assert ctx(out)   # banner present despite malformed triggers

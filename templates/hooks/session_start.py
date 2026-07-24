@@ -2,7 +2,7 @@
 """SessionStart: session event + gap look-back + banner from manifest trigger rules."""
 import json, sys, os, datetime, subprocess
 from pathlib import Path
-from cairn_lib import find_root, manifest, append_event
+from cairn_lib import find_root, manifest, append_event, parse_ts
 
 def load_events(root):
     p = Path(root) / "telemetry" / "events.jsonl"
@@ -19,24 +19,20 @@ def load_events(root):
         # Keep only well-formed events — a dict with a type and a parseable ts — so every
         # downstream parse_ts / e["type"] / days_since is safe. One malformed row must not
         # blow up the banner: fail-soft is exit-0, but a lost banner loses all boot guidance.
-        if not isinstance(e, dict) or "type" not in e:
-            continue
-        try:
-            datetime.datetime.fromisoformat(e.get("ts"))
-        except (ValueError, TypeError):
+        if not isinstance(e, dict) or "type" not in e or parse_ts(e.get("ts")) is None:
             continue
         out.append(e)
     return out
-
-def parse_ts(ts):
-    t = datetime.datetime.fromisoformat(ts)
-    return t.replace(tzinfo=datetime.timezone.utc) if t.tzinfo is None else t
 
 def days_since(ts):
     return (datetime.datetime.now(datetime.timezone.utc) - parse_ts(ts)).days
 
 def trig(m, name):
-    return next((t for t in m.get("triggers", []) if t.get("template") == name), None)
+    # type-guarded like validate.py's sweeps: a malformed triggers value (dict, string)
+    # must not AttributeError its way into losing the whole banner
+    triggers = m.get("triggers")
+    triggers = triggers if isinstance(triggers, list) else []
+    return next((t for t in triggers if isinstance(t, dict) and t.get("template") == name), None)
 
 def main():
     h = json.load(sys.stdin)

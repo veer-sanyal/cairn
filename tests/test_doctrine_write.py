@@ -126,3 +126,14 @@ def test_docs_is_a_file_exits_clean(instance):
     (instance / "docs").write_text("i am a file, not a dir")
     r = write(instance, RESULT)
     assert r.returncode != 0 and "Traceback" not in r.stderr
+
+def test_unhashable_confidence_grades_thin_not_traceback(instance):
+    r = write(instance, {"findings": [{"claim": "c1", "confidence": ["high"],
+                                       "sources": ["https://a.example"]}]})
+    assert r.returncode == 0, r.stderr
+    assert "**THIN** c1" in (instance / "docs" / "RESEARCH.md").read_text()
+
+def test_claimless_entry_fails_loud_before_any_write(instance):
+    r = write(instance, {"findings": [{"confidence": "high", "evidence": "e1"}]})
+    assert r.returncode != 0 and "claim" in (r.stdout + r.stderr)
+    assert not (instance / "docs" / "RESEARCH.md").exists()   # nothing written

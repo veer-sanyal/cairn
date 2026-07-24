@@ -27,6 +27,10 @@ def aslist(x):
     # become one source, NOT be iterated character-by-character into RESEARCH.md.
     return x if isinstance(x, list) else ([] if x is None else [x])
 
+def grade(confidence):
+    # type-safe: an unhashable confidence (list/dict) must grade THIN, not traceback
+    return GRADE.get(confidence, "THIN") if isinstance(confidence, str) else "THIN"
+
 USAGE = ("usage: doctrine_write.py <result.json> <instance-root> --domain <name>"
          " [--perishability durable|semi-durable|perishable]")
 
@@ -61,22 +65,25 @@ def main():
     # skipped, never char-iterated into an AttributeError traceback.
     findings = [f for f in aslist(result.get("findings")) if isinstance(f, dict)]
     confirmed = [c for c in aslist(result.get("confirmed")) if isinstance(c, dict)]
+    refuted = [r for r in aslist(result.get("refuted")) if isinstance(r, dict)]
     if not findings and not confirmed:
         sys.exit("no findings and no confirmed claims — refusing to write an empty doctrine section")
+    # hard failures are correct here (docstring): a claim-less entry must fail LOUD before
+    # any write, never land as a silent blank bullet in permanent doctrine.
+    for entry in (*findings, *confirmed, *refuted):
+        if not flat(entry.get("claim") or ""):
+            sys.exit("entry missing 'claim' — refusing to write a blank doctrine line")
     if result.get("synthesisDegraded") or not findings:
         # never lose the verified layer: fall back to raw confirmed claims
         lines.append("_Synthesis degraded — raw verified claims below._")
         for c in confirmed:
-            g = GRADE.get(c.get("confidence") or "low", "THIN")
-            lines.append(f"- **{g}** {flat(c.get('claim', ''))} (vote {flat(c.get('vote', '?'))}) — {flat(c.get('source', ''))}")
+            lines.append(f"- **{grade(c.get('confidence'))}** {flat(c['claim'])} (vote {flat(c.get('vote', '?'))}) — {flat(c.get('source', ''))}")
     else:
         for f in findings:
-            g = GRADE.get(f.get("confidence") or "low", "THIN")
-            lines.append(f"- **{g}** {flat(f.get('claim', ''))}")
+            lines.append(f"- **{grade(f.get('confidence'))}** {flat(f['claim'])}")
             if f.get("evidence"):
                 lines.append(f"  - evidence: {flat(f['evidence'])} (vote {flat(f.get('vote', '?'))})")
             lines.append(f"  - sources: {', '.join(flat(s) for s in aslist(f.get('sources')))}")
-    refuted = [r for r in aslist(result.get("refuted")) if isinstance(r, dict)]
     if refuted:
         lines += ["", "### Refuted — do not build on"]
         for r in refuted:

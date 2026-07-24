@@ -42,16 +42,19 @@ CAPS = {"CLAUDE.md": {"soft": 4096, "hard": 8192},
         "state/working/*": {"soft": 16384, "hard": 32768}}
 
 def render(tmpl, subs):
-    # Check the TEMPLATE (trusted) for placeholders subs doesn't cover — a real authoring
-    # bug — instead of scanning substituted output for any "{{", which false-positives on
-    # legitimate user content (a purpose mentioning {{handlebars}} would abort the build).
+    # Check the TEMPLATE (trusted) for authoring bugs — never the substituted output,
+    # which false-positives on legitimate user content mentioning {{handlebars}}:
+    # 1. every well-formed placeholder must have a subs value;
+    # 2. any '{{' left after stripping well-formed placeholders is a malformed one
+    #    (non-word name like {{owner-map}}) the \w+ regex would otherwise miss.
     unknown = {name for name in PLACEHOLDER.findall(tmpl) if name not in subs}
     if unknown:
         sys.exit(f"template has unrendered placeholder(s): {', '.join(sorted(unknown))}")
-    out = tmpl
-    for k, v in subs.items():
-        out = out.replace("{{" + k + "}}", str(v))
-    return out
+    if "{{" in PLACEHOLDER.sub("", tmpl):
+        sys.exit("template contains a malformed '{{' placeholder (non-word name?)")
+    # Single-pass substitution against the template: substituted values are never
+    # rescanned, so user content that literally says "{{today}}" stays the user's words.
+    return PLACEHOLDER.sub(lambda mo: str(subs[mo.group(1)]), tmpl)
 
 def validate_config(cfg):
     # Validate EVERYTHING before the first mkdir, so a bad config fails clean with nothing

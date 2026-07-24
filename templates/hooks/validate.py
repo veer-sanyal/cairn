@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """Cairn validator ('lint'). Report-only: always exit 0. --json for machine output."""
 import json, re, sys, os, time, fnmatch, datetime
-from cairn_lib import find_root, manifest
+from cairn_lib import find_root, manifest, parse_date, pos_int
 
 SENTINEL_TTL_H = 24
 STAMP = re.compile(r"Last reconciled: (\d{4}-\d{2}-\d{2})")
@@ -24,65 +24,57 @@ def sweeps(root, m, today):
 
     Every section is independently type-robust: a malformed manifest field (census as a
     list, a non-iso date, metrics not a dict) or an impossible date must NEVER suppress
-    another section's findings — that is the entire purpose of the sweep. Date parsers
-    catch (ValueError, TypeError) because fromisoformat raises TypeError on non-str input;
-    dict-typed fields go through _dict()."""
+    another section's findings — that is the entire purpose of the sweep. All date parsing
+    goes through cairn_lib.parse_date (returns None on any malformed input); dict-typed
+    fields go through _dict(); day-count fields through pos_int (which excludes bool)."""
     out = []
+    cadence = _dict(m.get("cadence"))
     research = root / "docs" / "RESEARCH.md"
     if research.is_file():
         text = research.read_text()
         for d in REFRESH.findall(text):
-            try:
-                if datetime.date.fromisoformat(d) < today:
-                    out.append({"check": "research_expired", "level": "soft",
-                                "file": "docs/RESEARCH.md", "refresh_by": d})
-            except (ValueError, TypeError):
-                pass
+            dd = parse_date(d)
+            if dd is not None and dd < today:
+                out.append({"check": "research_expired", "level": "soft",
+                            "file": "docs/RESEARCH.md", "refresh_by": d})
         for d in RESEARCHED.findall(text):
-            try:
-                if (today - datetime.date.fromisoformat(d)).days > ANNUAL_CEILING_DAYS:
-                    out.append({"check": "research_annual_ceiling", "level": "soft",
-                                "file": "docs/RESEARCH.md", "researched": d})
-            except (ValueError, TypeError):
-                pass
+            dd = parse_date(d)
+            if dd is not None and (today - dd).days > ANNUAL_CEILING_DAYS:
+                out.append({"check": "research_annual_ceiling", "level": "soft",
+                            "file": "docs/RESEARCH.md", "researched": d})
     census = m.get("census")
-    if isinstance(census, dict):
-        try:
-            age = (today - datetime.date.fromisoformat(census.get("date", ""))).days
-            if age > CENSUS_STALE_DAYS:
-                out.append({"check": "census_stale", "level": "soft", "age_days": age})
-        except (ValueError, TypeError):
+    if isinstance(census, dict) and census:
+        dd = parse_date(census.get("date"))
+        if dd is None:
             out.append({"check": "census_stale", "level": "soft", "detail": "unreadable census date"})
-    elif census:  # present but wrong type — surface it, don't silently skip
+        elif (today - dd).days > CENSUS_STALE_DAYS:
+            out.append({"check": "census_stale", "level": "soft", "age_days": (today - dd).days})
+    elif census and not isinstance(census, dict):  # present but wrong type — surface it
         out.append({"check": "census_stale", "level": "soft", "detail": "census is not an object"})
     elif m.get("data_paths"):
+        # covers both absent census and an empty {} — never populated is the same finding
         out.append({"check": "census_stale", "level": "soft",
                     "detail": "data_paths recorded but no census"})
     last = _dict(m.get("metrics")).get("last_revalidated")
-    days = _dict(m.get("cadence")).get("proxy_revalidation_days")
-    if last and isinstance(days, int) and days > 0:
-        try:
-            age = (today - datetime.date.fromisoformat(last)).days
-            if age > days:
-                out.append({"check": "proxy_revalidation_due", "level": "soft", "age_days": age})
-        except (ValueError, TypeError):
-            pass
+    days = pos_int(cadence.get("proxy_revalidation_days"))
+    if days:
+        dd = parse_date(last)
+        if dd is not None and (today - dd).days > days:
+            out.append({"check": "proxy_revalidation_due", "level": "soft",
+                        "age_days": (today - dd).days})
     smap = root / "docs" / "SYSTEM-MAP.md"
     if smap.is_file():
         stamp = STAMP.search(smap.read_text())
-        review_days = _dict(m.get("cadence")).get("review_days", 30)
-        limit = 2 * review_days if isinstance(review_days, int) and review_days > 0 else 60
+        review_days = pos_int(cadence.get("review_days"))
+        limit = 2 * review_days if review_days else 60
         if not stamp:
             out.append({"check": "system_map", "level": "soft",
                         "file": "docs/SYSTEM-MAP.md", "detail": "no 'Last reconciled:' stamp"})
         else:
-            try:
-                age = (today - datetime.date.fromisoformat(stamp.group(1))).days
-                if age > limit:
-                    out.append({"check": "system_map", "level": "soft",
-                                "file": "docs/SYSTEM-MAP.md", "age_days": age})
-            except (ValueError, TypeError):
-                pass
+            dd = parse_date(stamp.group(1))
+            if dd is not None and (today - dd).days > limit:
+                out.append({"check": "system_map", "level": "soft",
+                            "file": "docs/SYSTEM-MAP.md", "age_days": (today - dd).days})
     return out
 
 def run(root):
@@ -105,18 +97,20 @@ def run(root):
         out.append({"check": "staleness", "level": "hard", "file": "state/HOT.md", "detail": "no 'Last reconciled:' stamp"})
     else:
         # A well-formed-but-impossible date (2026-02-30) must not blank out every other
-        # finding: parse defensively and report the broken stamp as its own hard finding.
-        try:
-            age = (datetime.date.today() - datetime.date.fromisoformat(stamp.group(1))).days
-            triggers = m.get("triggers", [])
-            triggers = triggers if isinstance(triggers, list) else []
-            limit = next((t.get("days", 14) for t in triggers
-                          if isinstance(t, dict) and t.get("template") == "staleness_escalation"), 14)
-            if age > limit:
-                out.append({"check": "staleness", "level": "soft", "file": "state/HOT.md", "age_days": age})
-        except (ValueError, TypeError):
+        # finding — and only a bad DATE may be reported as unparseable: the limit lookup
+        # is guarded separately so a malformed trigger days value can't be mislabeled.
+        d = parse_date(stamp.group(1))
+        if d is None:
             out.append({"check": "staleness", "level": "hard", "file": "state/HOT.md",
                         "detail": "unparseable 'Last reconciled:' date"})
+        else:
+            age = (datetime.date.today() - d).days
+            triggers = m.get("triggers", [])
+            triggers = triggers if isinstance(triggers, list) else []
+            limit = next((pos_int(t.get("days")) for t in triggers
+                          if isinstance(t, dict) and t.get("template") == "staleness_escalation"), None) or 14
+            if age > limit:
+                out.append({"check": "staleness", "level": "soft", "file": "state/HOT.md", "age_days": age})
     for rel in ["state/archive.jsonl", "telemetry/events.jsonl"]:
         p = root / rel
         if p.is_file():
