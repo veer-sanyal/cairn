@@ -41,6 +41,15 @@ def parse_ts(ts):
         return None
     return t.replace(tzinfo=datetime.timezone.utc) if t.tzinfo is None else t
 
+def read_text_safe(p):
+    """File text with undecodable bytes replaced, "" on any OS error. The single home for
+    the 'a 0x80 byte must not UnicodeDecodeError away a banner/finding/event' rule — a
+    replaced-garbage JSONL line then fails json.loads legitimately and surfaces there."""
+    try:
+        return Path(p).read_text(errors="replace")
+    except OSError:
+        return ""
+
 def pos_int(x):
     """x if a positive int, else None. Excludes bool (a subclass of int in Python)."""
     return x if isinstance(x, int) and not isinstance(x, bool) and x > 0 else None
@@ -50,7 +59,7 @@ def load_events(root):
     if not p.is_file():
         return []
     out = []
-    for line in p.read_text().splitlines():
+    for line in read_text_safe(p).splitlines():
         if not line.strip():
             continue
         try:
@@ -71,9 +80,13 @@ def now_iso():
 def append_event(root, etype, **fields):
     ev = {"ts": now_iso(), "type": etype, **fields}
     p = Path(root) / "telemetry" / "events.jsonl"
-    p.parent.mkdir(parents=True, exist_ok=True)
-    with open(p, "a", encoding="utf-8") as f:
-        f.write(json.dumps(ev) + "\n")
+    # telemetry is best-effort: a read-only dir/full disk drops one event, never a banner
+    try:
+        p.parent.mkdir(parents=True, exist_ok=True)
+        with open(p, "a", encoding="utf-8") as f:
+            f.write(json.dumps(ev) + "\n")
+    except OSError:
+        return None
     return ev
 
 # --- global registry (SP6): a rebuildable cache of instance pointers, never state ---
@@ -103,7 +116,9 @@ def _write_registry(reg):
 
 def registry_upsert(root):
     """Upsert this instance into the global registry. Fail-soft: returns bool, never raises.
-    Read-modify-write is not locked; a lost race costs one stale field until the next boot."""
+    Read-modify-write is not locked; a lost race costs one stale field until the next boot.
+    ponytail: on case-insensitive filesystems the same instance reached via two casings
+    keys two entries — known ceiling; prune + boot-time self-heal cover it, no normalization."""
     try:
         m = manifest(root)
         inst = m.get("instance") if isinstance(m.get("instance"), dict) else {}

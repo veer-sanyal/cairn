@@ -1,5 +1,7 @@
 # SP1: Research Engine Vendoring Implementation Plan
 
+**Executed — shipped as 0.3.0 (4a772b0)**
+
 > **For agentic workers:** REQUIRED SUB-SKILL: Use superpowers:subagent-driven-development (recommended) or superpowers:executing-plans to implement this plan task-by-task. Steps use checkbox (`- [ ]`) syntax for tracking.
 
 **Goal:** Vendor the directing-research + deep-research engine into Cairn as `skills/research/`, so every builder/governor research run uses the plugin's own claim-scaled, 3-vote adversarial engine — no dependency on the user's global setup.

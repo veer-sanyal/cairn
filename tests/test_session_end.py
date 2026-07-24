@@ -17,6 +17,16 @@ def test_end_without_start_fail_soft(instance):
     assert r.returncode == 0
 
 
+def test_binary_byte_in_log_still_writes_end_event(instance):
+    # a 0x80 byte in events.jsonl must not UnicodeDecodeError away the end record (A1)
+    (instance / "telemetry" / "events.jsonl").write_bytes(b"\x80garbage\n")
+    r = run_script("session_end.py", cwd=instance,
+                   payload={"hook_event_name": "SessionEnd", "cwd": str(instance), "session_id": "sB"})
+    assert r.returncode == 0
+    ends = [e for e in events(instance) if e["type"] == "session" and e["phase"] == "end"]
+    assert len(ends) == 1
+
+
 def test_naive_start_ts_still_writes_end_event(instance):
     # a naive (tz-less) start ts must not drop the end record via tz-subtraction TypeError
     with open(instance / "telemetry" / "events.jsonl", "a") as f:

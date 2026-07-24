@@ -7,7 +7,7 @@ Research-derived design principles. Every principle carries an evidence grade:
 - **[BET]** — no surviving evidence either way; a reasoned design decision, labeled as such.
 - **[REFUTED]** — claims that FAILED verification and must not be cited or built on.
 
-Every principle carries an annotation line: `Perishability: durable|semi-durable|perishable · Verified: YYYY-MM · Round: R<n>` — durable refreshes on contradiction only, semi-durable within ~2 releases, perishable is probe-not-recall (short windows). The governor's expiry sweep (SP3) reads these fields.
+Every principle carries an annotation line: `Perishability: durable|semi-durable|perishable · Verified: YYYY-MM · Round: R<n>` — durable refreshes on contradiction only, semi-durable within ~2 releases, perishable is probe-not-recall (short windows). The governor's expiry sweep (SP3) reads the equivalent `Refresh-by`/`researched` dates in each instance's docs/RESEARCH.md; the annotations in THIS file are enforced by the repo's own test suite (age checks in tests/test_principles.py: any principle >12 months old fails, perishable >6 months fails).
 
 Sources are listed per principle. Rounds: R1 = context/memory, R2 = enforcement/self-improvement, R3 = telemetry/abandonment, R4 = elicitation/prior art, R5 = failure/capability, R6 = verification/epistemics, R7 = objective design/Goodhart, R8 = human-agent boundary, R9 = orchestration/tiering. Full per-round provenance is in "## Research provenance" at the end of this file.
 
@@ -106,7 +106,7 @@ Caveat: one published critique argues the 39% magnitude is partly experimental-d
 Perishability: perishable · Verified: 2026-07 · Round: R2
 
 **[VERIFIED]** Claude Code PreToolUse hooks hard-block tool calls before execution (exit code 2 + stderr fed back, or JSON permissionDecision: deny), fire before permission-mode checks in every mode, and cannot be bypassed even by bypassPermissions / --dangerously-skip-permissions. Hooks can tighten policy but never loosen it.
-Source: Anthropic hooks docs (fetched live Jul 2026). Caveat: open GitHub issues (#37210, #24327) show hook deny enforcement has had real bugs → belt-and-suspenders post-hoc validation for must-never-violate invariants.
+Source: Anthropic hooks docs (fetched live Jul 2026). Caveat: open GitHub issues (#37210, #24327) show hook deny enforcement has had real bugs → belt-and-suspenders post-hoc validation for must-never-violate invariants, and as of the 2026-07-24 re-verification the official docs no longer state the bypassPermissions interaction explicitly (claim retained from the 2026-07-23 live-docs verification; re-verify experimentally).
 
 **Design implication:** the kernel ships hooks for invariants (file-size caps, telemetry write-through, staleness stamps) and treats prose discipline as UX, not enforcement.
 
@@ -149,6 +149,7 @@ Caveat: playbook is marketing-adjacent — fine for framework definitions, not e
 **Design implications:**
 - The builder's metric contract has three layers: north star (leading, value-representing, NOT directly targetable) → input metrics (what the system actually moves day to day) → guardrails (OEC-style: measurable-in-period, sensitive, timely).
 - Reviews act on inputs and guardrails; the north star is watched, not chased.
+- The leading-indicator REQUIREMENT is VERIFIED, but the construction METHOD — how to derive a valid leading proxy — is BET-grade (P18): propose candidates and verify each causally; never present the derivation as settled.
 
 ## 13. Abandonment is the dominant failure mode — and it is typed, often temporary, and not always failure
 Perishability: durable · Verified: 2026-07 · Round: R3
@@ -262,7 +263,7 @@ Sources: Manheim & Garrabrant (arXiv 1803.04585) + MIRI summary; 3-0 votes acros
 
 **[VERIFIED — medium; single practitioner blog]** The goal itself lives above the metric layer: a short strategic narrative that multiple metrics serve as evidence for, since single-number north stars still trigger Goodhart ("people optimize for the metric, rather than the value it's supposed to represent" — Mehta, ex-CPO Tinder).
 
-**[BET]** Leading/lagging-indicator design is the weakest-covered sub-area: only Amplitude's leading-indicator requirement and one vendor formalism (Statsig surrogate metrics, Var(X) = Var(S) + MSE — low confidence, single vendor blog) survived. Treat proxy-chain construction as a design bet pending better evidence.
+**[BET]** Leading/lagging-indicator design is the weakest-covered sub-area: only Amplitude's leading-indicator requirement and one vendor formalism (Statsig surrogate metrics, Var(X) = Var(S) + MSE — low confidence, single vendor blog) survived. Treat proxy-chain construction as a design bet pending better evidence. Watch condition: surrogate-index econometrics (Athey et al.) and clinical surrogate-endpoint validation criteria are the likely-evidence literatures — recorded as research candidate #2 in the umbrella spec's gaps ledger.
 
 **[REFUTED — do not build on]** The two canonical-sounding leading-indicator methods both died: "behavior-measuring proxies beat stated-intent proxies (NPS as referral stand-in)" (1-2) and "build a leading-indicator chain by backward-chaining from a lagging outcome, each step demonstrably predictive of the next" (0-3). Also: "every success metric must be paired with a counter-metric" as a universal rule (1-2 — continuous guardrail monitoring itself is verified and already in P12); Wells Fargo cross-sell-metric specifics ("~3.5M accounts, sole metric, no guardrails", 0-3) — cite the verified $3B/concealment version above.
 
@@ -369,14 +370,14 @@ Perishability: durable · Verified: 2026-07 · Round: R6
 
 **Design implications:**
 - Expiry triggers must be structural — dated claims, dependency graphs, census diffs — never model self-assessment; staleness probes ask explicitly ("is X still true?"), because prompts that presuppose a stale fact are exactly where models comply with it.
-- The perishability annotations in THIS file and doctrine_write's Refresh-by dates are the structural triggers: the governor's expiry sweep (SP3) reads them as the cheap surveillance pass, escalating to full re-research only when new evidence changes conclusions — with an unconditional annual-ceiling audit of every entry.
+- doctrine_write's Refresh-by dates in each instance's docs/RESEARCH.md are the structural triggers the governor's expiry sweep (SP3) reads as the cheap surveillance pass, escalating to full re-research only when new evidence changes conclusions — with an unconditional annual-ceiling audit of every entry. The annotations in THIS file are swept by a different mechanism: the repo's test suite fails on any principle Verified >12 months ago (the same annual ceiling) or any perishable principle >6 months old.
 - Refresh loops are rationed by the entry/exit criteria: decision priority × low certainty × likely new evidence; anything failing them goes static.
 - By this principle's own logic, R6's judge magnitudes carry their own re-verification triggers — hence P21's semi-durable magnitudes.
 
 ## 23. Mechanism selection: context cost first, then the decision tree
 Perishability: perishable · Verified: 2026-07 · Round: docs-verified (claude-code-guide)
 
-**[VERIFIED — first-party docs]** The first question for any new capability is context cost: resident (CLAUDE.md is fully loaded every session; each MCP server holds ~100 tokens of tool list) vs on-demand (skills, subagents, saved workflows load only when used). Resident tokens are P1's distractors — default to on-demand.
+**[VERIFIED — first-party docs]** The first question for any new capability is context cost: resident (CLAUDE.md is fully loaded every session; each MCP server holds ~100–120 tokens of tool list) vs on-demand (skills, subagents, saved workflows load only when used). Resident tokens are P1's distractors — default to on-demand.
 
 **[VERIFIED — first-party docs]** Given the cost class, the selection tree:
 - Fires automatically on an event, no judgment call → hook (deterministic; P9's enforcement primitive).
@@ -389,12 +390,14 @@ Perishability: perishable · Verified: 2026-07 · Round: docs-verified (claude-c
 
 **[VERIFIED — first-party docs]** Census enumerability is asymmetric: MCP servers are enumerable (`claude mcp list` / `system-init` array), but tool schemas are not programmatically queryable and no registry-search API exists — so the builder census infers capability from server identity, and rung 2 of the data-access ladder ("a connector exists but isn't installed") is a manual-assisted web-lookup + user-approval flow, never automatic.
 
-Detail file: `docs/research/research-mechanisms-claude-code-2026-07.md` (full selection matrix, hook-event surface, plugin packaging limits) — refresh-by next release or any Claude Code minor-version jump; this principle expires with it.
+Detail file: `docs/research/research-mechanisms-claude-code-2026-07.md` (full selection matrix, hook-event surface, plugin packaging limits; docs-verified 2026-07-23, re-verified 2026-07-24) — refresh-by next release or any Claude Code minor-version jump; this principle expires with it.
+
+Recorded deviation: the tree says skills subsume legacy slash commands, yet scaffolded instances ship `commands/*.md`. Deliberate — instance commands are parameter-rendered per instance at scaffold time, and per-instance rendering is what the command path supports; migrating them to skills is a kernel-release matter, not an instance fix.
 
 ## 24. Cold start: doctrine governs until instance data earns authority
 Perishability: durable · Verified: n/a · Round: none — explicit BET
 
-**[BET]** A fresh instance has zero telemetry — nothing to tune on, nothing to review against. Its defensible defaults are inherited, not measured: level-zero doctrine supplies the ask-budget and blast-radius table (P19), single-writer orchestration (P20), and the metric-contract shape (P12/P18); the build-time research round supplies whatever domain claims it verified. Control shifts from doctrine to instance data on a declared schedule, not silently: the first governor review is the handover point — from then on the instance's own telemetry outranks generic doctrine wherever the two conflict, and doctrine retains only the invariants (hooks, caps, privacy). This cold start rule has no dedicated research round; the umbrella gaps ledger names it. Graded [BET] end to end — revisit if it earns evidence.
+**[BET]** A fresh instance has zero telemetry — nothing to tune on, nothing to review against. Its defensible defaults are inherited, not measured: level-zero doctrine supplies the ask-budget and blast-radius table (P19), single-writer orchestration (P20), and the metric-contract shape (P12/P18); the build-time research round supplies whatever domain claims it verified. Control shifts from doctrine to instance data on a declared schedule, not silently: the first governor review is the handover point — from then on the instance's own telemetry outranks generic doctrine wherever the two conflict, and doctrine retains only the invariants (hooks, caps, privacy). The review skill implements this (Stage 4.5 telemetry-handover rule: post-handover, telemetry citations are valid auto-adopt evidence alongside P-refs). Settling telemetry, named: `re_elicit` outcomes (Stage 3 goal-drift check) and post-handover proposal outcomes (adopted vs reverted rates) are the evidence stream that will confirm or refute this bet. This cold start rule has no dedicated research round; the umbrella gaps ledger names it. Graded [BET] end to end — revisit if it earns evidence.
 
 ---
 

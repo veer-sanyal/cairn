@@ -90,6 +90,20 @@ launch is denied:
    **THIN** — the degraded pass verifies at reduced scale and must not masquerade as the
    full engine. Say so in the section's caveats.
 
+You hand-build the result.json the engine would have produced — this exact shape:
+
+```json
+{"findings": [{"claim": "<surviving claim>", "confidence": "medium",
+               "sources": ["<url>", "<url>"], "vote": "3-0"}],
+ "confirmed": [],
+ "refuted": [{"claim": "<killed claim>", "vote": "0-3", "source": "<url>"}],
+ "caveats": "degraded mode: reduced-scale verification, grades capped at THIN"}
+```
+
+doctrine_write maps confidence → grade: `high` → VERIFIED, `medium`/`low` → THIN.
+"Cap at THIN" therefore means: never write `confidence: "high"` in degraded mode — use
+`medium` for the strongest survivors.
+
 ## Contract summary
 
 **In:** a framed decision + GROUNDING block. **Out:** graded findings + refuted list +

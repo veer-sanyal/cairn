@@ -197,3 +197,15 @@ Each sub-project: own spec → plan → implementation → review, per the exist
 - Judge calibration against human labels requires *the user* to label a small set for any instance that builds its own judge — this is an ask-budget expense SP3 must price in.
 - Workflow availability requires Pro+/API and can be disabled (`disableWorkflows`) — SP1 needs a degraded-mode path (subagent-based research fallback).
 - P11 session-stamping is approximated: runtime work events carry no session_id — association is by timestamp window (session_start.py). A recorded kernel deviation; revisit if telemetry mis-association ever surfaces in review.
+- Probe-tagging idea (P5): when a Stage-2 memory probe fails and the missing fact turns out to have been demoted working→archive, tag the failure `demotion_miss` — those events are the direct evidence stream for P5's PREPRINT-grade decay-formula bet (recency-only demotion in v1). Not yet implemented; costs one tag, buys the bet its settling telemetry.
+- Open-bets cross-reference: the 2026-07-19 design spec's "'Unfilled niche' beyond Claude Code ecosystem" bet row is unchanged by the 2026-07-23 README broadening — that rewrite is domain-generality *framing* (Cairn builds systems for any domain), not a competitive-uniqueness claim; the niche question still awaits verification before public positioning.
+
+### Ranked research candidates (2026-07-24 audit; locked decision 8 — recorded here, not executed in the 0.8.1 pass)
+
+| # | Candidate | Principle | Decision it would settle |
+|---|---|---|---|
+| 1 | Drift / re-elicitation triggers | P14 | Which behavioral signals (typed-lapse patterns, input-metric decline windows) should fire the governor's goal-drift check — current 2-review-period heuristic is a BET |
+| 2 | Surrogate-index construction (Athey et al. econometrics; clinical surrogate-endpoint criteria) | P18 | How the builder derives a valid leading indicator from a lagging outcome — the construction method behind every north-star proposal |
+| 3 | Cold-start handover | P24 | Whether first-completed-review is the right doctrine→telemetry handover point, and what evidence volume "earns authority" |
+| 4 | Ask-budget dose-response | P19 | The default ask_budget_per_session value (currently 1) — Kovacs gives frequency-harms direction, not a dose curve |
+| 5 | Multi-instance patterns | SP6 | What cross-instance signals (shared lapse patterns, portfolio-level metrics) the registry should surface beyond names/paths/purpose |

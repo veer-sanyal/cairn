@@ -62,5 +62,14 @@ def run_script(script, payload=None, cwd=None, argv=()):
         capture_output=True, text=True, cwd=str(cwd) if cwd else None)
 
 def events(root):
-    lines = (root / "telemetry" / "events.jsonl").read_text().splitlines()
-    return [json.loads(l) for l in lines if l.strip()]
+    # errors="replace" + skip-unparseable: binary-corruption tests seed garbage lines on purpose
+    lines = (root / "telemetry" / "events.jsonl").read_text(errors="replace").splitlines()
+    out = []
+    for l in lines:
+        if not l.strip():
+            continue
+        try:
+            out.append(json.loads(l))
+        except json.JSONDecodeError:
+            continue
+    return out

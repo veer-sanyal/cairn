@@ -1,6 +1,7 @@
 #!/usr/bin/env python3
 """Persist a deep-research result JSON as graded findings in docs/RESEARCH.md.
-Engine contract (umbrella spec §4): graded findings + refuted list + caveats,
+Engine contract (docs/superpowers/specs/2026-07-23-level-zero-umbrella-design.md §4):
+graded findings + refuted list + caveats,
 dated, with a perishability class driving the refresh-by date.
 Kernel utility, not an event hook (like validate.py): invoked explicitly, so
 hard failures are correct here — no exit-0 swallowing.
@@ -66,14 +67,18 @@ def main():
     findings = [f for f in aslist(result.get("findings")) if isinstance(f, dict)]
     confirmed = [c for c in aslist(result.get("confirmed")) if isinstance(c, dict)]
     refuted = [r for r in aslist(result.get("refuted")) if isinstance(r, dict)]
-    if not findings and not confirmed:
-        sys.exit("no findings and no confirmed claims — refusing to write an empty doctrine section")
+    # refuted-only is legitimate (every claim killed): the do-not-build-on list persists.
+    # only a truly-empty run refuses.
+    if not findings and not confirmed and not refuted:
+        sys.exit("no findings, confirmed, or refuted claims — refusing to write an empty doctrine section")
     # hard failures are correct here (docstring): a claim-less entry must fail LOUD before
     # any write, never land as a silent blank bullet in permanent doctrine.
     for entry in (*findings, *confirmed, *refuted):
         if not flat(entry.get("claim") or ""):
             sys.exit("entry missing 'claim' — refusing to write a blank doctrine line")
-    if result.get("synthesisDegraded") or not findings:
+    if not findings and not confirmed:
+        lines.append("_All candidate claims were refuted — negatives only below._")
+    elif result.get("synthesisDegraded") or not findings:
         # never lose the verified layer: fall back to raw confirmed claims
         lines.append("_Synthesis degraded — raw verified claims below._")
         for c in confirmed:

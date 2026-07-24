@@ -29,17 +29,35 @@ bypasses and out-of-band edits surface here — this is the real backstop.
    entry → Edit that entry) / INSERT (novel → add to the owner file). Wholesale rewrites of a
    working/ file are permitted ONLY in this stage (the sentinel unlocks the guard).
 5. Demote: content unreferenced by recent sessions moves working/ → archive (recency-only in
-   v1 — a BET, see manifest decisions). Refresh HOT.md and its `Last reconciled:` stamp.
+   v1 — a BET, see manifest decisions). The archive append is Bash — one JSON object per
+   demoted item:
+   `printf '%s\n' '{"ts":"<iso>","type":"demoted","from":"<working file>","content":"<summary>"}' >> state/archive.jsonl`
+   (the file is append-only; /log and cairn_event.py write telemetry, not the archive).
+   Then Edit the working/ file to remove the demoted content. Refresh HOT.md and its
+   `Last reconciled:` stamp.
 
 ## Stage 3 — Metrics report (P12)
 From telemetry/events.jsonl compute and show: north star trend (watched, not chased), each
 input metric, each guardrail (flag regressions), lapse events BY TYPE (forgot/upkeep/skipped/
-suspended — upkeep lapses are kernel bugs: propose removing the demanding step, not nagging
+suspended, plus `untyped` — the cause session_start records when a gap passes unexplained —
+upkeep lapses are kernel bugs: propose removing the demanding step, not nagging
 the user), friction outcomes with notes.
 Also report: failure_mode tag frequencies from events since the last review (spec / verify /
-context / overreach / tooling / upkeep — P16), and asks-per-session against
-manifest.boundary.ask_budget_per_session (P19). An overreach tag is a boundary-contract
-violation — always surfaced, never averaged away.
+context / overreach / tooling / upkeep — P16), and a boundary audit (P19): no per-ask event
+exists, so audit `failure_mode=overreach` tags, then check conversationally — ask the user
+whether the system's asking felt like too much this period, with
+manifest.boundary.ask_budget_per_session as the stated intent. An overreach tag is a
+boundary-contract violation — always surfaced, never averaged away.
+
+**Goal-drift check (P14 — behavioral triggers, never calendar; no reliable threshold
+exists).** IF the lapse report shows a repeated typed-lapse pattern OR any input metric
+has declined across 2+ review periods, re-run the artifact-based goal interview from
+build Stage 2: show the current goals (the user's own goal statement + the metric
+contract) as the artifact and ask what changed — the user still authors any revision.
+Log the outcome either way:
+`python3 .claude/hooks/cairn_event.py re_elicit outcome=<changed|unchanged>`
+No trigger fired → no interview; re-elicitation on a calendar is exactly the refuted
+pattern P14 warns against.
 
 ## Stage 4 — System lane: proposals with the user as gate (P10)
 For each friction cluster or guardrail regression, draft a proposal. HARD RULES:
@@ -55,7 +73,10 @@ For each friction cluster or guardrail regression, draft a proposal. HARD RULES:
   propose the upgrade; `proxy_revalidation_due` → walk each input lever's causal link to the
   north star against P18's four Goodhart mechanisms (regressional noise, extremal breakdown,
   causal validity, adversarial gaming), then stamp manifest.metrics.last_revalidated with
-  today's date whatever the outcome — the check is the event, not the change.
+  today's date whatever the outcome — the check is the event, not the change. Also list
+  every RESEARCH.md entry classed `durable` for one-line manual confirmation ("still
+  can't rot? y/n") — durable means refresh-on-contradiction, not silently trusted
+  forever (P22's exit criteria).
 - **De-automation rule (P16/P17).** If the same task class carries the same failure_mode tag
   ≥3 times since the last review, propose de-automating that task — move it below the
   autonomy line (act → ask, or ask → never) or add a checked verifier — citing the events.
@@ -69,7 +90,8 @@ For each friction cluster or guardrail regression, draft a proposal. HARD RULES:
   flipped) and `[door: one-way|two-way]` (recoverable within one review period?). Present
   dependencies first, then largest blast; among equals, one-way doors first. Never ask a
   question whose right answer depends on an unanswered upstream one.
-- No proposal may regress the standing anti-bloat guardrails (boot_context_bytes, ceremony).
+- No proposal may regress the standing guardrails: boot_context_bytes + upkeep burden
+  (measured via lapse cause=upkeep events).
 - **Advise, don't menu.** Every proposal carries 2-3 mutually exclusive options and a
   recommended default with its grade — pre-chewed to yes/adjust, never a hanging menu.
   The user's attention is the scarce resource.
@@ -118,17 +140,26 @@ A live entry needs no status field. Reverting an auto-adoption = the same protoc
 reverse (the revert mints its own superseding entry pointing back).
 
 ## Stage 4.5 — Bounded auto-adopt lane (only if manifest `auto_adopt.armed` is true)
+**Telemetry handover (P24).** After this instance's first completed review, where the
+instance's own telemetry and a generic doctrine default conflict, the telemetry wins —
+doctrine retains only the invariants (hooks, caps, privacy). From that point a telemetry
+citation (event counts/trends from telemetry/events.jsonl) is valid evidence for
+auto-adopt eligibility alongside P-refs and RESEARCH.md findings.
+
 A proposal skips the per-item ask and applies immediately ONLY when ALL hold:
 - `[blast: low]` AND `[door: two-way]`;
 - its backing is graded VERIFIED (a PRINCIPLES.md P-ref or a docs/RESEARCH.md finding that
-  survived refutation) — BET / THIN / PREPRINT never auto-adopts;
+  survived refutation) — of the canonical enum (VERIFIED / VERIFIED-probed / PREPRINT /
+  THIN / BET, build Stage 5), only plain VERIFIED qualifies; VERIFIED-probed never
+  auto-adopts (probes are perishable), and BET / THIN / PREPRINT never auto-adopt — OR,
+  after the first completed review, a telemetry citation per the handover rule above;
 - it touches none of: the metric contract (north_star / inputs / guardrails), privacy,
   caps, cadence minimums, anything involving money, or text the user authored in their
   own words.
 Anything else — including everything when `armed` is false — goes through the normal
 BUILD / PARK / REJECT ask. Mechanics (all binding):
 - Apply, record the decision change via the lifecycle above, then log:
-  `python3 .claude/hooks/cairn_event.py proposal id=<n> status=auto_adopted cites="<event refs>" blast=low door=two-way grade=VERIFIED revert_until=<today+7d>`
+  `python3 .claude/hooks/cairn_event.py proposal id=<n> status=auto_adopted cites="<event refs>" blast=low door=two-way grade=<VERIFIED|telemetry> revert_until=<today+7d>`
 - The boot banner names every in-window adoption every session (kernel rule). "revert #n"
   is a plain undo, no ceremony — log it as `status=reverted_merits` (right lane, wrong
   call) or `status=reverted_misgrade` (should never have been eligible).

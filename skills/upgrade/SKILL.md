@@ -1,6 +1,6 @@
 ---
 name: upgrade
-description: Migrate a cairn instance to the installed plugin version, never overwriting user-modified files
+description: Migrate a cairn instance to the installed plugin version — plugin-owned hooks and research engine are always replaced; user-modified command files are never overwritten (.cairn-new)
 ---
 
 # /cairn:upgrade
@@ -12,7 +12,7 @@ Run from inside a cairn instance. Never silent, never destructive (P10: versione
    Same → say so, stop. Instance newer → warn, stop.
 2. Show the user the changelog between the two versions
    (${CLAUDE_PLUGIN_ROOT}/CHANGELOG.md) BEFORE touching anything. Get a go-ahead.
-3. Hook scripts are plugin-owned and never user-edited: copy every file from
+3. Hook scripts are plugin-owned and never user-edited: copy every *.py file from
    ${CLAUDE_PLUGIN_ROOT}/templates/hooks/ directly over the instance's .claude/hooks/
    (report each file replaced).
    The research workflow is plugin-owned too: copy
@@ -21,7 +21,8 @@ Run from inside a cairn instance. Never silent, never destructive (P10: versione
    lacks it).
    Command files are managed-but-rendered: render each new
    ${CLAUDE_PLUGIN_ROOT}/templates/instance/commands/*.md by substituting
-   {{cairn_version}} (the NEW version) and {{intents}} (from manifest.json) into a temp dir.
+   {{cairn_version}} (the NEW version) and {{intents}} (manifest.json's intents list,
+   rendered comma-joined: `plan, log, other`) into a temp dir.
    For each command file, check provenance first: if `git status --porcelain <file>` is empty
    AND `git log -1 --format=%s -- <file>` starts with "cairn" (scaffold or a prior upgrade
    authored it, user never modified), replace it in place with the rendered new version and

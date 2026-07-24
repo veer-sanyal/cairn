@@ -1,6 +1,6 @@
 import json, datetime
 from conftest import run_script, events
-from cairn_helpers_for_tests import seed_event  # defined in step 2
+from cairn_helpers_for_tests import seed_event
 
 def boot(instance):
     r = run_script("session_start.py", cwd=instance, payload={
@@ -50,6 +50,16 @@ def test_untyped_lapses_do_not_trigger_suspend(instance):
     seed_event(instance, days_ago=9, type="session", phase="start", session_id="s1")
     out = boot(instance)
     assert "/suspend" not in ctx(out)
+
+def test_deliberate_lapse_is_typed_activity_no_nag(instance):
+    # a suspend-only session must not draw the "cause unknown" nag or a spurious
+    # untyped lapse on the next boot — suspend.md promises no guilt (A8)
+    seed_event(instance, days_ago=2, type="session", phase="start", session_id="s1")
+    seed_event(instance, days_ago=2, type="lapse", cause="suspended", deliberate="true")
+    out = boot(instance)
+    assert "cause unknown" not in ctx(out)
+    assert not any(e["type"] == "lapse" and e.get("cause") == "untyped"
+                   for e in events(instance))
 
 def test_refire_same_session_id_no_false_lapse(instance):
     boot(instance)                      # first boot, session s2
@@ -117,6 +127,13 @@ def test_malformed_ts_does_not_blank_banner(instance):
     assert "gap" in ctx(out).lower()      # the good event's nudge still computed
 
 
+def test_binary_byte_in_events_does_not_blank_banner(instance):
+    # a 0x80 byte in events.jsonl must not UnicodeDecodeError away the banner (A1)
+    (instance / "telemetry" / "events.jsonl").write_bytes(b"\x80garbage\n")
+    out = boot(instance)
+    assert "cairn boot:" in ctx(out)
+
+
 def test_boot_upserts_registry(instance, _cairn_home):
     run_script("session_start.py", {"cwd": str(instance), "session_id": "s-reg"})
     reg = json.loads((_cairn_home / "registry.json").read_text())
@@ -141,6 +158,56 @@ def test_unwritable_registry_never_costs_the_banner(instance, _cairn_home):
     r = run_script("session_start.py", {"cwd": str(instance), "session_id": "s-bad"})
     out = json.loads(r.stdout)
     assert "cairn boot:" in out["systemMessage"]  # banner intact
+
+
+def _rewrite_manifest(instance, mutate):
+    m = json.loads((instance / "manifest.json").read_text())
+    mutate(m)
+    (instance / "manifest.json").write_text(json.dumps(m))
+
+def _assert_full_banner(instance):
+    seed_event(instance, days_ago=9, type="session", phase="start", session_id="s1")
+    seed_event(instance, days_ago=9, type="intent", intent="plan", session_id="s1")
+    out = boot(instance)
+    assert "cairn boot:" in ctx(out)
+
+def test_trigger_days_as_string_does_not_blank_banner(instance):
+    # days "7" used to TypeError at the >= compare → empty stdout, no banner (A2)
+    def mutate(m):
+        for t in m["triggers"]:
+            if "days" in t:
+                t["days"] = str(t["days"])
+    _rewrite_manifest(instance, mutate)
+    _assert_full_banner(instance)
+
+def test_metrics_as_list_does_not_blank_banner(instance):
+    _rewrite_manifest(instance, lambda m: m.update(metrics=["north_star"]))
+    _assert_full_banner(instance)
+
+def test_guardrail_entry_as_string_does_not_blank_banner(instance):
+    _rewrite_manifest(instance, lambda m: m["metrics"].update(guardrails=["boot_context_bytes"]))
+    _assert_full_banner(instance)
+
+def test_guardrail_max_as_string_does_not_blank_banner(instance):
+    _rewrite_manifest(instance,
+                      lambda m: m["metrics"]["guardrails"][0].update(max="1"))
+    _assert_full_banner(instance)
+
+
+def test_unwritable_telemetry_still_prints_banner(instance):
+    # telemetry is best-effort: a read-only log must not cost the banner (A4)
+    import os, pytest
+    if os.geteuid() == 0:
+        pytest.skip("perms are advisory as root")
+    log = instance / "telemetry" / "events.jsonl"
+    log.chmod(0o444)
+    (instance / "telemetry").chmod(0o555)
+    try:
+        out = boot(instance)
+        assert "cairn boot:" in ctx(out)
+    finally:
+        (instance / "telemetry").chmod(0o755)
+        log.chmod(0o644)
 
 
 def test_malformed_triggers_type_does_not_blank_banner(instance):

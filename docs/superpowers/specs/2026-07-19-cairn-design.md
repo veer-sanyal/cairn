@@ -138,6 +138,14 @@ The complete parametrizable set stage 4 selects from — an implementer builds e
 
 Menu growth is a kernel-release matter (P10), not a per-instance one.
 
+> **Amendment (2026-07-24, as of 0.8.1):** the shipped trigger-template menu is the five
+> banner-rule templates — `gap_nudge`, `review_due`, `staleness_escalation`,
+> `friction_accumulator`, `suspend_suggestion`. Of the original eight above, guardrail
+> regression is compiled into `manifest.metrics.guardrails` (a standing banner check, not a
+> parametrized trigger), metric-observation prompts are scaffolded command steps, and the
+> intent enum is a manifest field rendered into `/log` — manifest/command compilation
+> targets, not trigger templates. The table stands as the original design record.
+
 ## Component 3: Governor (`/cairn:review`)
 
 ### 3.1 Cadence

@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """Cairn validator ('lint'). Report-only: always exit 0. --json for machine output."""
 import json, re, sys, os, time, fnmatch, datetime
-from cairn_lib import find_root, manifest, parse_date, pos_int
+from cairn_lib import find_root, manifest, parse_date, pos_int, read_text_safe
 
 SENTINEL_TTL_H = 24
 STAMP = re.compile(r"Last reconciled: (\d{4}-\d{2}-\d{2})")
@@ -31,7 +31,7 @@ def sweeps(root, m, today):
     cadence = _dict(m.get("cadence"))
     research = root / "docs" / "RESEARCH.md"
     if research.is_file():
-        text = research.read_text()
+        text = read_text_safe(research)
         for d in REFRESH.findall(text):
             dd = parse_date(d)
             if dd is not None and dd < today:
@@ -64,7 +64,7 @@ def sweeps(root, m, today):
                         "age_days": (today - dd).days})
     smap = root / "docs" / "SYSTEM-MAP.md"
     if smap.is_file():
-        stamp = STAMP.search(smap.read_text())
+        stamp = STAMP.search(read_text_safe(smap))
         review_days = pos_int(cadence.get("review_days"))
         limit = 2 * review_days if review_days else 60
         if not stamp:
@@ -80,6 +80,11 @@ def sweeps(root, m, today):
 def run(root):
     m = manifest(root)
     out = []
+    # a top-level "concluded" (misplaced conclude.md edit) is silently ignored by every
+    # reader — the user thinks the instance is concluded; the system keeps nagging
+    if "concluded" in m:
+        out.append({"check": "misplaced_concluded", "level": "soft", "file": "manifest.json",
+                    "detail": "top-level 'concluded' is ignored — it belongs at instance.concluded"})
     caps = m.get("caps", {})
     for rel in ["CLAUDE.md", "state/HOT.md",
                 *[f"state/working/{p.name}" for p in (root / "state" / "working").glob("*") if p.is_file()]]:
@@ -92,7 +97,7 @@ def run(root):
             elif size > cap.get("soft", 1 << 30):
                 out.append({"check": "size_cap", "level": "soft", "file": rel, "size": size, "cap": cap["soft"]})
     hot = root / "state" / "HOT.md"
-    stamp = STAMP.search(hot.read_text()) if hot.is_file() else None
+    stamp = STAMP.search(read_text_safe(hot)) if hot.is_file() else None
     if not stamp:
         out.append({"check": "staleness", "level": "hard", "file": "state/HOT.md", "detail": "no 'Last reconciled:' stamp"})
     else:
@@ -114,7 +119,7 @@ def run(root):
     for rel in ["state/archive.jsonl", "telemetry/events.jsonl"]:
         p = root / rel
         if p.is_file():
-            for i, line in enumerate(p.read_text().splitlines(), 1):
+            for i, line in enumerate(read_text_safe(p).splitlines(), 1):
                 if line.strip():
                     try:
                         json.loads(line)

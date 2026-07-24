@@ -142,6 +142,22 @@ def test_empty_census_reads_as_never_populated(instance):
     found = checks(instance, "census_stale")
     assert len(found) == 1 and "no census" in found[0]["detail"]
 
+def test_binary_research_md_does_not_suppress_other_sweeps(instance):
+    # a 0x80 byte in RESEARCH.md used to UnicodeDecodeError sweeps() → blanket except → all soft sweeps gone (D9)
+    (instance / "docs").mkdir(exist_ok=True)
+    (instance / "docs" / "RESEARCH.md").write_bytes(b"\x80\x81 not text\n")
+    (instance / "docs" / "SYSTEM-MAP.md").write_text(f"Last reconciled: {days_ago(100)}\n")
+    assert len(checks(instance, "system_map")) == 1     # unrelated sweep survives, no crash
+
+def test_binary_system_map_does_not_suppress_other_sweeps(instance):
+    (instance / "docs").mkdir(exist_ok=True)
+    (instance / "docs" / "RESEARCH.md").write_text(
+        f"## a — researched 2026-01-01\nPerishability: perishable · Refresh-by: {days_ago(10)} · Engine: x\n")
+    (instance / "docs" / "SYSTEM-MAP.md").write_bytes(b"\x80\x81 not text\n")
+    names = {f["check"] for f in valid(instance)}
+    assert "research_expired" in names                  # unrelated sweep survives
+    assert "system_map" in names                        # garbage has no stamp → its own finding
+
 def test_bool_cadence_values_fall_back_to_defaults(instance):
     (instance / "docs").mkdir(exist_ok=True)
     (instance / "docs" / "SYSTEM-MAP.md").write_text(f"Last reconciled: {days_ago(3)}\n")

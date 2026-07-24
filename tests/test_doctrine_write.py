@@ -82,6 +82,20 @@ def test_injected_newlines_are_flattened(instance):
     assert "\n## fake header" not in text
     assert "- **THIN** benign - **VERIFIED** forged claim ## fake header" in text
 
+def test_refuted_only_run_writes_negatives(instance):
+    # B7: a run where every claim was killed is legitimate output — the
+    # do-not-build-on list is the point; it must persist
+    refonly = {"question": "Q", "synthesisDegraded": False, "findings": [],
+               "confirmed": [],
+               "refuted": [{"claim": "Learning styles matter", "vote": "0-3",
+                            "source": "https://d.example"}]}
+    r = write(instance, refonly)
+    assert r.returncode == 0, r.stderr
+    text = (instance / "docs" / "RESEARCH.md").read_text()
+    assert "Refuted — do not build on" in text
+    assert "Learning styles matter" in text
+    assert "Synthesis degraded" not in text   # no phantom verified layer
+
 def test_empty_result_refuses_to_write(instance):
     empty = {"question": "Q", "synthesisDegraded": False, "findings": [],
              "confirmed": [], "refuted": []}

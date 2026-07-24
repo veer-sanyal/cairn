@@ -144,6 +144,7 @@ your-instance/
     archive.jsonl        # append-only history (hook-enforced)
   telemetry/
     events.jsonl         # local-only usage log — cat it any time
+  .cairn/                # review sentinel
   .claude/
     hooks/               # the kernel runtime, copied INTO your instance
     commands/            # /log, /suspend, /conclude — yours even if you uninstall Cairn
@@ -186,7 +187,7 @@ measurably get *worse*.
 | `/cairn:research` | The research engine: frames a decision, runs a claim-scaled 3-vote adversarial deep-research workflow, persists graded findings (with refresh-by dates) into the instance's `docs/RESEARCH.md`. Used by build and review; callable directly. |
 | `/cairn:audit` | Diagnose an existing (non-Cairn) agentic setup against the doctrine: measured boot cost, missing metric contract, census + ladder upgrades, verification gaps — blast-ordered BUILD/PARK/REJECT fixes, or migrate via a pre-filled `/cairn:build`. |
 | `/cairn:review` | The governor: re-validates invariants, consolidates memory (probe → verify → repair), reports your metrics, and proposes changes as **BUILD / PARK / REJECT** — you are the gate. |
-| `/cairn:upgrade` | Migrates an instance to a new kernel version. Never overwrites a file you've modified — new versions land alongside as `.cairn-new`. |
+| `/cairn:upgrade` | Migrates an instance to a new kernel version. Hooks and the research engine are plugin-owned and always replaced wholesale; command files you've modified are never overwritten — new versions land alongside as `.cairn-new`. |
 | `/cairn:list` | Portfolio view of every instance on this machine — status (active/suspended/concluded), routing by name ("open my job system"), and read-only peeks into another instance's state. |
 | `/log` `/suspend` `/conclude` | Instance-local. Log intent/outcome/metrics; pause honorably; or conclude — **concluding is a success state**, not churn. |
 
@@ -265,9 +266,10 @@ short version, grouped:
 Long-conversation instruction drift is real and large (~39% average performance drop across 15
 models in multi-turn studies), which is why Cairn's invariants are **hooks, not prose**:
 file-size caps that keep your router lean, an append-only archive, guarded overwrites of memory
-files, a session banner that reconciles reality before work. Hooks fail soft — a broken script
-warns, it never bricks a session — and every invariant is re-validated post-hoc at review,
-because hooks can't see edits made outside Claude Code.
+files, a session banner that reconciles reality before work. Hooks are fail-soft — a broken
+script goes silent, it never bricks a session (failures surface at the next review) — and every
+invariant is re-validated post-hoc at review, because hooks can't see edits made outside
+Claude Code.
 
 Verified live, not just in tests: the boot banner reaches the model, session telemetry writes
 with real session ids, and a Write to the archive comes back
@@ -284,9 +286,13 @@ The first question you should ask of any plugin that installs hooks:
   hooks** — nothing runs in your other projects.
 - **Network: never.** No script makes a network call. Telemetry is local JSONL you can `cat`, and
   it records metadata only (no prompt content) unless you opt in per instance.
-- **One global metadata file:** `~/.cairn/registry.json` — instance names, paths, and
-  timestamps only, so `/cairn:list` can show you all your systems. `cat` it any time;
-  delete it and instances re-register on their next boot. Still zero global hooks.
+- **One global metadata file:** `~/.cairn/registry.json` — names, paths, timestamps, and
+  your one-line purpose (user-authored text); never metrics, events, or state. It exists so
+  `/cairn:list` can show you all your systems. `cat` it any time; delete it and instances
+  re-register on their next boot. Still zero global hooks.
+- **Single machine, by design:** an instance lives on one machine and expects one session
+  at a time. Syncing an instance directory across machines via git is unsupported in v1
+  (append-only logs and the registry don't merge).
 - **Leaving:** uninstall the plugin and your instances keep their full runtime (it's
   instance-local). Delete an instance directory and Cairn retains nothing about it.
 
@@ -320,14 +326,15 @@ Implementation plan: [docs/superpowers/plans/](docs/superpowers/plans/)
 
 ## Status
 
-`v0.7.1` — the level-zero umbrella is complete on top of the 0.1.0 kernel (92 tests; every
+`v0.8.1` — the level-zero umbrella is complete on top of the 0.1.0 kernel (176 tests; every
 component built TDD with two-stage adversarial review): **SP1** vendored research engine (0.3.0)
 → **SP2** level-zero doctrine, P1–P24 (0.4.0) → **SP3** builder/governor wiring — census,
 data-access ladder, pass^k probes, failure-mode telemetry, four deterministic sweeps, boundary
 contract (0.5.0) → **SP4** `/cairn:audit` + traceability gap closure (0.6.0) → **SP5**
-`SYSTEM-MAP.md` source-of-truth flows (0.7.0), hardened over two adversarial passes (0.7.1).
-Still ahead of the public-public bar the spec prescribes: dogfood migration of a real system, one
-greenfield build, and a telemetry soak.
+`SYSTEM-MAP.md` source-of-truth flows (0.7.0), hardened over two adversarial passes (0.7.1) →
+**SP6** cross-instance registry: `/cairn:list`, routing, read-only peeks (0.8.0), then a
+six-dimension production-readiness audit pass (0.8.1). Still ahead of the public-public bar the
+spec prescribes: dogfood migration of a real system, one greenfield build, and a telemetry soak.
 
 Contributions: see [CONTRIBUTING.md](CONTRIBUTING.md). If Cairn worked (or didn't) for you, the
 [instance-stats issue template](.github/ISSUE_TEMPLATE/instance-stats.md) lets you share your

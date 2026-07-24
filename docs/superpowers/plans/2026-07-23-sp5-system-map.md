@@ -1,5 +1,7 @@
 # SP5: SYSTEM-MAP.md Implementation Plan
 
+**Executed — shipped as 0.7.0 (1a07969)**
+
 > **For agentic workers:** REQUIRED SUB-SKILL: Use superpowers:subagent-driven-development (recommended) or superpowers:executing-plans to implement this plan task-by-task. Steps use checkbox (`- [ ]`) syntax for tracking.
 
 **Goal:** `docs/SYSTEM-MAP.md` in every instance — kernel flows from a template at scaffold, instance flows authored at build, drift-checked at audit, updated by the governor, staleness-checked by the validator.

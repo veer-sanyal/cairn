@@ -16,6 +16,7 @@ their parameters — and iterate on the draft with the user. React-to-artifact b
 batteries. Prefer pairwise choices ("weekly plan file, or per-topic files?") over open ratings.
 
 ## Stage 1.5 — Environment census & data paths (P23)
+The platform-capability baseline the census builds on is `capabilities/snapshot.md` (in the plugin).
 Enumerate what THIS machine can actually do, before designing around presence or absence:
 list the session's MCP servers/tools (and `claude mcp list` via Bash where available), and
 note surfaces (Chrome extension, computer use). Record in the build-config `census` field
@@ -71,11 +72,13 @@ in agent-systems evidence — WITHOUT the user having to ask for research.
    pre-scaffold there is no instance copy yet). If the Workflow tool is unavailable, use
    that skill's degraded mode: 2-5 angle subagents, then per-claim adversarial verifiers
    prompted to REFUTE (≥2/3 refutations kill); degraded-mode grades cap at THIN.
-5. **Grade and persist.** Persist every run through doctrine_write.py (the /cairn:research
-   skill's Step 4): findings land in the instance's `docs/RESEARCH.md` graded VERIFIED
-   (survived refutation, high confidence) / THIN (weaker), with a date stamp, perishability
-   class, and the refuted claims (do-not-build-on negatives). BET is not a research grade —
-   it marks decisions in manifest decisions[] where evidence ran out or research was skipped.
+5. **Grade and hold.** Save each completed run's result JSON to a temp file and HOLD it —
+   there is no instance yet (scaffold.py refuses non-empty targets, and doctrine_write.py
+   needs the instance root). Persistence happens in Stage 5, after scaffold succeeds.
+   Findings will land in the instance's `docs/RESEARCH.md` graded VERIFIED (survived
+   refutation, high confidence) / THIN (weaker), with a date stamp, perishability class,
+   and the refuted claims (do-not-build-on negatives). BET is not a research grade — it
+   marks decisions in manifest decisions[] where evidence ran out or research was skipped.
    Every research-backed parameter in the scaffold cites its finding in the manifest
    decisions[] entry.
 
@@ -112,10 +115,13 @@ Findings from Stage 2.5 inform the metric DEFAULTS you propose (e.g., evidence-b
 values) — but the user still authors the goals (Stage 2 is untouched by research).
 From their statement derive together:
 - north_star: leading, value-representing, NOT directly targetable (if daily work can move it
-  directly, it's an input, not the north star)
+  directly, it's an input, not the north star). The leading-indicator requirement is
+  VERIFIED (P12) but the construction method is BET-grade (P18): propose candidate
+  indicators and verify them causally — never present the derivation as settled.
 - inputs: 1-3 levers daily use actually moves
-- guardrails: keep the standing ones (boot_context_bytes, upkeep lapse rate) + at most one
-  domain guardrail; each must be measurable-within-period, sensitive, timely
+- guardrails: keep the standing ones — boot_context_bytes + upkeep burden (measured via
+  lapse cause=upkeep events) — + at most one domain guardrail; each must be
+  measurable-within-period, sensitive, timely
 
 Then stress the draft contract against P18's mechanisms before it hardens:
 - **Causal validity** per input lever: would moving this lever move the north star, or do
@@ -148,6 +154,10 @@ Set, with the user, blast-ordered largest first (build-config `boundary` field):
 - **ask_budget_per_session** — default 1. Asks are a rationed budget: ask FREQUENCY, not
   per-ask depth, drives abandonment (P19). Every prompt the instance adds must name which
   budget slot it spends.
+- **Over-constraint check (P19):** if the drafted autonomy table has NOTHING in `act`,
+  push back once — an all-ask/never table collapses the agent into rule-following
+  automation with nothing real to oversee, and spends the ask budget on noise. The user
+  may still keep it; record the pushback and their call.
 Enforcement in v1 is instructional + telemetry-audited (overreach events), not hook-gated —
 record this as a decisions[] entry graded BET so the governor can revisit it if overreach
 tags appear.
@@ -159,15 +169,18 @@ size (never ask a question whose right answer depends on an unanswered upstream 
 contract-level choices before trigger minutiae, and among equals, irreversible (one-way)
 choices first. Answering a small question before the big one that governs it wastes the
 answer. Map each accepted rule onto the CLOSED trigger-template menu
-(spec §2.1): gap_nudge, review_due, staleness_escalation, friction_accumulator,
-suspend_suggestion, guardrail regression flag, metric-observation prompts, intent enum.
-Parametrize; never invent new
+(docs/superpowers/specs/2026-07-19-cairn-design.md §2.1) — exactly these five: gap_nudge, review_due, staleness_escalation,
+friction_accumulator, suspend_suggestion.
+(Guardrail regressions are a manifest.metrics.guardrails behavior surfaced at review, and
+intents are a manifest field — neither is a trigger.) Parametrize; never invent new
 trigger mechanics — menu growth is a kernel-release matter.
 
 ## Stage 5 — Scaffold
 Assemble the build-config JSON (exact shape documented at the top of skills/build/scaffold.py),
 including a decisions[] entry for every design choice with its principle tag, grade
-(VERIFIED / PREPRINT / BET), `blast` (low|med|high: what else changes if it flips) and
+(canonical enum: VERIFIED / VERIFIED-probed / PREPRINT / THIN / BET — the same vocabulary
+the governor reads; VERIFIED-probed never auto-adopts, probes are perishable),
+`blast` (low|med|high: what else changes if it flips) and
 `one_way` (bool) tags — the governor's ask-order and auto-adopt lane run on these tags.
 Write it to a temp file and run:
     python3 "${CLAUDE_PLUGIN_ROOT}/skills/build/scaffold.py" <config.json> <target-dir>
@@ -180,9 +193,14 @@ Verification field is "none" but whose Writes is not — say so out loud; that g
 finding waiting to happen (P16). This file is the system's source of truth: hidden-in-prompts
 behavior is exactly what it exists to prevent.
 
-Then: write `docs/RESEARCH.md` (from Stage 2.5) into the instance, `git init`, commit
-"cairn scaffold", run one boot (open a session or invoke session_start manually) to show the
-user their banner, and hand over with the three habits that matter: /log real work, trust
+Then: after scaffold.py succeeds, persist Stage 2.5's research — for each saved
+result.json run
+`python3 "${CLAUDE_PLUGIN_ROOT}/templates/hooks/doctrine_write.py" <result.json> <target-dir> --domain "<name>" --perishability <class>`
+against the new instance root. Never hand-write RESEARCH.md, never run doctrine_write
+before scaffold. Then `git init`, commit
+"cairn scaffold", run one boot to show the user their banner — open a session in the
+instance, or invoke the hook manually from the instance root:
+`echo '{"cwd":"'$PWD'"}' | python3 .claude/hooks/session_start.py` — and hand over with the three habits that matter: /log real work, trust
 the banner, expect the first review after the minimum telemetry window (not sooner —
 adoption verdicts wait ~2 months, P13).
 
