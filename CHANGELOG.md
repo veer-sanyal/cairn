@@ -1,5 +1,11 @@
 # Changelog
 
+## 0.7.0 — SYSTEM-MAP.md: the system's flows as a source of truth
+
+- **`docs/SYSTEM-MAP.md`** in every instance — one Mermaid flowchart per workflow with a machine-checkable metadata line (Trigger · Writes · Verification · Boundary) and stable flow ids telemetry can cite (`flow=<id>`). Kernel flows ship pre-authored from a template; the builder appends instance-specific flows before the first commit.
+- **Governor maintains it** — an applied BUILD that changes a flow updates the map in the same step; the validator flags staleness (`system_map`, silent when absent — legacy instances get a one-time proposal, never a nag).
+- **Audit uses it** — map-first rule: reuse and drift-check an existing SYSTEM-MAP.md (drift is a finding), or reconstruct it as the audit's first deliverable so the doctrine walk cites flow ids.
+
 ## 0.6.0 — /cairn:audit (SP4 — the level-zero umbrella is complete)
 
 - **`/cairn:audit`** — point Cairn's diagnosis stack at any existing Claude Code agentic setup: mechanism mapping with measured boot cost (P23/P1), north-star elicitation (P14), environment census + data-access-ladder upgrades (P23), and a doctrine walk (memory, verification, orchestration, Goodhart, boundary, staleness) where every finding carries a principle ref AND file:line evidence. Output: blast-ordered BUILD/PARK/REJECT proposals; dispositions are fix-in-place (git checkpoint first, never destructive), a persistent `AUDIT.md` with anti-re-litigation, or migration to a full instance via a pre-filled /cairn:build hand-off.

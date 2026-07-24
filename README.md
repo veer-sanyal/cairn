@@ -42,6 +42,8 @@ Claude Code — the plugin is a dependency, not a cage:
 your-instance/
   CLAUDE.md              # thin router: what this system is, where each fact lives
   manifest.json          # your metric contract + every design decision, with its evidence grade
+  docs/
+    SYSTEM-MAP.md        # every flow as mermaid — the system's source of truth
   state/
     HOT.md               # lean "where things stand" snapshot — boots every session
     working/             # topic files, loaded on demand
